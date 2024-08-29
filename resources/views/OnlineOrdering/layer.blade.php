@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Crust-House</title>
     <link rel="stylesheet" href="{{ asset('CSS/OnlineOrdering/layer.css') }}" class="css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
@@ -17,15 +18,58 @@
 </script>
 
 <body>
+    @if (session('success'))
+        <div id="success" class="alert alert-success">
+            {{ session('success') }}
+        </div>
+        <script>
+            localStorage.removeItem('cartItems');
+            setTimeout(() => {
+                document.getElementById('success').classList.add('alert-hide');
+            }, 2000);
+
+            setTimeout(() => {
+                document.getElementById('success').style.display = 'none';
+            }, 3000);
+        </script>
+    @endif
+
+    @if (session('error'))
+        <div id="error" class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+        <script>
+            setTimeout(() => {
+                document.getElementById('error').classList.add('alert-hide');
+            }, 2000);
+
+            setTimeout(() => {
+                document.getElementById('error').style.display = 'none';
+            }, 3000);
+        </script>
+    @endif
+
+    @if (session('deleteSucceed'))
+        <script>
+            localStorage.removeItem('LoginStatus');
+            localStorage.removeItem('cartItems');
+            localStorage.removeItem('savedLocation');
+        </script>
+    @endif
+
     @php
         $Products = $Products;
         $Deals = $Deals;
         $Categories = $Categories;
         $count = $Categories->count();
         $AllProducts = $AllProducts;
+
+        $addons = $AllProducts->whereIn('category_name', ['Addons', 'addons', 'Addon', 'addon']);
+
     @endphp
-    <div class="overlay" id="overlay"></div>
-    <div class="frontmodel">
+
+    <div class="overlay" id="overlay" style="display: none;"></div>
+    <div class="frontmodel" id='frontModel' style="display: none;">
         <div class="maincontainer">
             <div class="mainp1">
                 <span class="imgmain">
@@ -49,26 +93,27 @@
             <div class="fields">
                 <div class="inputfields">
                     <input class="subin_fields" type="text" name="" id="district"
-                        placeholder="Select City / Region ">
+                        placeholder="Select City / Region " required>
                     <input class="subin_fields" type="text" name="" id="address"
-                        placeholder="Select Area / Sub Region">
-                    <button class="btnn" onclick="SelectLocation()">Select</button>
+                        placeholder="Select Area / Sub Region" required>
+                    <div id="location-message" class="error-message" style="display: none;"></div>
+                    <button id="submit-btn" class="btnn" onclick="SelectLocation()">Select</button>
                 </div>
             </div>
-            <div class="close-button">
+            {{-- <div class="close-button">
                 <button class="closebtn" onclick="closeFrontModel()">&times;</button>
-            </div>
+            </div> --}}
         </div>
 
     </div>
     <!-- end of frontmodel -->
 
-    <!-- full page of website include nav footer and product cards -->
     <div class="whole">
         <div class="temp">
             <div class="popwhole">
+
                 <div class="nav">
-                    <div class="location">
+                    <div class="location" onclick="changeLocation()">
                         <img class="locimg" src="{{ asset('Images/OnlineOrdering/locationpin.png') }}" alt="">
                         <div class="locelement">
                             <span class="ele1">Deliver to</span>
@@ -79,17 +124,47 @@
                         <img class="imgelement" src="{{ asset('Images/OnlineOrdering/image-1.png') }}" alt="">
                     </div>
                     <div class="icons">
-                        <hr>
-                        <img class="locimgg" src="{{ asset('Images/OnlineOrdering/search.png') }}" alt="">
-                        <hr>
-                        <img id="profileImg" class="locimgg" src="{{ asset('Images/OnlineOrdering/profile.png') }}"
-                            alt="">
-                        <hr>
-                        <img onclick="toggleCart()" id="locimgg" class="locimgg"
-                            src="{{ asset('Images/OnlineOrdering/cart.png') }}" alt="">
-                        <hr>
+                        <div id="search_bar_div" class="search_bar_div">
+                            <input type="text" id="search_bar" name="search" placeholder="Search.."
+                                style="background-image: url('{{ asset('Images/search.png') }}');">
+                        </div>
+                        <div class="icons-btns">
+                            <hr>
+                            <img class="locimgg" onclick="toggleSearchBar()"
+                                src="{{ asset('Images/OnlineOrdering/search.png') }}" alt="">
+                            <script>
+                                function toggleSearchBar() {
+                                    let searchBarDiv = document.getElementById('search_bar_div');
+
+                                    if (searchBarDiv) {
+                                        searchBarDiv.style.display = (searchBarDiv.style.display === 'flex') ? 'none' : 'flex';
+                                    } else {
+                                        console.error('Element with id "search_bar_div" not found.');
+                                    }
+                                }
+                            </script>
+                            <hr>
+                            <div class="profile-container">
+                                <div id="profile-image-name" onclick="checkProfile(event)">
+                                    <img id="profileImg" class="locimgg"
+                                        src="{{ asset('Images/OnlineOrdering/profile.png') }}" alt="">
+                                    <span id="username"></span>
+                                </div>
+                                <div id="dropdownMenu" class="dropdownMenu-content">
+                                    <a
+                                        onclick="openProfilePopup('{{ route('deleteCustomer', ':customer_id') }}')">Profile</a>
+                                    <a onclick="logout()">Logout</a>
+                                </div>
+                            </div>
+                            <hr>
+                            <img onclick="toggleCart()" id="locimgg" class="locimgg"
+                                src="{{ asset('Images/OnlineOrdering/cart.png') }}" alt="">
+                            <hr>
+
+                        </div>
                     </div>
                 </div>
+
                 <div class="section">
                     @foreach ($Categories as $key => $Category)
                         <a href="#section{{ $key + 1 }}">
@@ -100,6 +175,7 @@
                         <button class="botn">Deals</button>
                     </a>
                 </div>
+
                 <div class="root">
                     @foreach ($Categories as $key => $Category)
                         <div id="section{{ $key + 1 }}" class="content-section">
@@ -129,7 +205,7 @@
                                                     </div>
                                                     <div class="btn">
                                                         <button
-                                                            onclick="addToCart({{ json_encode($Product) }}, {{ json_encode($CategoryProducts) }})"
+                                                            onclick="addToCart({{ json_encode($Product) }}, {{ json_encode($CategoryProducts) }}, {{ json_encode($addons) }})"
                                                             class="cartbtn">Add To Cart</button>
                                                     </div>
                                                 </div>
@@ -168,7 +244,7 @@
                                                             {{ $Deal->deal->dealDiscountedPrice }}</p>
                                                     </div>
                                                     <div class="btn">
-                                                        <button {{-- onclick="addToCart({{ json_encode($Product) }}, {{ json_encode($CategoryProducts) }})" --}} class="cartbtn">Add To
+                                                        <button class="cartbtn">Add To
                                                             Cart</button>
                                                     </div>
                                                 </div>
@@ -180,9 +256,9 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="gapp"></div>
-                
+
                 <div class="footer_main">
                     <div class="footer">
                         <div class="footer_hlf">
@@ -251,7 +327,7 @@
                         </div>
                     </div>
                 </div>
-                
+
             </div>
         </div>
     </div>
@@ -278,8 +354,8 @@
                     </div>
                 </div>
                 <div class="extra_items">
-                    <div class="extra_1">
-                        <div class="extra_4" onclick="toggleDropdown()">
+                    <div class="extra_1" style="display: flex; flex-direction: column; gap: 1vw;">
+                        <div class="extra_4" onclick="toggleDropdown(this)">
                             <div class="extra_5">
                                 <div class="extra_6">
                                     <span class="size">Variation</span>
@@ -297,7 +373,30 @@
                             <div class="dropdown_1">
                                 <div>
                                     <div class="drop">
-                                        
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="extra_4" class="extra_4" onclick="toggleDropdown(this)">
+                            <div class="extra_5">
+                                <div class="extra_6">
+                                    <span class="size">Toppings</span>
+                                    <span class="required">Required</span>
+                                </div>
+                                <div class="arrow" onclick="toggleDropdown1()">
+                                    <img class="up" src="{{ asset('Images/OnlineOrdering/up.png') }}"
+                                        alt="">
+                                    <img class="down" src="{{ asset('Images/OnlineOrdering/down.png') }}"
+                                        alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dropdown-content1" class="dropdown-content">
+                            <div class="dropdown_1">
+                                <div>
+                                    <div class="drop">
+
                                     </div>
                                 </div>
                             </div>
@@ -333,7 +432,9 @@
 
     <!-- login component -->
     <div id="logincomponent" class="logincomponent">
-        <div class="popup-content">
+        <form class="popup-content" onsubmit="event.preventDefault(); loginUser('{{ route('customerLogin') }}');"
+            enctype="multipart/form-data">
+            @csrf
             <div class="textt">
                 <span class="details">Enter your mobile number</span>
             </div>
@@ -341,39 +442,37 @@
                 <span class="select">Please enter email and confirm your country code and enter your mobile
                     number</span>
                 <div class="lo_email">
-                    <input class="l_input" type="email" id="email" placeholder="Enter your email">
+                    <input class="l_input" type="email" id="loginEmail" name="email" required
+                        placeholder="Enter your email">
                 </div>
             </div>
             <div class="code">
-                <input id="countryCode" type="tel">
-                <input id="phoneNumber" type="tel" placeholder="Enter phone number">
+                <input id="countryCode" type="tel" name="phonePrefix" value="+92" max="3" readonly>
+                <input id="phoneNumber" type="tel" name="phone_number" required placeholder="Enter phone number"
+                    maxlength="10" pattern="\d{10}">
             </div>
+            <div id="login-response-message" class="error-message" style="display: none;"></div>
             <div class="privacy">This site is protected by reCAPTCHA and the Google
-                <a href="https://policies.google.com/privacy">Privacy Policy</a>
+                <a href="https://policies.google.com/privacy" target="_blank">Privacy Policy</a>
                 and
-                <a href="https://policies.google.com/terms">Terms of Service</a>
+                <a href="https://policies.google.com/terms" target="_blank">Terms of Service</a>
                 apply.
             </div>
-
-
             <div class="loginbtn">
-                <button class="lobtn">Login</button>
+                <button type="submit" class="lobtn">Login</button>
                 <div class="orline">
                     <span class="or">OR</span>
                 </div>
-                <button class="signbtn">Sign-up</button>
+                <button class="signbtn" onclick="showSignupPopup()">Sign-up</button>
             </div>
-        </div>
-
-        <span class="close">&times;</span>
-        <!-- <p>This is the profile popup content!</p> -->
+        </form>
+        <span class="close" onclick="hideLoginPopup()">&times;</span>
     </div>
 
-
-    <!-- end of login -->
-    <!-- signup page -->
     <div id="signupcomponent" class="signupcomponent">
-        <div class="main">
+        <form class="main" action="{{ route('customerSignup') }}" method="POST" enctype="multipart/form-data"
+            onsubmit="return updateLoginStatus()">
+            @csrf
             <div class="regtext">
                 <h2 class="r_text">Register</h2>
             </div>
@@ -382,25 +481,30 @@
                     <div class="name">
                         <label class="s_label">Enter Name</label>
                         <div class="gap">
-                            <input class="s_input" type="text" id="name" placeholder="Enter your name">
+                            <input class="s_input" type="text" id="name" name="name"
+                                placeholder="Enter your name">
                         </div>
                     </div>
+
                     <div class="email">
                         <label class="s_label">Enter Email</label>
                         <div class="gap">
-                            <input class="s_input" type="email" id="email" placeholder="Enter your email">
+                            <input class="s_input" type="email" id="email" name="email"
+                                placeholder="Enter your email" oninput = "validateEmail()">
                         </div>
+                        <div id="email-error-message" class="error-message" style="display: none;"></div>
                     </div>
-                    <div class="gend-dob">
-                        <div class="main-GenDob">
-                            <div class="row1">
+
+                    {{-- <div class="gend-dob">
+                        {{-- <div class="main-GenDob"> --}}
+                    {{-- <div class="row1">
                                 <label class="s_label" for="gender">Gender</label>
                                 <select name="" id="gender">
                                     <option value="male">Male</option>
                                     <option value="female">Female</option>
                                     <option value="other">Other</option>
                                 </select>
-                            </div>
+                            </div> --/}}
 
                             <div class="row2">
                                 <label class="s_label">Date of Birth</label>
@@ -414,30 +518,32 @@
                                     document.getElementById('dob').setAttribute('max', previousDay);
                                 </script>
                             </div>
-                        </div>
-                    </div>
+                        {{-- </div> --/}}
+                    </div> --}}
+
                     <div id="mobileno" class="mobileno">
                         <label class="s_label">Mobile Number</label>
                         <div class="codee">
-                            <input id="countryCodee" type="tel">
-                            <input id="phoneNumberr" type="tel" placeholder="Enter phone number">
+                            <input id="countryCodee" type="tel" name="phonePrefix" value="+92"
+                                max="3" readonly>
+                            <input id="phoneNumberr" type="tel" name="phone_number" maxlength="10"
+                                pattern="\d{10}" title="Please enter a 10-digit phone number"
+                                placeholder="Enter phone number">
                         </div>
                     </div>
+
                     <div class="registerbtn">
-                        <button class="regbtn">Register</button>
-                    </div>
-                    <div class="alreadyacc">
-                        <a class="alraccount">Already have an account?</a>
+                        <button class="regbtn" id="regBtn">Register</button>
                     </div>
 
+                    <div class="alreadyacc">
+                        <a class="alraccount" onclick="redirectToLogin()">Already have an account?</a>
+                    </div>
                 </div>
             </div>
-        </div>
-        <span class="closee">&times;</span>
+        </form>
+        <span class="closee" onclick="hideSignupPopup()">&times;</span>
     </div>
-
-
-    <!-- end of signup -->
 
     <!-- cart div -->
     <div id="cart" class="cart">
@@ -465,14 +571,13 @@
                         <span>Garnd Total</span>
                         <span>Rs 0.00</span>
                     </div>
-                    <button class="checkoutbtn">Checkout</button>
+                    <button class="checkoutbtn" onclick="checkOut()">Checkout</button>
                 </div>
 
             </div>
 
         </div>
         <div class="clear" style="display: none;">
-            <!-- code of clear cart -->
             <div class="clear_Cart_itens">
                 <span>Are you sure?</span>
                 <div class="clear_cart">
@@ -498,11 +603,199 @@
         </div>
     </div>
 
+    {{-- <div class="popupOverlay" id="popupOverlay" style="block"></div> --}}
+    <div class="checkOutDiv" id="checkOutDiv">
+        <form action="{{ route('addToCart') }}" method="POST" enctype="multipart/form-data"
+            onsubmit="return checkPaymentMethod()">
+            @csrf
+            <div id="leftSide">
+                <div id="data-row">
+                    <div class="input-div">
+                        <label for="userName">Full Name</label>
+                        <input type="text" name="name" id="userName" placeholder="Enter your name" required>
+                    </div>
+                    <div class="input-div">
+                        <label for="userPhone">Mobile Number</label>
+                        <input type="text" name="phone_number" id="userPhone" placeholder="+923000000000"
+                            required>
+                    </div>
+                    <div class="input-div">
+                        <label for="userEmail">Email Address</label>
+                        <input type="text" name="email" id="userEmail" placeholder="Enter you email address"
+                            required>
+                    </div>
+                    <div class="input-address-div">
+                        <label for="userAddress">Your Address</label>
+                        <textarea type="text" name="address" id="userAddress" placeholder="Enter street address" required></textarea>
+                    </div>
+                </div>
+                <div id="payment-row">
+                    <p>Select Payment Method</p>
+
+                    <div class="payment-methods">
+                        <!-- Cash On Delivery -->
+                        <label for="COD" class="payment-option" onclick="selectPaymentOption(this)">
+                            <input type="radio" class="payment" id="COD" name="paymentMethod"
+                                value="Cash On Delivery">
+                            <span class="custom-radio"></span>
+                            <img src="{{ asset('Images/cash-on-delivery.png') }}" alt="Cash On Delivery">
+                            Cash On Delivery
+                        </label>
+
+                        <!-- Credit Card -->
+                        <label for="CreditCard" class="payment-option" onclick="selectPaymentOption(this)">
+                            <input type="radio" class="payment" id="CreditCard" name="paymentMethod"
+                                value="Credit Card">
+                            <span class="custom-radio"></span>
+                            <img src="{{ asset('Images/atm-card.png') }}" alt="Credit Card">
+                            Credit Card
+                        </label>
+
+                        <!-- PayPal -->
+                        {{-- <label for="PayPal" class="payment-option">
+                            <input type="radio" class="payment" id="PayPal" name="paymentMethod" value="PayPal">
+                            <span class="custom-radio"></span>
+                            <img src="{{ asset('Images/paypal.png') }}" alt="PayPal">
+                            PayPal
+                        </label> --}}
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="rightSide">
+                <h4>Your Cart</h4>
+                <div id="center-div">
+                    {{-- <div id="carted-item-div">
+                        <input type="hidden" name="carteditem1" id="carteditem1">
+                        <div id="item-img">
+                            <img src="{{ asset('Images/3293465.jpg') }}" alt="">
+                        </div>
+                        <div id="item-data">
+                            <h5>Product Name</h5>
+                            <p>Product Variation</p>
+                            <p>Product Topping</p>
+                            <div id="quantity-price">
+                                <span class="quantity-bdr">19</span> <span>Rs. 12300.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="carted-item-div">
+                        <input type="hidden" name="carteditem1" id="carteditem1">
+                        <div id="item-img">
+                            <img src="{{ asset('Images/3293465.jpg') }}" alt="">
+                        </div>
+                        <div id="item-data">
+                            <h5>Product Name</h5>
+                            <p>Product Variation</p>
+                            <p>Product Topping</p>
+                            <div id="quantity-price">
+                                <span class="quantity-bdr">19</span> <span>Rs. 12300.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="carted-item-div">
+                        <input type="hidden" name="carteditem1" id="carteditem1">
+                        <div id="item-img">
+                            <img src="{{ asset('Images/3293465.jpg') }}" alt="">
+                        </div>
+                        <div id="item-data">
+                            <h5>Product Name</h5>
+                            <p>Product Variation</p>
+                            <p>Product Topping</p>
+                            <div id="quantity-price">
+                                <span class="quantity-bdr">19</span> <span>Rs. 12300.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="carted-item-div">
+                        <input type="hidden" name="carteditem1" id="carteditem1">
+                        <div id="item-img">
+                            <img src="{{ asset('Images/3293465.jpg') }}" alt="">
+                        </div>
+                        <div id="item-data">
+                            <h5>Product Name</h5>
+                            <p>Product Variation</p>
+                            <p>Product Topping</p>
+                            <div id="quantity-price">
+                                <span class="quantity-bdr">19</span> <span>Rs. 12300.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="carted-item-div">
+                        <input type="hidden" name="carteditem1" id="carteditem1">
+                        <div id="item-img">
+                            <img src="{{ asset('Images/3293465.jpg') }}" alt="">
+                        </div>
+                        <div id="item-data">
+                            <h5>Product Name</h5>
+                            <p>Product Variation</p>
+                            <p>Product Topping</p>
+                            <div id="quantity-price">
+                                <span class="quantity-bdr">19</span> <span>Rs. 12300.00</span>
+                            </div>
+                        </div>
+                    </div> --}}
+                </div>
+                <div class="total">
+                    <div class="main_total">
+                        <div class="subtotal">
+                            <span>Subtotal</span>
+                            <span id="subtotal-amount">Rs 0.00</span>
+                            <input type="hidden" name="subTotal" id="subTotal">
+                        </div>
+                        <div class="delichrge">
+                            <span>Delivery Charges</span>
+                            <span id="delivery-charge">Rs 0.00</span>
+                            <input type="hidden" name="deliveryCharge" id="deliveryCharge">
+                        </div>
+                        <div class="grandtotal">
+                            <span>Garnd Total</span>
+                            <span id="grand-total">Rs 0.00</span>
+                            <input type="hidden" name="grandTotal" id="grandTotal">
+                        </div>
+                        <div class="form-btns">
+                            <button type="button" class="closeBtn" onclick="closeCheckOut()">Close</button>
+                            <button type="submit" class="checkOutBtn">Proceed</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    {{-- Profile Update --}}
+    <div id="profilePopup">
+        <h2>Profile</h2>
+        <form id="profileFileds" action="{{ route('updateCustomerProfile') }}" method="POST"
+            enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" id="customer_id" name="customer_id">
+            <label for="edit_name">Full Name</label>
+            <input name="name" id="edit_name" type="text" required>
+            <label for="edit_email">Email</label>
+            <input name="email" id="edit_email" type="email" readonly>
+            <label for="edit_country_code">Phone Number</label>
+            <div class="profilePhone">
+                <input name="phonePrefix" id="edit_country_code" class="phoneCode" type="text" readonly>
+                <input name="phone_number" id="edit_phone_number" class="phoneNum" type="text" required>
+            </div>
+            <div class="Profilebtn">
+                <button onclick="closeProfilePopup()" class="profileCloseBtn">Close</button>
+                <button type="submit" class="profileUpdateBtn">Update</button>
+            </div>
+        </form>
+        <div class="deleteProfile">
+            <a id="deleteCustomerProfile" href="#">Delete Account</a>
+        </div>
+    </div>
+
     <!-- end of cart -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
     <script src="{{ asset('JavaScript/frontend.js') }}"></script>
     <script src="{{ asset('JavaScript/location.js') }}"></script>
-    <script src="{{ asset('JavaScript/phone.js') }}"></script>
     <script src="{{ asset('JavaScript/final.js') }}"></script>
 
 

@@ -226,7 +226,7 @@
                         document.getElementById('statisticsPopUpOverlay').style.display = 'none';
                         document.getElementById('statisticsPopUp').style.display = 'none';
                     };
-                </script>
+                </script> 
             </div>
         @endif
 
@@ -521,7 +521,7 @@
 
         {{--   
             |---------------------------------------------------------------|
-            |===================== Confirm deletion ========================|
+            |===================== Edit Owner Profile ======================|
             |---------------------------------------------------------------|
         --}}
         <div id="editOwnerProfileOverlay"></div>

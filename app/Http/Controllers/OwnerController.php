@@ -183,7 +183,7 @@ class OwnerController extends Controller
         if ($branch->onlineDeliveryOption === 0) {
             return redirect()->back()->with('warning', 'The Online Option for this Branch is disabled.');
         }
-        $orders = Order::with('branch')->where('branch_id', $branch_id)->whereIn('ordertype', ['online', 'Online', 'ONLINE'])->get();
+        $orders = Order::with('branch')->where('branch_id', $branch_id)->where('ordertype', 'online')->get();
         $orders->branch_details = $branch;
         return redirect()->back()->with('Orders', $orders);
     }

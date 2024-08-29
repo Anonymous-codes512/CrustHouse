@@ -18,10 +18,6 @@ Route::get('/', function () {
     return view('index');
 })->name('welcome');
 
-Route::get('/online', [OnlineOrdersController::class, 'viewOnlinePage'])->name('onlineOrderPage');
-
-Route::get('viewOnlineProducts/{locationData}', [OnlineOrdersController::class, 'viewOnlineProducts'])->name('viewOnlineProducts');
-
 Route::get('/login',[AuthController::class, 'loginIndex'])->name('viewLoginPage');
 Route::get('/viewRegisterPage',[AuthController::class, 'registrationIndex'])->name('viewRegisterPage');
 
@@ -250,6 +246,11 @@ Route::get('salesman/removeOneProduct/{id}/{salesman_id}/{branch_id}', [Salesman
 Route::get('salesman/increaseQuantity/{id}/{salesman_id}/{branch_id}', [SalesmanController::class,'increaseQuantity'])->name('increaseQuantity');
 Route::get('salesman/decreaseQuantity/{id}/{salesman_id}/{branch_id}', [SalesmanController::class,'decreaseQuantity'])->name('decreaseQuantity');
 Route::get('salesman/deleteReceiptPDF/{file_name}', [SalesmanController::class,'deleteReceiptPDF'])->name('deleteReceiptPDF');
+Route::get('salesman/confirmOnlineOrder/{branch_id}/{salesman_id}/{order_id}', [SalesmanController::class,'confirmOnlineOrder'])->name('confirmOnlineOrder');
+
+// Route::post('/sendNotification/{message}', [SalesmanController::class, 'sendNotification'])->name('sendNotification');
+Route::get('/getNotificationData', [SalesmanController::class, 'getNotificationData'])->name('getNotificationData');
+Route::delete('/deleteOnlineNotification/{id}', [SalesmanController::class, 'deleteNotification'])->name('deleteOnlineNotification');
 
 /*
 |---------------------------------------------------------------|
@@ -260,3 +261,19 @@ Route::get('salesman/deleteReceiptPDF/{file_name}', [SalesmanController::class,'
 Route::get('chef/dashboard/{user_id}/{branch_id}',[KitchenController::class,'viewChefDashboard'])->name('chef_dashboard');
 Route::get('chef/orderComplete/{order_id}',[KitchenController::class,'orderComplete'])->name('orderComplete');
 Route::get('chef/printChefRecipt/{order_id}',[KitchenController::class,'printChefRecipt'])->name('printChefRecipt');
+
+/*
+|---------------------------------------------------------------|
+|================== Online Ordering Routes =====================|
+|---------------------------------------------------------------|
+*/
+
+Route::get('/online', [OnlineOrdersController::class, 'viewOnlinePage'])->name('onlineOrderPage');
+Route::post('/customerSignUp', [OnlineOrdersController::class, 'customerSignup'])->name('customerSignup');
+Route::post('/customerLogin', [OnlineOrdersController::class, 'customerLogin'])->name('customerLogin');
+Route::get('/customerEmailConfirmation/{token}', [OnlineOrdersController::class, 'customerEmailConfirmation'])->name('customerEmailConfirmation');
+Route::post('/addToCart', [OnlineOrdersController::class, 'addToCart'])->name('addToCart');
+Route::get('/registeredCustomer', [OnlineOrdersController::class, 'registeredCustomer'])->name('registeredCustomer');
+Route::get('/profile/{email}', [OnlineOrdersController::class, 'Profile'])->name('profile');
+Route::post('/updateCustomerProfile', [OnlineOrdersController::class, 'updateCustomerProfile'])->name('updateCustomerProfile');
+Route::get('/deleteCustomer/{customer_id}', [OnlineOrdersController::class, 'deleteCustomer'])->name('deleteCustomer');

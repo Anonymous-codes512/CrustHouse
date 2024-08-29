@@ -70,11 +70,40 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
 });
 
-// Dropdown function
-function toggleDropdown() {
-    const dropdownContent = document.getElementById('dropdown-content');
-    const arrow = document.querySelector('.arrow');
+// // Dropdown function
+// function toggleDropdown() {
+//     const dropdownContent = document.getElementById('dropdown-content');
+//     const arrow = document.querySelector('.arrow');
 
+//     if (dropdownContent.classList.contains('active')) {
+//         dropdownContent.classList.remove('active');
+//         arrow.classList.remove('active');
+//     } else {
+//         dropdownContent.classList.add('active');
+//         arrow.classList.add('active');
+//     }
+// }
+function toggleDropdown(element) {
+    const dropdownContent = element.nextElementSibling;
+    const arrow = element.querySelector('.arrow');
+
+    // Close all other active dropdowns
+    const allDropdowns = document.querySelectorAll('.dropdown-content');
+    const allArrows = document.querySelectorAll('.arrow');
+
+    allDropdowns.forEach((content) => {
+        if (content !== dropdownContent) {
+            content.classList.remove('active');
+        }
+    });
+
+    allArrows.forEach((otherArrow) => {
+        if (otherArrow !== arrow) {
+            otherArrow.classList.remove('active');
+        }
+    });
+
+    // Toggle the selected dropdown
     if (dropdownContent.classList.contains('active')) {
         dropdownContent.classList.remove('active');
         arrow.classList.remove('active');
@@ -82,55 +111,34 @@ function toggleDropdown() {
         dropdownContent.classList.add('active');
         arrow.classList.add('active');
     }
+
+    // Close dropdown when a radio button is selected
+    dropdownContent.querySelectorAll('input[type="radio"]').forEach((radio) => {
+        radio.addEventListener('change', () => {
+            dropdownContent.classList.remove('active');
+            arrow.classList.remove('active');
+            updateLabel(element, radio);
+        });
+    });
+    dropdownContent.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+        checkbox.addEventListener('change', () => {
+            updateLabelForToppings(element, checkbox); // Update label for toppings
+        });
+    });
 }
 
-// // Popclose function
-// function closePopup() {
-//     document.getElementById('popup').style.display = 'none';
-//     document.getElementById('closeButton').style.display = 'none';
-//     document.querySelector(".popwhole").style.filter = 'initial';
-//     document.querySelector(".popwhole").style.pointerEvents = "auto";
-//     document.body.style.overflow = "initial";
-// }
+function updateLabel(element, radio) {
+    const labelSpan = element.querySelector('.required');
+    if (labelSpan) {
+        labelSpan.innerText = 'Selected';
+        labelSpan.style.backgroundColor = 'rgb(139, 195, 74)';
+    }
+}
 
-// Show and hide login
-document.getElementById('profileImg').onclick = function() {
-    document.getElementById('overlay').style.display = "block";
-    document.getElementById('logincomponent').style.display = "flex";
-    toggleClass(".whole", "active");
-    document.querySelector(".temp").style.display = "block";
-    // document.querySelector(".temp").style.filter = "blur(3px)";
-    document.querySelector(".temp").style.pointerEvents = "none";
-    document.body.style.overflow = "hidden";
-};
-
-document.querySelector('.close').onclick = function() {
-    document.getElementById('overlay').style.display = "none";
-    document.getElementById('logincomponent').style.display = "none";
-    toggleClass(".whole", "active");
-    document.querySelector(".temp").style.pointerEvents = "auto";
-    document.body.style.overflow = "initial";
-};
-
-// Show and hide signup
-document.querySelector('.signbtn').onclick = function() {
-    document.getElementById('signupcomponent').style.display = "flex";
-    document.getElementById('logincomponent').style.display = "none";
-    document.body.classList.add("no-scroll");
-};
-
-document.querySelector('.closee').onclick = function() {
-    document.getElementById('overlay').style.display = "none";
-    document.getElementById('signupcomponent').style.display = "none";
-    toggleClass(".whole", "active");
-    document.querySelector(".temp").style.pointerEvents = "auto";
-    document.body.classList.remove("no-scroll");
-};
-
-document.querySelector('.alraccount').onclick = function() {
-    document.getElementById('signupcomponent').style.display = "none";
-    document.getElementById('logincomponent').style.display = "flex";
-    document.body.classList.add("no-scroll");
-};
-
-// Cart functionality
+function updateLabelForToppings(element, checkbox) {
+    const labelSpan = element.querySelector('.required');
+    if (labelSpan && checkbox.checked) {
+        labelSpan.innerText = 'Selected';
+        labelSpan.style.backgroundColor = 'rgb(139, 195, 74)';
+    }
+}

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\OnlineNotification;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ThemeSetting;
@@ -17,9 +18,24 @@ class KitchenController extends Controller
 
         // $branch = Branch::find($branch_id);
         $settings = ThemeSetting::where('branch_id', $branch_id)->with(['branch.users'])->first();
-        $newOrders = Order::with('items')->where('status', 2)->where('branch_id',$branch_id)->get();
-        $completeOrders = Order::with('items')->where('status', 1)->where('branch_id',$branch_id)->get();
+       
+        $newOrders = Order::with('items')
+        ->where('branch_id', $branch_id)
+        ->where(function ($query) {
+            $query->where('ordertype', 'online')
+                  ->where('status', 4)
+                  ->orWhere(function ($query) {
+                      $query->where('ordertype', '!=', 'online')
+                            ->where('status', 2);
+                  });
+        })
+        ->get();
     
+        $completeOrders = Order::with('items')
+            ->where('branch_id', $branch_id)
+            ->where('status', 1)
+            ->get();
+
         return view('Kitchen.Dashboard', [
             'newOrders' => $newOrders,
             'completeOrders' => $completeOrders,
@@ -27,7 +43,6 @@ class KitchenController extends Controller
             'user_id' => $user_id
         ]);
     }
-    
 
     public function orderComplete($order_id)
     {
@@ -36,8 +51,13 @@ class KitchenController extends Controller
         }
 
         $order = Order::find($order_id);
-        $order->status = 1;
+        $order->status = ($order->status == 4) ? 5 : 1;
         $order->save();
+
+        $notify = new OnlineNotification();
+        $notify->message = "Order is ready by the Chef. Please refresh your page.";
+        $notify->toast = 0;
+        $notify->save();
         return redirect()->back();
     }
     public function printChefRecipt($order_id)
@@ -45,7 +65,7 @@ class KitchenController extends Controller
         if (!session()->has('chef')) {
             return redirect()->route('viewLoginPage');
         }
-        
+
         $order = Order::with('salesman')->where('id', $order_id)->first();
         $products = OrderItem::where('order_id', $order_id)->get();
         $html = view('KitchenRecipt', ['products' => $products, 'orderData' => $order])->render();

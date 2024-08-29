@@ -70,7 +70,7 @@
             $allProducts = $AllProducts;
             $staff_id = $staff_id;
             $branch_id = $branch_id;
-            $cartProducts = $cartProducts; 
+            $cartProducts = $cartProducts;
             $totalbill = 0;
             $taxes = $taxes;
             $discounts = $discounts;
@@ -101,7 +101,6 @@
                     <a class="category_link">Deals</a>
                 </div>
             </div>
-
 
             <div id="products">
                 @php
@@ -381,7 +380,7 @@
                                 <label for="tables_list">Select Table Number</label>
                                 <select name="table_number" id="tables_list">
                                     @foreach ($dineInTables as $table)
-                                        <option value="{{$table->table_number}}">{{$table->table_number}}</option>
+                                        <option value="{{ $table->table_number }}">{{ $table->table_number }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -523,46 +522,143 @@
                         <thead>
                             <tr>
                                 <th>Order #</th>
+                                <th>Customer Name</th>
+                                <th>Customer Phone</th>
                                 <th>Address</th>
                                 <th>Order Status</th>
                                 <th>Order Items</th>
-                                <th>Item Price</th>
-                                <th>Total Bill</th>
+                                <th style="text-align: center;">Price</th>
+                                <th style="text-align: center;">Item QTY</th>
+                                <th style="text-align: center;">Item Price</th>
+                                <th style="text-align: center;">Total Bill</th>
                                 <th>Action</th>
 
                             </tr>
                         </thead>
                         <tbody>
-                            {{-- @foreach ($orders as $order) --}}
-                            <tr class="table-row">
-                                <td id="table-number">
-                                    CH102
-                                </td>
-                                <td class="truncate-text">
-                                    10/368 Barri Gali Awanan Neka Pura
-                                </td>
-                                <td>
-                                    Complete
-                                </td>
-                                <td>
-                                    <div>Pizza</div>
-                                    <div>Calzon</div>
-                                    <div>Pasta</div>
-                                </td>
-                                <td>
-                                    <div>Rs. 1200</div>
-                                    <div>Rs. 1500</div>
-                                    <div>Rs. 1100</div>
-                                </td>
-                                <td>
-                                    Rs. 3800
-                                </td>
-                                <td>
-                                    {{-- <a title="Add New Prduct" ><i class='bx bxs-cart-add'></i></a> --}}
-                                    <a title="Assign to Rider"><i class='bx bxs-right-arrow-square'></i></a>
-                                </td>
-                            </tr>
-                            {{-- @endforeach --}}
+                            @foreach ($onlineOrders as $order)
+                                <tr class="table-row">
+                                    <td id="table-number">
+                                        {{ $order->order_number }}
+                                    </td>
+                                    <td>{{ $order->customers->name }}</td>
+                                    <td>{{ $order->customers->phone_number }}</td>
+                                    <td class="truncate-text" title="{{ $order->order_address }}">
+                                        {{ $order->order_address }}
+                                    </td>
+                                    <td>
+                                        @php
+                                            $color = '';
+                                            $statusText = '';
+                                            switch ($order->status) {
+                                                case 1:
+                                                    $statusText = 'Completed';
+                                                    $color = '#000'; // black
+                                                    break;
+
+                                                case 2:
+                                                    $statusText = 'Pending';
+                                                    $color = '#FFC107'; // Yellow
+                                                    break;
+
+                                                case 3:
+                                                    $statusText = 'Cancel';
+                                                    $color = '#F44336'; // Red
+                                                    break;
+
+                                                case 4:
+                                                    $statusText = 'Send to Chef';
+                                                    $color = '#2196F3'; // Blue
+                                                    break;
+
+                                                case 5:
+                                                    $statusText = 'Order Ready';
+                                                    $color = '#4CAF50'; // green
+                                                    break;
+
+                                                default:
+                                                    $statusText = 'Unknown';
+                                                    $color = '#9E9E9E'; // Gray
+                                            }
+                                        @endphp
+                                        <span style="color: {{ $color }};">
+                                            {{ $statusText }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        @foreach ($order->items as $item)
+                                            <div>
+                                                @if ($item->addons)
+                                                    {{ $item->product_name }} with {{ $item->addons }}
+                                                @else
+                                                    {{ $item->product_name }}
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </td>
+                                    <td style="text-align: center;">
+                                        @foreach ($order->items as $item)
+                                            <div>{{ $item->product_price }}</div>
+                                        @endforeach
+                                    </td>
+                                    <td style="text-align: center;">
+                                        @foreach ($order->items as $item)
+                                            <div>{{ $item->product_quantity }}</div>
+                                        @endforeach
+                                    </td>
+                                    <td style="text-align: center;">
+                                        @foreach ($order->items as $item)
+                                            <div>{{ $item->total_price }}</div>
+                                        @endforeach
+                                    </td>
+                                    <td style="text-align: center;">
+                                        {{ $order->total_bill }}
+                                    </td>
+                                    <td>
+                                        @if ($order->status == 1 || $order->status == 3)
+                                            <!-- Disabled for status 1 and 3 -->
+                                            <a title="Confirm order">
+                                                <i style="background-color:#1ac371; cursor: default;"
+                                                    class='bx bx-check'></i>
+                                            </a>
+                                            <a title="Assign to Rider">
+                                                <i style="background-color:#1ac371; cursor: default;"
+                                                    class='bx bxs-right-arrow-square'></i>
+                                            </a>
+                                        @elseif ($order->status == 2)
+                                            <!-- Default for status 2 -->
+                                            <a href="{{ route('confirmOnlineOrder', [$branch_id, $staff_id, $order->id]) }}"
+                                                title="Confirm order">
+                                                <i class='bx bx-check'></i>
+                                            </a>
+                                            <a title="Assign to Rider">
+                                                <i class='bx bxs-right-arrow-square'></i>
+                                            </a>
+                                        @elseif ($order->status == 4 || $order->status == 5)
+                                            <!-- Disabled first icon and default for second -->
+                                            <a title="Confirm order">
+                                                <i style="background-color:#4d4d4d; cursor: default;"
+                                                    class='bx bx-check'></i>
+                                            </a>
+                                            <a href="{{ route('confirmOnlineOrder', [$branch_id, $staff_id, $order->id]) }}"
+                                                title="Assign to Rider">
+                                                <i class='bx bxs-right-arrow-square'></i>
+                                            </a>
+                                        @else
+                                            <!-- Default for any other status -->
+                                            <a href="{{ route('confirmOnlineOrder', [$branch_id, $staff_id, $order->id]) }}"
+                                                title="Confirm order">
+                                                <i class='bx bx-check'></i>
+                                            </a>
+                                            <a href="{{ route('assignToRider', [$staff_id, $order->id]) }}"
+                                                title="Assign to Rider">
+                                                <i class='bx bxs-right-arrow-square'></i>
+                                            </a>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -603,7 +699,7 @@
                         <tbody>
                             @foreach ($orders as $order)
                                 <tr class="table-row">
-                                    <td>{{ $order->id }}</td> 
+                                    <td>{{ $order->id }}</td>
                                     <td id="table-number">{{ $order->order_number }}</td>
                                     <td>{{ $order->salesman->name }}</td>
                                     <td>{{ $order->total_bill }}</td>
@@ -614,6 +710,10 @@
                                         <td class="status">Pending</td>
                                     @elseif ($order->status == 3)
                                         <td class="status">Canceled</td>
+                                    @elseif ($order->status == 4)
+                                        <td class="status">Send to Chef</td>
+                                    @elseif ($order->status == 5)
+                                        <td class="status">Ready for delivery</td>
                                     @endif
                                     <td id="actionstd">
                                         <a id="view" href="#"
@@ -622,10 +722,17 @@
                                             <a id="cancel-order"
                                                 style="background-color:#4d4d4d; cursor: default;">Cancel</a>
                                         @elseif($order->status == 2)
-                                            <a id="cancel-order" href="{{ route('cancelorder', [$order->id, $staff_id]) }}">Cancel</a>
+                                            <a id="cancel-order"
+                                                href="{{ route('cancelorder', [$order->id, $staff_id]) }}">Cancel</a>
                                         @elseif($order->status == 3)
                                             <a id="cancel-order"
                                                 style="background-color:#4d4d4d;  cursor: default;">Cancel</a>
+                                        @elseif($order->status == 4)
+                                            <a id="cancel-order"
+                                                href="{{ route('cancelorder', [$order->id, $staff_id]) }}">Cancel</a>
+                                        @elseif($order->status == 5)
+                                            <a id="cancel-order"
+                                                href="{{ route('cancelorder', [$order->id, $staff_id]) }}">Cancel</a>
                                         @endif
                                     </td>
                                 </tr>
@@ -658,15 +765,131 @@
             </div>
 
             <div class="btns">
-                <a style="text-decoration:none;" href="#" id="printReciptLink"><button id="printbtn" type="button">Print</button></a>
+                <a style="text-decoration:none;" href="#" id="printReciptLink"><button id="printbtn"
+                        type="button">Print</button></a>
                 <button id="closebtn" type="button" onclick="closeOrderItems()">Close</button>
             </div>
         </div>
 
+        <div id="custom-popup" style="display: none;">
+            <p id="popup-message"></p>
+            <button id="enable-sound" onclick="playAudio()" style="display: none;">Enable Sound</button>
+            <audio id="notification-sound" src="{{ asset('Sound/notification.mp3') }}" allow="autoplay"></audio>
+        </div>
+        <style>
+            #custom-popup {
+                position: fixed;
+                left: -300px;
+                bottom: 20px;
+                width: 350px;
+                max-width: 600px;
+                background-color: #9c7301;
+                color: #ffffff;
+                padding: 15px;
+                border-radius: 5px;
+                box-shadow: 0 0 10px #535353;
+                font-size: 16px;
+                font-weight: 600;
+                transition: right 0.5s ease-in-out;
+                z-index: 1100;
+            }
+
+            #custom-popup.show {
+                left: 20px;
+            }
+        </style>
 
     </main>
 
     <script>
+        let interval = 10000; // 10 seconds
+        let remainingTime = interval;
+        let previousData = [];
+
+        async function fetchData() {
+            try {
+                const response = await fetch("http://127.0.0.1:8000/getNotificationData");
+                const data = await response.json();
+
+                if (JSON.stringify(data.collection) !== JSON.stringify(previousData)) {
+                    document.getElementById('enable-sound').click();
+
+                    previousData = data.collection;
+                    data.collection.forEach((message) => {
+                        showPopup(message.message, message.id);
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        async function deleteNotification(messageId) {
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                const response = await fetch(`http://127.0.0.1:8000/deleteOnlineNotification/${messageId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': token,
+                        'Content-Type': 'application/json'
+                    },
+                });
+
+                if (response.ok) {
+                    console.log(`Notification ${messageId} deleted successfully.`);
+                } else {
+                    console.error('Failed to delete notification:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error deleting notification:', error);
+            }
+        }
+
+        function showPopup(message, messageId) {
+            const popup = document.getElementById('custom-popup');
+            const popupMessage = document.getElementById('popup-message');
+            const notificationSound = document.getElementById('notification-sound');
+
+            popup.style.display = "block";
+            popupMessage.textContent = message;
+            popup.classList.add('show');
+
+            setTimeout(async () => {
+                popup.style.display = "none";
+                popup.classList.remove('show');
+                await deleteNotification(messageId);
+            }, 3000);
+        }
+
+        function updateCountdown() {
+            const seconds = Math.ceil(remainingTime / 1000);
+        }
+
+        function playAudio() {
+            const notificationSound = document.getElementById('notification-sound');
+            notificationSound.play();
+        }
+
+        function startCountdown() {
+            updateCountdown();
+            setInterval(() => {
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    fetchData();
+                    remainingTime = interval;
+                }
+                updateCountdown();
+            }, 1000);
+        }
+
+        startCountdown();
+
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchData();
+        });
+
+
         document.addEventListener('DOMContentLoaded', function() {
             let toggle = document.getElementById('order_type');
             const falsetext = document.getElementById('false-option').textContent;
@@ -996,9 +1219,9 @@
                 <td>${item.product_name}</td>
                 <td>${item.product_quantity}</td>
                 <td>${item.total_price}</td>
-            </tr>
-        `;
-                orderItemsBody.insertAdjacentHTML('beforeend', row);
+            </tr>`;
+
+            orderItemsBody.insertAdjacentHTML('beforeend', row);
             });
 
             let route = `{{ route('printrecipt', ':orderId') }}`;
@@ -1009,7 +1232,7 @@
             document.getElementById('orderItems').style.display = 'flex';
             document.getElementById('allOrdersDiv').style.display = 'none';
         }
-        
+
         function closeOrderItems() {
             document.getElementById('orderItemsOverlay').style.display = 'none';
             document.getElementById('orderItems').style.display = 'none';

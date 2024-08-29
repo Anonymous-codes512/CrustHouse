@@ -13,7 +13,7 @@ class ResetPassword extends Mailable
     use Queueable, SerializesModels;
 
     public $users;
-
+ 
     public function __construct($users)
     {
         $this->users = $users;

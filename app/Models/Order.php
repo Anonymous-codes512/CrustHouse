@@ -16,6 +16,11 @@ class Order extends Model
     {
         return $this->belongsTo(User::class, 'salesman_id');
     }
+ 
+    public function customers()
+    {
+        return $this->belongsTo(User::class, 'customer_id');
+    }
 
     public function branch()
     {

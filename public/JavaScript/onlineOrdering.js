@@ -1,16 +1,26 @@
-function addToCart(product, allProducts) {
-    const popup = document.getElementById('popup');
-    const popupImg = document.getElementById('popup-img');
-    const popupTitle = document.getElementById('popup-title');
-    const popupPrice = document.getElementById('popup-price');
-    const dropdownContainer = document.querySelector('.drop');
+let RegisteredCustomer = {
+    name: null,
+    "Phone Number": null,
+    Email: null,
+};
+
+function addToCart(product, allProducts, addons) {
+    const popup = document.getElementById("popup");
+    const popupImg = document.getElementById("popup-img");
+    const popupTitle = document.getElementById("popup-title");
+    const popupPrice = document.getElementById("popup-price");
+    const dropdownContainer = document.querySelector(".drop");
+    const extra4Div = document.getElementById("extra_4");
+    const overlay = document.getElementById("overlay");
 
     const productArray = Object.values(allProducts);
+    const getAddons = Object.values(addons);
+
     let productPrices = [];
     let productVariations = [];
+    let addOnPrices = [];
 
-    // Clear previous dropdown options
-    dropdownContainer.innerHTML = '';
+    dropdownContainer.innerHTML = "";
 
     productArray.forEach((element) => {
         if (element.productName === product.productName) {
@@ -19,31 +29,42 @@ function addToCart(product, allProducts) {
         }
     });
 
-    // Create dropdown options dynamically
     productVariations.forEach((variation, index) => {
-        const dropdown2 = document.createElement('div');
-        dropdown2.className = 'dropdown_2';
+        const dropdown2 = document.createElement("div");
+        dropdown2.className = "dropdown_2";
 
-        const radioDiv = document.createElement('div');
-        const radioInput = document.createElement('input');
-        radioInput.type = 'radio';
-        radioInput.name = 'option';
+        const radioDiv = document.createElement("div");
+        const radioInput = document.createElement("input");
+        radioInput.type = "radio";
+        radioInput.name = "option";
         radioInput.value = productPrices[index];
-        radioInput.onclick = () => updatePrice(radioInput);
-        if (index === 0) radioInput.checked = true;
+        radioInput.id = `variation-${index}`;
+        radioInput.onclick = () => {
+            document
+                .querySelectorAll('input[name="addon"]')
+                .forEach((checkbox) => {
+                    checkbox.checked = false;
+                });
+            updatePrice(radioInput);
 
+            filterAddons(variation); // Filter addons based on selected variation only if checked
+        };
+        if (index === 0) {
+            updatePrice(radioInput);
+            // Do not filter addons here to delay the update until user interacts
+        }
         radioDiv.appendChild(radioInput);
         dropdown2.appendChild(radioDiv);
 
-        const dropdown3 = document.createElement('div');
-        dropdown3.className = 'dropdown_3';
+        const dropdown3 = document.createElement("div");
+        dropdown3.className = "dropdown_3";
 
-        const sizeSpan = document.createElement('span');
-        sizeSpan.className = 'sizee';
+        const sizeSpan = document.createElement("span");
+        sizeSpan.className = "sizee";
         sizeSpan.innerText = variation;
 
-        const priceSpan = document.createElement('span');
-        priceSpan.className = 'rs';
+        const priceSpan = document.createElement("span");
+        priceSpan.className = "rs";
         priceSpan.innerText = `Rs. ${productPrices[index]}`;
 
         dropdown3.appendChild(sizeSpan);
@@ -52,12 +73,71 @@ function addToCart(product, allProducts) {
 
         dropdownContainer.appendChild(dropdown2);
     });
+    const toppingShow = document.getElementById("extra_4");
+    const addonsSection = document.getElementById("dropdown-content1");
+    const addonsContainer = addonsSection.querySelector(".drop");
 
-    // Update popup content
+    // Function to filter addons based on selected variation
+    function filterAddons(selectedVariation) {
+        addonsContainer.innerHTML = ""; // Clear previous addons options
+
+        getAddons.forEach((addon) => {
+            // Check if the addon’s variations array includes the selected variation
+            if (
+                addon.productVariation &&
+                Array.isArray(addon.productVariation)
+            ) {
+                if (addon.productVariation.includes(selectedVariation)) {
+                    addAddonToContainer(addon);
+                }
+            } else if (addon.productVariation === selectedVariation) {
+                addAddonToContainer(addon);
+            }
+        });
+    }
+
+    // Function to add addon to container
+    function addAddonToContainer(addon) {
+        const dropdown2 = document.createElement("div");
+        dropdown2.className = "dropdown_2";
+
+        const radioDiv = document.createElement("div");
+        const radioInput = document.createElement("input");
+        radioInput.type = "radio";
+        radioInput.name = "addon";
+        radioInput.value = addon.productPrice; // Assuming addons have prices
+        radioInput.onclick = () => toppingPrice(radioInput); // Function to update price with addons
+
+        radioDiv.appendChild(radioInput);
+        dropdown2.appendChild(radioDiv);
+
+        const dropdown3 = document.createElement("div");
+        dropdown3.className = "dropdown_3";
+
+        const addonSpan = document.createElement("span");
+        addonSpan.className = "sizee";
+        addonSpan.innerText = addon.productName + " " + addon.productVariation;
+
+        const addonPriceSpan = document.createElement("span");
+        addonPriceSpan.className = "rs";
+        addonPriceSpan.innerText = `Rs. ${addon.productPrice}`;
+
+        dropdown3.appendChild(addonSpan);
+        dropdown3.appendChild(addonPriceSpan);
+        dropdown2.appendChild(dropdown3);
+        addonsContainer.appendChild(dropdown2);
+    }
+
+    if (product.category_name === "Pizza") {
+        toppingShow.style.display = "block";
+        // Initialize addons based on the first variation when the user interacts
+    } else {
+        toppingShow.style.display = "none"; // Hide addons section if no addons are available
+    }
+
     popupImg.src = `Images/ProductImages/${product.productImage}`;
     popupTitle.innerText = product.productName;
-    popupPrice.innerText = productPrices[0]; // Set initial price based on the first option
-    // Set initial price based on the first option
+    popupPrice.innerText = productPrices[0];
     document.getElementById("originalprice").textContent = product.productPrice;
     document.getElementById("cart-price").textContent = product.productPrice;
 
@@ -70,32 +150,618 @@ function addToCart(product, allProducts) {
     document.querySelector(".popwhole").style.pointerEvents = "none";
 }
 
-
-function closeAddToCart() {
-    document.getElementById('overlay').style.display = 'none';
-    document.getElementById('popup').style.display = 'none';
-    document.querySelector(".popwhole").style.pointerEvents = "auto";
-    document.body.style.overflow = "initial";
-}
-
-// Check if the 'overlay' element exists
-// Ensure the overlay element exists
-document.addEventListener('DOMContentLoaded', function() {
-    const overlay = document.getElementById('overlay');
+document.addEventListener("DOMContentLoaded", function() {
+    const overlay = document.getElementById("overlay");
     if (overlay) {
-        overlay.addEventListener('click', () => {
-            const cart = document.getElementById('cart');
-            if (cart.classList.contains('active')) {
-                cart.classList.remove('active');
+        overlay.addEventListener("click", () => {
+            const cart = document.getElementById("cart");
+            if (cart.classList.contains("active")) {
+                cart.classList.remove("active");
                 document.body.classList.remove("no-scroll");
                 document.querySelector(".whole").style.pointerEvents = "auto";
                 // document.querySelector(".whole").style.filter = "initial";
-                overlay.style.display = 'none';
+                overlay.style.display = "none";
             }
             document.body.classList.add("no-scroll");
             document.body.style.overflow = "initial";
         });
     } else {
-        console.error('Overlay element not found.');
+        console.error("Overlay element not found.");
     }
 });
+
+function showLoginPopup() {
+    const cart = document.getElementById("cart");
+    cart.classList.remove("active");
+    document.querySelector(".whole").style.pointerEvents = "auto";
+
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("logincomponent").style.display = "flex";
+    toggleClass(".whole", "active");
+    document.querySelector(".temp").style.display = "block";
+    document.querySelector(".temp").style.pointerEvents = "none";
+    document.body.style.overflow = "hidden";
+}
+
+function hideLoginPopup() {
+    document.getElementById("overlay").style.display = "none";
+    document.getElementById("logincomponent").style.display = "none";
+    toggleClass(".whole", "active");
+    document.querySelector(".temp").style.pointerEvents = "auto";
+    document.body.style.overflow = "initial";
+}
+
+function showSignupPopup() {
+    document.getElementById("signupcomponent").style.display = "flex";
+    document.getElementById("logincomponent").style.display = "none";
+    document.body.classList.add("no-scroll");
+}
+
+function hideSignupPopup() {
+    document.getElementById("overlay").style.display = "none";
+    document.getElementById("signupcomponent").style.display = "none";
+    toggleClass(".whole", "active");
+    document.querySelector(".temp").style.pointerEvents = "auto";
+    document.body.classList.remove("no-scroll");
+}
+
+function redirectToLogin() {
+    document.getElementById("signupcomponent").style.display = "none";
+    document.getElementById("logincomponent").style.display = "flex";
+    document.body.classList.add("no-scroll");
+}
+
+function handleCartButtonClick() {
+    const title = document.getElementById("popup-title").innerText;
+    const imageSrc = document.getElementById("popup-img").src;
+    const price = parseInt(
+        document
+        .getElementById("cart-price")
+        .innerText.replace("Rs. ", "")
+        .replace(",", "")
+    );
+    const Originalprice = parseInt(
+        document
+        .getElementById("originalprice")
+        .innerText.replace("Rs. ", "")
+        .replace(",", "")
+    );
+    const quantity = parseInt(document.getElementById("quantity").innerText);
+    const selectedOption = document.querySelector(
+        'input[name="option"]:checked'
+    );
+    const selectedSizeElement = selectedOption
+        .closest(".dropdown_2")
+        .querySelector(".sizee");
+    const selectedVariation = selectedSizeElement ?
+        selectedSizeElement.innerText.trim() :
+        "No variation selected";
+    const variationPrice = parseInt(
+        document
+        .querySelector('input[name="option"]:checked')
+        .getAttribute("value")
+    );
+
+    let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+
+    let existingCartItemIndex = -1;
+    cartItems.forEach((item, index) => {
+        if (item.name === title && item.variation === selectedVariation) {
+            existingCartItemIndex = index;
+        }
+    });
+
+    const cartItem = {
+        name: title,
+        originalPrice: Originalprice,
+        price: price,
+        quantity: quantity,
+        imgSrc: imageSrc,
+        variation: selectedVariation,
+        variationPrice: variationPrice,
+    };
+
+    if (existingCartItemIndex !== -1) {
+        cartItems[existingCartItemIndex].quantity += quantity;
+        cartItems[existingCartItemIndex].price =
+            cartItems[existingCartItemIndex].variationPrice *
+            cartItems[existingCartItemIndex].quantity;
+    } else {
+        cartItems.push(cartItem);
+    }
+
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    showMessage();
+    closeAddToCart();
+}
+
+function closeAddToCart() {
+    document.querySelectorAll('input[name="option"]').forEach((radio) => {
+        radio.checked = false;
+    });
+
+    // Reset all topping checkboxes
+    document.querySelectorAll('input[name="addon"]').forEach((checkbox) => {
+        checkbox.checked = false;
+    });
+
+    // Reset labels to "Requires"
+    document.querySelectorAll(".required").forEach((labelSpan) => {
+        labelSpan.innerText = "Required";
+        labelSpan.style.backgroundColor = "rgb(220, 53, 69)"; // Set to the original color
+    });
+    document.getElementById("overlay").style.display = "none";
+    document.getElementById("popup").style.display = "none";
+    document.querySelector(".popwhole").style.pointerEvents = "auto";
+    document.body.style.overflow = "initial";
+}
+
+function showMessage() {
+    const msgElement = document.querySelector(".msg");
+
+    msgElement.classList.add("show");
+    setTimeout(() => {
+        msgElement.classList.remove("show");
+        msgElement.classList.add("hide");
+    }, 1000);
+
+    setTimeout(() => {
+        msgElement.classList.remove("hide");
+    }, 1000);
+}
+
+function checkOut() {
+    const LoginStatus = localStorage.getItem("LoginStatus");
+    if (LoginStatus) {
+        const parsedLoginStatus = JSON.parse(LoginStatus);
+        if (
+            (parsedLoginStatus.loginStatus === false &&
+                parsedLoginStatus.signupStatus === false) ||
+            parsedLoginStatus.loginStatus === null
+        ) {
+            showSignupPopup();
+        } else if (
+            (parsedLoginStatus.loginStatus === false &&
+                parsedLoginStatus.signupStatus === true) ||
+            parsedLoginStatus.loginStatus === null
+        ) {
+            showLoginPopup();
+        } else if (
+            (parsedLoginStatus.loginStatus === true &&
+                parsedLoginStatus.signupStatus === true) ||
+            parsedLoginStatus.loginStatus === null
+        ) {
+            showCheckOutPopup();
+        }
+    } else {
+        showSignupPopup();
+    }
+}
+
+function updateLoginStatus() {
+    let email = document.getElementById("email").value;
+    let Data = { loginStatus: false, signupStatus: true, email: email };
+    localStorage.setItem("LoginStatus", JSON.stringify(Data));
+    return true;
+}
+
+function validateEmail() {
+    let email = document.getElementById("email").value.trim();
+    let emailErrorMessage = document.getElementById("email-error-message");
+    let submitBtn = document.getElementById("regBtn");
+
+    if (!email.endsWith(".com")) {
+        emailErrorMessage.style.display = "block";
+        emailErrorMessage.textContent = "Email must end with '.com'.";
+        submitBtn.disabled = true;
+        submitBtn.classList.remove("regbtn");
+        submitBtn.classList.add("disable-btn");
+        return;
+    }
+    var invalidChars = /[\*\/=\-+]/;
+    if (invalidChars.test(email)) {
+        emailErrorMessage.style.display = "block";
+        emailErrorMessage.textContent =
+            "Email contains invalid characters like *, /, =.";
+        submitBtn.style.color = "#fff";
+        submitBtn.classList.remove("regbtn");
+        submitBtn.classList.add("disable-btn");
+        submitBtn.disabled = true;
+        return;
+    }
+
+    submitBtn.classList.add("regbtn");
+    submitBtn.classList.remove("disable-btn");
+    emailErrorMessage.style.display = "none";
+    submitBtn.disabled = false;
+}
+
+function showCheckOutPopup() {
+    updateCartAndTotals();
+    const cart = document.getElementById("cart");
+    cart.classList.remove("active");
+    document.querySelector(".whole").style.pointerEvents = "auto";
+
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("checkOutDiv").style.display = "flex";
+
+    document.body.classList.add("no-scroll");
+    document.body.style.overflow = "hidden";
+    toggleClass(".whole", "active");
+    document.querySelector(".temp").style.display = "block";
+    document.querySelector(".temp").style.pointerEvents = "none";
+    document.body.style.overflow = "hidden";
+}
+
+function closeCheckOut() {
+    document.getElementById("overlay").style.display = "none";
+    document.getElementById("checkOutDiv").style.display = "none";
+
+    document.body.classList.remove("no-scroll");
+    document.body.style.overflow = "initial";
+    toggleClass(".whole", "active");
+    document.querySelector(".temp").style.display = "block";
+    document.querySelector(".temp").style.pointerEvents = "initial";
+}
+
+function updateCartAndTotals() {
+    document.getElementById("userName").value = RegisteredCustomer["name"];
+    document.getElementById("userPhone").value =
+        RegisteredCustomer["Phone Number"];
+    document.getElementById("userEmail").value = RegisteredCustomer["Email"];
+
+    const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+    const centerDiv = document.getElementById("center-div");
+    centerDiv.innerHTML = "";
+
+    let subTotal = 0;
+    let deliveryCharge = 0;
+    cartItems.forEach((item, key) => {
+        subTotal += item.price;
+        const cartedItemDiv = document.createElement("div");
+        cartedItemDiv.id = "carted-item-div";
+
+        // Handling toppings
+        let toppingsHTML = "";
+        if (item.topping && item.topping.length > 0) {
+            toppingsHTML = item.topping.map((topping) => `<p>${topping.name}`);
+        }
+
+        cartedItemDiv.innerHTML = `
+        <input type="hidden" name="cartedItem${key}" id="cartedItem${key}" value='${JSON.stringify(
+            item
+        )}'>
+        <div id="item-img">
+            <img src="${item.imgSrc}" alt="${item.name}">
+        </div>
+        <div id="item-data">
+            <h5>${item.name}</h5>
+            <p>${item.variation}</p>
+            ${toppingsHTML}
+            <div id="quantity-price">
+                <span class="quantity-bdr">${item.quantity}</span> 
+                <span>Rs. ${item.price.toLocaleString()}</span>
+            </div>
+        </div>
+        `;
+
+        centerDiv.appendChild(cartedItemDiv);
+    });
+
+    const grandTotal = subTotal + deliveryCharge;
+    const subtotalElement = document.getElementById("subtotal-amount");
+    const deliveryChargeElement = document.getElementById("delivery-charge");
+    const grandTotalElement = document.getElementById("grand-total");
+
+    document.getElementById("subTotal").value = subTotal;
+    document.getElementById("deliveryCharge").value = deliveryCharge;
+    document.getElementById("grandTotal").value = grandTotal;
+
+    if (subtotalElement) {
+        subtotalElement.textContent = `Rs ${subTotal.toLocaleString()}`;
+    }
+    if (deliveryChargeElement) {
+        deliveryChargeElement.textContent = `Rs ${deliveryCharge.toLocaleString()}`;
+    }
+    if (grandTotalElement) {
+        grandTotalElement.textContent = `Rs ${grandTotal.toLocaleString()}`;
+    }
+}
+
+function selectPaymentOption(element) {
+    var paymentOptions = document.querySelectorAll(".payment-option");
+    paymentOptions.forEach(function(option) {
+        option.classList.remove("active");
+    });
+    element.classList.add("active");
+    element.querySelector('input[type="radio"]').checked = true;
+}
+
+document.addEventListener("DOMContentLoaded", async() => {
+    let loginData = localStorage.getItem("LoginStatus");
+    if (loginData) {
+        loginData = JSON.parse(loginData);
+        await fetch("/registeredCustomer", {
+                method: "GET",
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                let userFound = false;
+
+                data.forEach((user) => {
+                    if (user.email === loginData.email) {
+                        RegisteredCustomer["name"] = user.name;
+                        RegisteredCustomer["Phone Number"] = user.phone_number;
+                        RegisteredCustomer["Email"] = user.email;
+                        userFound = true;
+                    }
+                });
+                if (!userFound) {
+                    const updatedLoginData = {
+                        loginStatus: loginData.loginStatus,
+                        signupStatus: false,
+                        email: loginData.email,
+                    };
+                    localStorage.setItem(
+                        "LoginStatus",
+                        JSON.stringify(updatedLoginData)
+                    );
+                    console.log("Email Not Verified");
+                }
+            })
+            .catch((error) => console.error("Error:", error));
+
+        if (loginData.loginStatus == true) {
+            document.getElementById("username").textContent =
+                RegisteredCustomer["name"];
+        }
+    } else {
+        console.error("LoginStatus is not available in localStorage.");
+    }
+});
+
+function checkPaymentMethod() {
+    const paymentMethods = document.querySelectorAll(
+        'input[name="paymentMethod"]'
+    );
+    let selected = false;
+    paymentMethods.forEach((method) => {
+        if (method.checked) {
+            selected = true;
+        }
+    });
+    if (!selected) {
+        alert("Please select a payment method.");
+        return false; // Prevent form submission
+    }
+
+    return true; // Allow form submission
+}
+
+function loginUser(route) {
+    const email = document.getElementById("loginEmail").value;
+    const phonePrefix = document.getElementById("countryCode").value;
+    const phoneNumber = document.getElementById("phoneNumber").value;
+    const csrfToken = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute("content");
+
+    let loginData = localStorage.getItem("LoginStatus");
+    let cartedItems = localStorage.getItem("cartItems");
+
+    loginData = JSON.parse(loginData);
+    fetch(route, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrfToken,
+            },
+            body: JSON.stringify({
+                email: email,
+                phone_number: phonePrefix + phoneNumber,
+            }),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.status === "success") {
+                hideLoginPopup();
+                const updatedLoginData = {
+                    loginStatus: true,
+                    signupStatus: true,
+                    email: data.user.email,
+                };
+                localStorage.setItem(
+                    "LoginStatus",
+                    JSON.stringify(updatedLoginData)
+                );
+                RegisteredCustomer["name"] = data.user.name;
+                RegisteredCustomer["Phone Number"] = data.user.phone_number;
+                RegisteredCustomer["Email"] = data.user.email;
+                document.getElementById("username").textContent =
+                    data.user.name;
+                if (cartedItems) {
+                    showCheckOutPopup();
+                }
+            } else {
+                let login_response_message = document.getElementById(
+                    "login-response-message"
+                );
+                login_response_message.style.display = "block";
+                login_response_message.textContent = data.message;
+
+                setTimeout(() => {
+                    login_response_message.style.display = "none";
+                }, 50000);
+            }
+        })
+        .catch((error) => {
+            let login_response_message = document.getElementById(
+                "login-response-message"
+            );
+            login_response_message.style.display = "block";
+            login_response_message.textContent = error;
+
+            setTimeout(() => {
+                login_response_message.style.display = "none";
+            }, 50000);
+        });
+}
+
+function checkProfile(event) {
+    const LoginStatus = localStorage.getItem("LoginStatus");
+    const parsedLoginStatus = JSON.parse(LoginStatus);
+
+    if (!parsedLoginStatus || parsedLoginStatus.loginStatus === false) {
+        showLoginPopup();
+    } else {
+        var dropdown = document.getElementById("dropdownMenu");
+        if (dropdown.style.display === "block") {
+            dropdown.style.display = "none";
+            document.removeEventListener("click", closeDropdownOnClickOutside);
+        } else {
+            dropdown.style.display = "block";
+            document.addEventListener("click", closeDropdownOnClickOutside);
+        }
+    }
+
+    event.stopPropagation();
+}
+
+function closeDropdownOnClickOutside(event) {
+    var dropdown = document.getElementById("dropdownMenu");
+    if (!dropdown.contains(event.target)) {
+        dropdown.style.display = "none";
+        document.removeEventListener("click", closeDropdownOnClickOutside);
+    }
+}
+
+function logout() {
+    // const LoginStatus = localStorage.getItem("LoginStatus");
+    // const parsedLoginStatus = JSON.parse(LoginStatus);
+    // data = { loginStatus: false, signupStatus: parsedLoginStatus.signupStatus, email: parsedLoginStatus.email }
+    // localStorage.setItem("LoginStatus", JSON.stringify(data));
+    localStorage.removeItem("cartItems");
+    localStorage.removeItem("LoginStatus");
+    localStorage.removeItem("savedLocation");
+    var dropdown = document.getElementById("dropdownMenu");
+    if (dropdown.style.display === "block") {
+        dropdown.style.display = "none";
+    } else {
+        dropdown.style.display = "block";
+    }
+    window.location.reload();
+}
+
+let interval = 3600000;
+
+function checkAndRemoveData() {
+    let cartedItems = localStorage.getItem("cartItems");
+    let LoginStatus = localStorage.getItem("LoginStatus");
+    let savedLocation = localStorage.getItem("savedLocation");
+
+    if (cartedItems || LoginStatus || savedLocation) {
+        setTimeout(() => {
+            localStorage.removeItem("cartItems");
+            localStorage.removeItem("LoginStatus");
+            localStorage.removeItem("savedLocation");
+            window.location.reload();
+        }, interval);
+    } else {
+        console.log("No data found.");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    checkAndRemoveData();
+});
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("search_bar");
+    const sections = Array.from(document.querySelectorAll(".content-section"));
+
+    const debounce = (func, delay) => {
+        let timeoutId;
+        return (...args) => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(null, args), delay);
+        };
+    };
+
+    const filterItems = () => {
+        const filterText = searchInput.value.toLowerCase();
+        sections.forEach((section) => {
+            const items = section.querySelectorAll(".imgbox");
+            let shouldDisplaySection = false;
+
+            items.forEach((item) => {
+                const nameElement = item.querySelector(".product_name");
+                const nameText = nameElement ?
+                    nameElement.textContent.toLowerCase() :
+                    "";
+                const isVisible = nameText.includes(filterText);
+
+                if (isVisible) {
+                    shouldDisplaySection = true;
+                    item.style.display = ""; // Reset to default
+                } else {
+                    item.style.display = "none"; // Hide item
+                }
+            });
+
+            section.style.display = shouldDisplaySection ? "" : "none"; // Show or hide section
+        });
+    };
+
+    searchInput.addEventListener("input", debounce(filterItems, 300));
+});
+
+function openProfilePopup(route) {
+    getProfileData(route);
+    const dropdown = document.getElementById("dropdownMenu");
+    dropdown.style.display = "none";
+    const cart = document.getElementById("cart");
+    cart.classList.remove("active");
+    document.querySelector(".whole").style.pointerEvents = "auto";
+
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("profilePopup").style.display = "flex";
+
+    document.body.classList.add("no-scroll");
+    document.body.style.overflow = "hidden";
+    toggleClass(".whole", "active");
+    document.querySelector(".temp").style.display = "block";
+    document.querySelector(".temp").style.pointerEvents = "none";
+    document.body.style.overflow = "hidden";
+}
+
+function closeProfilePopup() {
+    document.getElementById("overlay").style.display = "none";
+    document.getElementById("profilePopup").style.display = "none";
+
+    document.body.classList.remove("no-scroll");
+    document.body.style.overflow = "initial";
+    toggleClass(".whole", "active");
+    document.querySelector(".temp").style.display = "block";
+    document.querySelector(".temp").style.pointerEvents = "initial";
+}
+
+async function getProfileData(route) {
+    const Email = JSON.parse(localStorage.getItem('LoginStatus'));
+    await fetch(`/profile/${Email.email}`)
+        .then((response) => response.json())
+        .then((data) => {
+            const phoneNumber = data.user.phone_number;
+            const countryCode = phoneNumber.slice(0, 3);
+            const number = phoneNumber.slice(3);
+            document.getElementById("customer_id").value = data.user.id;
+            document.getElementById("edit_name").value = data.user.name;
+            document.getElementById("edit_email").value = data.user.email;
+            document.getElementById("edit_country_code").value = countryCode;
+            document.getElementById("edit_phone_number").value = number;
+
+            route = route.replace(':customer_id', data.user.id);
+            document.getElementById('deleteCustomerProfile').setAttribute('href', route);
+        })
+        .catch((error) => {
+            console.error("Error fetching customer data:", error);
+        });
+}

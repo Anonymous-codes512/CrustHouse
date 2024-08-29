@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Branch;
 use App\Models\PaymentMethod;
+use App\Models\OnlineNotification;
 use App\Models\DineInTable;
 use App\Models\Product;
 use App\Models\ThemeSetting;
@@ -23,7 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 
 
-class SalesmanController extends Controller 
+class SalesmanController extends Controller
 {
     public function viewSalesmanDashboard($id, $branch_id)
     {
@@ -39,7 +40,9 @@ class SalesmanController extends Controller
         $taxes = Tax::where('branch_id', $branch_id)->get();
         $payment_methods = PaymentMethod::where('branch_id', $branch_id)->get();
         $tables = DineInTable::where('branch_id', $branch_id)->get();
-        $allOrders = Order::with(['salesman','items'])->where('branch_id', $branch_id)->where('salesman_id', $id)->get();
+        $allOrders = Order::with(['salesman', 'items'])->where('branch_id', $branch_id)->where('salesman_id', $id)->get();
+
+        $onlineOrders = Order::with(['items', 'customers'])->where('ordertype', 'online')->get();
 
         $deals = Handler::where(function ($query) use ($branch_id) {
             $query->whereHas('product', function ($query) use ($branch_id) {
@@ -85,7 +88,8 @@ class SalesmanController extends Controller
             'branch_data' => $branch,
             'orders' => $allOrders,
             'ThemeSettings' => $settings,
-            'dineInTables'=> $tables
+            'dineInTables' => $tables,
+            'onlineOrders' => $onlineOrders
         ]);
     }
     public function salesmanCategoryDashboard($categoryName, $id, $branch_id)
@@ -100,13 +104,13 @@ class SalesmanController extends Controller
 
         $cartproducts = Cart::where('salesman_id', $id)->get();
         $branch = Branch::find($branch_id);
-        
+
         $tables = DineInTable::where('branch_id', $branch_id)->get();
         $discounts = Discount::where('branch_id', $branch_id)->get();
         $taxes = Tax::where('branch_id', $branch_id)->get();
         $payment_methods = PaymentMethod::where('branch_id', $branch_id)->get();
-        $allOrders = Order::with(['salesman','items'])->where('branch_id', $branch_id)->where('salesman_id', $id)->get();
-
+        $allOrders = Order::with(['salesman', 'items'])->where('branch_id', $branch_id)->where('salesman_id', $id)->get();
+        $onlineOrders = Order::with(['items', 'customers'])->where('ordertype', 'online')->get();
         // $filteredCategories = $categories->reject(function ($category) {
         //     return $category->categoryName === 'Addons';
         // });
@@ -133,7 +137,8 @@ class SalesmanController extends Controller
                     'branch_data' => $branch,
                     'orders' => $allOrders,
                     'ThemeSettings' => $settings,
-                    'dineInTables'=> $tables
+                    'dineInTables' => $tables,
+                    'onlineOrders' => $onlineOrders
                 ]);
             } else {
                 $products = Product::where('category_name', $categoryName)->get();
@@ -151,7 +156,8 @@ class SalesmanController extends Controller
                     'branch_data' => $branch,
                     'orders' => $allOrders,
                     'ThemeSettings' => $settings,
-                    'dineInTables'=> $tables
+                    'dineInTables' => $tables,
+                    'onlineOrders' => $onlineOrders
                 ]);
             }
         }
@@ -188,7 +194,7 @@ class SalesmanController extends Controller
         $lastOrder = Order::where('branch_id', $user->branch_id)->orderBy('id', 'desc')->first();
         if ($lastOrder) {
             $lastOrderNumber = intval(substr($lastOrder->order_number, 3));
-            $newOrderNumber = $branch_initials .'-' . sprintf('%03d', $lastOrderNumber + 1);
+            $newOrderNumber = $branch_initials . '-' . sprintf('%03d', $lastOrderNumber + 1);
         } else {
             $newOrderNumber = "$branch_initials-100";
         }
@@ -246,7 +252,7 @@ class SalesmanController extends Controller
                 $totalBill = $totalBill - $discount;
             }
             $totalBill += $request->input('totaltaxes');
-            $order->total_bill = 'Rs. ' . $totalBill; 
+            $order->total_bill = 'Rs. ' . $totalBill;
             $order->save();
 
             $this->deductStock($order->id);
@@ -509,6 +515,52 @@ class SalesmanController extends Controller
         File::delete($filePath);
         return redirect()->back();
     }
+
+    public function confirmOnlineOrder($branch_id, $salesman_id, $order_id)
+    {
+        $order = Order::find($order_id);
+        $order->salesman_id = $salesman_id;
+        $order->status = 4;
+        $order->branch_id = $branch_id;
+        if ($order->save())
+            return redirect()->back()->with('success', 'Order confirm successfully');
+        else
+            return redirect()->back()->with('error', 'Order not confirmed');
+    }
+
+    public function getNotificationData()
+    {
+        try {
+            $messages = OnlineNotification::all();
+            $toast = [];
+            return response()->json([
+                'collection' => $messages,
+                'toast' => $toast,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching data: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    }
+
+    public function deleteNotification($id)
+    {
+        try {
+            $notification = OnlineNotification::findOrFail($id);
+            $notification->delete();
+            return response()->json(['message' => 'Notification deleted successfully.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to delete notification.'], 500);
+        }
+    }
+
+    // public function sendNotification($message)
+    // {
+    //     $notify = new OnlineNotification();
+    //     $notify->message = $message;
+    //     $notify->toast = 0;
+    //     $notify->save();
+    // }
 }
 
 //PDF Combine code.

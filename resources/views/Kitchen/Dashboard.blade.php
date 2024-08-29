@@ -29,7 +29,7 @@
     #completedOrdersTable_filter,
     .dataTables_length,
     .dataTables_info {
-        margin: 0.5vw 5vw !important;
+        margin: 0.5rem !important;
         font-size: 0.9rem !important;
     }
 
@@ -138,14 +138,14 @@
         $(document).ready(function() {
             $('#newOrdersTable').DataTable({
                 "paging": true,
-                "lengthMenu": [5, 10, 25, 50, 100]
+                "lengthMenu": [10, 25, 50, 100]
             });
         });
 
         $(document).ready(function() {
             $('#completedOrdersTable').DataTable({
                 "paging": true,
-                "lengthMenu": [5, 10, 25, 50, 100]
+                "lengthMenu": [10, 25, 50, 100]
             });
         });
 

@@ -1,7 +1,7 @@
 // 33.786080201690936, 72.72
 
 const http = new XMLHttpRequest();
-const apiKey = "4b18909ba78c4a439b61458413f4f159"; // Your OpenCage API key
+const apiKey = "4b18909ba78c4a439b61458413f4f159";
 
 document.querySelector(".btnloc").addEventListener("click", () => {
     findmylocation();
@@ -12,14 +12,35 @@ let city = "";
 let state = "";
 let district = "";
 
-function SelectLocation() {
-    var frontModel = document.querySelector(".frontmodel");
-    frontModel.classList.add("hidden");
-    toggleClass(".whole", "active");
-    document.body.style.overflow = "initial";
-    selectLocation(formattedAddress);
+function changeLocation() {
+    document.getElementById("overlay").style.display = "block";
+    let frontModel = document.getElementById("frontModel");
+    frontModel.classList.remove("hidden");
+    frontModel.style.display = "flex";
+}
 
-    document.getElementById("overlay").style.display = "none";
+function SelectLocation() {
+    var district = document.getElementById("district").value.trim();
+    var address = document.getElementById("address").value.trim();
+
+    if (district && address) {
+        var frontModel = document.querySelector(".frontmodel");
+        frontModel.classList.add("hidden");
+        toggleClass(".whole", "active");
+        document.body.style.overflow = "initial";
+        selectLocation(formattedAddress);
+        document.getElementById("location-message").style.display = "none";
+        document.getElementById("overlay").style.display = "none";
+    } else {
+        let error_message = document.getElementById("location-message");
+        error_message.style.display = "block";
+        error_message.style.fontSize = "1.1rem";
+        error_message.style.margin = "5px";
+        error_message.innerText = "Please select the location first.";
+        setTimeout(() => {
+            error_message.style.display = "none";
+        }, 1500);
+    }
 }
 
 function findmylocation() {
@@ -35,9 +56,9 @@ function findmylocation() {
                 console.error("Error:", err.message);
                 alert("Error: " + err.message);
             }, {
-                enableHighAccuracy: true, // Request high accuracy
-                timeout: 10000, // Timeout in milliseconds (10 seconds)
-                maximumAge: 0, // Do not use cached data
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0,
             }
         );
     } else {
@@ -71,4 +92,30 @@ function getAPI(Api) {
 function selectLocation(formattedAddress) {
     const hello = document.querySelector("#addr");
     hello.textContent = formattedAddress;
+    localStorage.setItem("savedLocation", formattedAddress);
+    let loginData = { loginStatus: false, signupStatus: false, email: null };
+    localStorage.setItem("LoginStatus", JSON.stringify(loginData));
+}
+
+function closeFrontModel() {
+    document.getElementById("overlay").style.display = "none";
+    document.getElementById("frontModel").style.display = "none";
+}
+
+window.onload = async function() {
+    const savedLocation = await checkSavedLocation();
+    if (!savedLocation) {
+        document.getElementById("overlay").style.display = "block";
+        document.getElementById("frontModel").style.display = "flex";
+    } else {
+        closeFrontModel();
+        document.querySelector("#addr").textContent = savedLocation;
+    }
+};
+
+async function checkSavedLocation() {
+    return new Promise((resolve) => {
+        const savedLocation = localStorage.getItem("savedLocation");
+        resolve(savedLocation);
+    });
 }

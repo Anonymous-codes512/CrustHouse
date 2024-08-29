@@ -724,7 +724,11 @@ input:checked+.slider:before {
 
 #dineInOrdersTable table thead tr th {
     text-align: left;
-    font-size: 0.85rem;
+    background-color: #c5c5c5;
+    border-right: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    padding-left: 5px;
+    font-size: 0.9rem;
 }
 
 #dineInOrdersTable table thead tr th:first-child,
@@ -733,15 +737,14 @@ input:checked+.slider:before {
 }
 
 #dineInOrdersTable table tbody tr {
-    /* border-bottom: 1px solid #898989; */
     box-shadow: 0 2px 5px -2px #898989;
 }
 
 #dineInOrdersTable table tbody tr td {
     text-align: left;
     border-radius: 6px;
-    padding: 0.5vw 0;
-    font-size: 1.3vw;
+    padding: 0.5vw 5px;
+    font-size: 0.8rem;
 }
 
 #dineInOrdersTable table tbody tr td:first-child,
@@ -754,17 +757,21 @@ input:checked+.slider:before {
 }
 
 .bxs-cart-add,
+.bx-check,
 .bxs-right-arrow-square {
     font-size: 1.5rem;
     color: #fff;
     border-radius: 0.30rem;
-    padding: 0.35rem 0.85rem;
+    padding: 0.2rem 0.6rem;
+    margin-left: 0.1rem;
 }
 
+.bx-check,
 .bxs-cart-add {
     background-color: #ffbb00;
 }
 
+.bx-check:hover,
 .bxs-cart-add:hover {
     background-color: #c99608;
 }
@@ -873,6 +880,7 @@ input:checked+.slider:before {
     top: 0;
     background-color: #fff;
     z-index: 1;
+    font-size: 1rem;
 }
 
 #itemtable thead tr {
@@ -891,7 +899,7 @@ input:checked+.slider:before {
     text-align: center;
     border-radius: 6px;
     padding: 0.5vw 0;
-    font-size: 1.3vw;
+    font-size: 0.9rem;
 }
 
 .btns {
