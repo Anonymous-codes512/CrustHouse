@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Deal;
-use App\Models\Handler;
+use App\Models\handler;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Branch;
@@ -15,7 +15,7 @@ use App\Models\DineInTable;
 use App\Models\Product;
 use App\Models\ThemeSetting;
 use App\Models\User;
-use App\Models\Tax;
+use App\Models\tax;
 use App\Models\Discount;
 use App\Models\Recipe;
 use App\Models\Stock;
@@ -37,14 +37,14 @@ class SalesmanController extends Controller
         $categories = Category::where('branch_id', $branch_id)->get();
         $branch = Branch::find($branch_id);
         $discounts = Discount::where('branch_id', $branch_id)->get();
-        $taxes = Tax::where('branch_id', $branch_id)->get();
+        $taxes = tax::where('branch_id', $branch_id)->get();
         $payment_methods = PaymentMethod::where('branch_id', $branch_id)->get();
         $tables = DineInTable::where('branch_id', $branch_id)->get();
         $allOrders = Order::with(['salesman', 'items'])->where('branch_id', $branch_id)->where('salesman_id', $id)->get();
 
         $onlineOrders = Order::with(['items', 'customers'])->where('ordertype', 'online')->get();
 
-        $deals = Handler::where(function ($query) use ($branch_id) {
+        $deals = handler::where(function ($query) use ($branch_id) {
             $query->whereHas('product', function ($query) use ($branch_id) {
                 $query->where('branch_id', $branch_id);
             })
@@ -107,7 +107,7 @@ class SalesmanController extends Controller
 
         $tables = DineInTable::where('branch_id', $branch_id)->get();
         $discounts = Discount::where('branch_id', $branch_id)->get();
-        $taxes = Tax::where('branch_id', $branch_id)->get();
+        $taxes = tax::where('branch_id', $branch_id)->get();
         $payment_methods = PaymentMethod::where('branch_id', $branch_id)->get();
         $allOrders = Order::with(['salesman', 'items'])->where('branch_id', $branch_id)->where('salesman_id', $id)->get();
         $onlineOrders = Order::with(['items', 'customers'])->where('ordertype', 'online')->get();
@@ -164,7 +164,7 @@ class SalesmanController extends Controller
     }
     public function deals($branch_id)
     {
-        $deals = Handler::where(function ($query) use ($branch_id) {
+        $deals = handler::where(function ($query) use ($branch_id) {
             $query->whereHas('product', function ($query) use ($branch_id) {
                 $query->where('branch_id', $branch_id);
             })

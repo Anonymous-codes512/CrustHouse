@@ -8,6 +8,12 @@ body {
     user-select: none;
 }
 
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 .alert {
     display: flex;
     color: white !important;
@@ -40,14 +46,18 @@ body {
 
 .overlay,
 .popupOverlay {
-    display: block;
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: #00000080;
     z-index: 999;
+}
+
+.popupOverlay {
+    background: #000000f1;
 }
 
 .checkOutDiv {
@@ -66,6 +76,38 @@ body {
     transform: translate(-50%, -50%);
     z-index: 1000;
     overflow: hidden;
+}
+
+#alert {
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 0.75rem;
+    position: fixed;
+    width: auto;
+    height: auto;
+    background-color: #ef665b;
+    color: #fff;
+    font-size: 1rem;
+    padding: 0.5rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+#alert p {
+    padding: 0;
+    margin: 1rem;
+}
+
+#alert i {
+    font-size: 2rem;
+}
+
+#alert .bx-x {
+    cursor: pointer;
 }
 
 .checkOutDiv form {
@@ -97,7 +139,7 @@ body {
     width: 99%;
     margin: 0.5rem;
     border-radius: 0.65rem;
-    background-color: #F8F9FA;
+    background-color: #f8f9fa;
     border: 1px solid #d4d4d4;
 }
 
@@ -154,7 +196,7 @@ body {
     margin: 0.5rem 1rem;
     cursor: pointer;
     position: relative;
-    background-color: #FFF;
+    background-color: #fff;
     border: 1px solid #000;
     transition: background-color 0.3s ease, border 0.3s ease;
 }
@@ -173,7 +215,7 @@ body {
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    border: 2px solid #FFD700;
+    border: 2px solid #ffd700;
     background-color: white;
     display: none;
 }
@@ -183,7 +225,7 @@ body {
 }
 
 .payment-option input[type="radio"]:checked+.custom-radio {
-    background-color: #FFD700;
+    background-color: #ffd700;
 }
 
 .payment-option input[type="radio"]:checked+.custom-radio+img {
@@ -197,7 +239,7 @@ body {
 }
 
 .payment-option.active {
-    border: 2px solid #FFD700;
+    border: 2px solid #ffd700;
     /* Gold border color when clicked */
 }
 
@@ -207,7 +249,7 @@ body {
     margin: 0.5rem auto;
     justify-content: space-between;
     height: 98%;
-    background-color: #F8F9FA;
+    background-color: #f8f9fa;
     border: 1px solid #d4d4d4;
 }
 
@@ -359,7 +401,7 @@ body {
     width: 100%;
     box-sizing: border-box;
     border: 1px solid #353535;
-    border-radius: 0.70rem;
+    border-radius: 0.7rem;
     font-size: 16px;
     background-color: #fbfbfb;
     background-position: 10px 10px;
@@ -390,6 +432,19 @@ body {
     /* border: 1px solid #000; */
 }
 
+.truncate-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.truncate-text-address {
+    width: 90%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 
 /* #profile-image-name #username {
     width: 150px;
@@ -416,7 +471,7 @@ body {
 }
 
 .dropdownMenu-content a:hover {
-    background-color: #f1f1f1
+    background-color: #f1f1f1;
 }
 
 .locimgg {
@@ -426,6 +481,7 @@ body {
 
 .locelement {
     display: flex;
+    width: 95%;
     flex-direction: column;
 }
 
@@ -461,15 +517,16 @@ hr {
     justify-content: space-evenly;
     align-items: center;
     gap: 1.5vw;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     padding: 1vw 3vw;
     margin-bottom: 3vw;
     position: fixed;
     width: 100%;
     height: 10vh;
+    overflow-x: auto;
     background-color: #f8f9fa;
-    /* z-index: 1000; */
     box-sizing: border-box;
+    box-shadow: 0 1px 5px #767676;
 }
 
 .botn {
@@ -507,18 +564,13 @@ hr {
 .imgbox {
     display: flex;
     flex-direction: column;
-    width: 13vw;
+    width: 20%;
     padding: 0.41vw;
     border-radius: 10px;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-    cursor: pointer;
     box-sizing: border-box;
+    border: 1.5px solid #ffbb00;
     background-color: #fff;
-}
-
-.imgbox:hover {
-    border: 2px solid #ffbb00;
-    box-sizing: border-box;
 }
 
 .cardimg {
@@ -580,6 +632,7 @@ hr {
     color: #000;
     font-weight: 700;
     font-size: 1rem;
+    cursor: pointer;
 }
 
 .cartbtn:hover {
@@ -815,6 +868,7 @@ li {
 }
 
 .extra_1 {
+    height: 80%;
     padding: 6px;
 }
 
@@ -886,7 +940,9 @@ li {
 }
 
 .dropdown-content.active {
-    display: block;
+    display: flex;
+    height: 50%;
+    overflow-x: auto;
     /* Show the dropdown when active */
 }
 
@@ -934,23 +990,28 @@ li {
     color: rgb(131, 143, 155);
 }
 
+.bottom_1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .bottom_2 {
-    display: inline;
+    display: flex;
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
     border: none;
     vertical-align: middle;
     flex: 0 0 auto;
-    font-size: 1.5rem;
-    border-radius: 2vw;
     cursor: pointer;
-    height: 2vw;
-    width: 2vw;
+    height: 30px;
+    width: 30px;
+    margin: 0 10px;
+    border-radius: 50%;
     font-weight: bold;
-    background-color: rgb(212, 0, 0);
-    color: rgb(255, 255, 255);
-    padding: 4px !important;
+    background-color: #d40000;
+    color: #ffffff;
 }
 
 .count {
@@ -967,7 +1028,8 @@ li {
     width: 99%;
 }
 
-.addcart {
+.addcart,
+.close_btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -978,11 +1040,15 @@ li {
     padding: 6px 16px;
     cursor: pointer;
     font-weight: bold;
-    background-color: rgb(212, 0, 0);
-    color: rgb(255, 255, 255);
+    background-color: #d40000;
+    color: #ffffff;
     gap: 3vw;
     border: none;
     border-radius: 1rem;
+}
+
+.close_btn {
+    background-color: #ffbb00;
 }
 
 
@@ -1026,9 +1092,9 @@ li {
     flex-direction: column;
     padding: 0.75rem 1.25rem;
     border-radius: 0.75rem;
-    position: absolute;
+    position: fixed;
     background-color: #fff;
-    width: 25vw;
+    width: 20vw;
     z-index: 1000;
     pointer-events: auto;
     top: 50%;
@@ -1051,7 +1117,7 @@ li {
     justify-content: space-between;
     align-items: center;
     gap: 1vw;
-    position: relative;
+    /* position: relative; */
 }
 
 .mainp1 {
@@ -1116,7 +1182,7 @@ li {
     flex-direction: column;
     justify-content: space-between;
     /* align-items: center; */
-    width: 25vw;
+    width: 95%;
     margin: auto;
     margin-bottom: 0.5vw;
 }
@@ -1205,7 +1271,7 @@ li {
     justify-content: center;
     align-items: center;
     border-radius: 0.75rem;
-    position: absolute;
+    position: fixed;
     background-color: rgb(255, 255, 255);
     width: 30vw;
     z-index: 1000;
@@ -1226,7 +1292,7 @@ li {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 2vw;
+    gap: 1vw;
 }
 
 .textt {
@@ -1234,7 +1300,8 @@ li {
 }
 
 .l_input {
-    padding: 1vw;
+    line-height: 2;
+    padding: 5px 10px;
     border-radius: 0.65rem;
     width: 100%;
     border: 1px solid rgb(169 169 169);
@@ -1277,10 +1344,10 @@ li {
 
 .phone-input {
     display: flex;
-    gap: 1vw;
+    /* gap: 1vw; */
     flex-direction: column;
     /* max-width: 300px;
-  margin: 0 auto; */
+    margin: 0 auto; */
 }
 
 .phone-input input {
@@ -1294,7 +1361,8 @@ li {
 #phoneNumberr {
     flex: 1;
     width: 85%;
-    padding: 1vw;
+    padding: 0.5rem;
+    line-height: 2;
     border-radius: 0.65rem;
     border: 1px solid rgb(169 169 169);
 }
@@ -1361,11 +1429,12 @@ li {
 .lobtn {
     width: 100%;
     border: none;
-    padding: 1vw;
+    padding: 0.5rem;
     border-radius: 1rem;
-    background-color: rgb(212, 0, 0);
+    background-color: #d40000;
     color: rgb(255, 255, 255);
-    font-size: 1vw;
+    font-size: 1rem;
+    line-height: 2;
     font-weight: 600;
 }
 
@@ -1374,14 +1443,29 @@ li {
     color: rgb(0, 0, 0);
 }
 
+.forgot-password {
+    display: flex;
+    color: #999;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease-in-out, font-size 0.3s ease-in-out;
+}
+
+.forgot-password:hover {
+    color: #ffbb00;
+    font-size: 1.1rem;
+}
+
 .signbtn {
     width: 100%;
     border: none;
-    padding: 1vw;
+    padding: 0.5rem;
+    line-height: 2;
     border-radius: 1rem;
     background-color: transparent;
     color: rgb(255, 255, 255);
-    font-size: 1vw;
+    font-size: 1rem;
     font-weight: 600;
     color: rgb(255, 203, 4);
     border-color: rgba(255, 203, 4, 0.5);
@@ -1389,8 +1473,9 @@ li {
 }
 
 .signbtn:hover {
-    background-color: rgba(255, 203, 4, 0.04);
-    border: 1px solid rgb(255, 203, 4);
+    background-color: #ffbb00;
+    color: #fff;
+    border: 1px solid #ffcb04;
 }
 
 .orline {
@@ -1416,6 +1501,32 @@ li {
     color: rgb(197, 197, 197);
 }
 
+.passwordField {
+    display: flex;
+    /* margin: 10px 20px; */
+    font-family: "Poppins", sans-serif;
+    border: 1px solid #8d8d8d;
+    border-radius: 0.65rem;
+}
+
+.passwordField input {
+    border: none;
+    padding: 5px 10px;
+    width: 100%;
+    line-height: 2;
+    border-top-left-radius: 0.65rem;
+    border-bottom-left-radius: 0.65rem;
+}
+
+.passwordField i {
+    border-left: 1px solid #8d8d8d;
+    padding: 5px 10px;
+    background-color: #cdcdcd;
+    border-top-right-radius: 0.65rem;
+    border-bottom-right-radius: 0.65rem;
+    line-height: 2;
+}
+
 
 /* signup */
 
@@ -1425,7 +1536,7 @@ li {
     justify-content: center;
     align-items: center;
     border-radius: 0.75rem;
-    position: absolute;
+    position: fixed;
     background-color: rgb(255, 255, 255);
     width: 30vw;
     top: 50%;
@@ -1472,7 +1583,8 @@ li {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 1vw;
+    width: 100%;
+    gap: 0.5rem;
 }
 
 .main-GenDob {
@@ -1724,14 +1836,14 @@ li {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    font-size: 0.9vw;
+    font-size: 0.75rem;
 }
 
 .delichrge {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    font-size: 0.8vw;
+    font-size: 0.75rem;
 }
 
 .grandtotal {
@@ -1851,7 +1963,7 @@ li {
 
 #profileFileds {
     border-radius: 0.65rem;
-    background-color: #F8F9FA;
+    background-color: #f8f9fa;
     border: 1px solid #d4d4d4;
     display: flex;
     flex-direction: column;
@@ -1933,18 +2045,114 @@ li {
     justify-content: center;
     align-items: center;
     border-radius: 0.65rem;
-    background-color: #F8F9FA;
-    border: 1px solid #d4d4d4
+    background-color: #f8f9fa;
+    border: 1px solid #d4d4d4;
+    overflow: hidden;
 }
 
 .deleteProfile a {
     text-decoration: none;
     color: #dc3545;
     font-weight: bold;
+    display: inline-block;
+    transition: transform 0.2s ease;
 }
 
 .deleteProfile a:hover {
-    font-size: 1.35rem;
+    transform: scale(1.2);
+}
+
+#confirmDeletionOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 999;
+}
+
+.confirmDeletion {
+    display: none;
+    flex-direction: column;
+    background-color: #ffffff;
+    position: absolute;
+    border-radius: 10px;
+    width: 40vw;
+    max-height: 98vh;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+.confirmDeletion h3 {
+    margin: 0;
+    padding: 0.5vw 2vw;
+    font-family: "Poppins", sans-serif;
+}
+
+.confirmDeletion hr {
+    border: 1px solid #9b9b9b;
+    width: 98%;
+    margin: 0 auto 1vw;
+}
+
+#message-text {
+    text-align: center;
+    margin: 10px;
+}
+
+.box-btns {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 01vw auto;
+    width: 85%;
+}
+
+.box-btns button {
+    display: flex;
+    font-family: "Poppins", sans-serif;
+    font-size: 1.2vw;
+    margin: 0.5vw;
+    border: none;
+    color: #fff;
+    font-weight: 400;
+    white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    line-height: 1.5;
+    padding: 0.375rem 0.75rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.box-btns #confirm {
+    background-color: #b52828;
+}
+
+.box-btns #close {
+    background-color: #008fd3;
+}
+
+.box-btns #confirm:hover {
+    background-color: #d84444;
+}
+
+.box-btns #close:hover {
+    background-color: #0f3c75;
+}
+
+.inputdivs {
+    margin: 0.2vw auto;
+    width: 85%;
+    display: flex;
+    flex-direction: column;
+    font-family: "Poppins", sans-serif;
+    font-size: 1vw;
 }
 
 @media (max-width: 480px) {

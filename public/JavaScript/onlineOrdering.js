@@ -5,6 +5,58 @@ let RegisteredCustomer = {
 };
 
 function addToCart(product, allProducts, addons) {
+    const productArray = Object.values(allProducts);
+    let productVariations = [];
+    productArray.forEach((element) => {
+        if (element.productName === product.productName) {
+            productVariations.push(element.productVariation);
+        }
+    });
+    if (productVariations.length >= 2) {
+        openProductPopup(product, allProducts, addons);
+    } else if (productVariations.length === 1) {
+        handleVariationLessProduct(product);
+    } else {
+        console.warn("Invalid Product");
+    }
+}
+
+function handleVariationLessProduct(Product) {
+    let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+
+    let existingCartItemIndex = -1;
+    cartItems.forEach((item, index) => {
+        if (item.name === Product.productName) {
+            existingCartItemIndex = index;
+        }
+    });
+
+    const cartItem = {
+        name: Product.productName,
+        type: "Variation less product",
+        originalPrice: Product.productPrice,
+        price: Product.productPrice,
+        quantity: 1,
+        imgSrc: `Images/ProductImages/${Product.productImage}`,
+        variation: null,
+        variationPrice: null,
+        topping: null,
+    };
+
+    if (existingCartItemIndex !== -1) {
+        cartItems[existingCartItemIndex].quantity += 1;
+        cartItems[existingCartItemIndex].price =
+            cartItems[existingCartItemIndex].price *
+            cartItems[existingCartItemIndex].quantity;
+    } else {
+        cartItems.push(cartItem);
+    }
+
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    showMessage();
+}
+
+function openProductPopup(product, allProducts, addons) {
     const popup = document.getElementById("popup");
     const popupImg = document.getElementById("popup-img");
     const popupTitle = document.getElementById("popup-title");
@@ -12,7 +64,6 @@ function addToCart(product, allProducts, addons) {
     const dropdownContainer = document.querySelector(".drop");
     const extra4Div = document.getElementById("extra_4");
     const overlay = document.getElementById("overlay");
-
     const productArray = Object.values(allProducts);
     const getAddons = Object.values(addons);
 
@@ -139,14 +190,16 @@ function addToCart(product, allProducts, addons) {
     popupTitle.innerText = product.productName;
     popupPrice.innerText = productPrices[0];
     document.getElementById("originalprice").textContent = product.productPrice;
-    document.getElementById("cart-price").textContent = product.productPrice;
+    document.getElementById(
+        "cart-price"
+    ).textContent = `Rs. ${product.productPrice}`;
 
     overlay.style.display = "block";
     popup.style.display = "block";
     document.body.classList.add("no-scroll");
     document.body.style.overflow = "hidden";
 
-    document.getElementById("closeButton").style.display = "block";
+    // document.getElementById("closeButton").style.display = "block";
     document.querySelector(".popwhole").style.pointerEvents = "none";
 }
 
@@ -160,10 +213,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.body.classList.remove("no-scroll");
                 document.querySelector(".whole").style.pointerEvents = "auto";
                 // document.querySelector(".whole").style.filter = "initial";
+                document.body.style.overflow = "initial";
                 overlay.style.display = "none";
             }
             document.body.classList.add("no-scroll");
-            document.body.style.overflow = "initial";
         });
     } else {
         console.error("Overlay element not found.");
@@ -192,9 +245,17 @@ function hideLoginPopup() {
 }
 
 function showSignupPopup() {
+    const cart = document.getElementById("cart");
+    cart.classList.remove("active");
+    document.querySelector(".whole").style.pointerEvents = "auto";
+    toggleClass(".whole", "active");
+    document.getElementById("overlay").style.display = "block";
     document.getElementById("signupcomponent").style.display = "flex";
     document.getElementById("logincomponent").style.display = "none";
     document.body.classList.add("no-scroll");
+    document.querySelector(".temp").style.display = "block";
+    document.querySelector(".temp").style.pointerEvents = "none";
+    document.body.style.overflow = "hidden";
 }
 
 function hideSignupPopup() {
@@ -273,6 +334,7 @@ function handleCartButtonClick() {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
     showMessage();
     closeAddToCart();
+    closeDealAddToCart();
 }
 
 function closeAddToCart() {
@@ -376,6 +438,37 @@ function validateEmail() {
     submitBtn.disabled = false;
 }
 
+function validatePassword() {
+    let password = document.getElementById("signup-password").value;
+    let confirmPassword = document.getElementById("cnfrmPswd").value;
+    let message = document.getElementById("password-error-message");
+
+    if (password.length < 8) {
+        message.textContent = "Password must be at least 8 characters long!";
+        message.className = "error-message";
+        message.style.display = "block";
+    } else if (password !== confirmPassword) {
+        message.textContent = "Passwords do not match!";
+        message.className = "error-message";
+        message.style.display = "block";
+    } else {
+        message.textContent = "Passwords match!";
+        message.className = "success-message";
+        setTimeout(() => {
+            message.style.display = "none";
+        }, 1000);
+    }
+}
+
+function showAndHidePswd(password_field_id) {
+    let pswd = document.getElementById(password_field_id);
+    if (pswd.type === "password") {
+        pswd.type = "text";
+    } else {
+        pswd.type = "password";
+    }
+}
+
 function showCheckOutPopup() {
     updateCartAndTotals();
     const cart = document.getElementById("cart");
@@ -408,6 +501,9 @@ function updateCartAndTotals() {
     document.getElementById("userName").value = RegisteredCustomer["name"];
     document.getElementById("userPhone").value =
         RegisteredCustomer["Phone Number"];
+    console.log(document.getElementById("userPhone").value);
+    console.log(RegisteredCustomer["Phone Number"]);
+
     document.getElementById("userEmail").value = RegisteredCustomer["Email"];
 
     const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -417,17 +513,20 @@ function updateCartAndTotals() {
     let subTotal = 0;
     let deliveryCharge = 0;
     cartItems.forEach((item, key) => {
-        subTotal += item.price;
-        const cartedItemDiv = document.createElement("div");
-        cartedItemDiv.id = "carted-item-div";
+                subTotal += parseInt(item.price);
+                console.log(item.price);
+                console.log(subTotal);
 
-        // Handling toppings
-        let toppingsHTML = "";
-        if (item.topping && item.topping.length > 0) {
-            toppingsHTML = item.topping.map((topping) => `<p>${topping.name}`);
-        }
+                const cartedItemDiv = document.createElement("div");
+                cartedItemDiv.id = "carted-item-div";
 
-        cartedItemDiv.innerHTML = `
+                // Handling toppings
+                let toppingsHTML = "";
+                if (item.topping && item.topping.length > 0) {
+                    toppingsHTML = item.topping.map((topping) => `<p>${topping.name}`);
+                }
+
+                cartedItemDiv.innerHTML = `
         <input type="hidden" name="cartedItem${key}" id="cartedItem${key}" value='${JSON.stringify(
             item
         )}'>
@@ -436,7 +535,7 @@ function updateCartAndTotals() {
         </div>
         <div id="item-data">
             <h5>${item.name}</h5>
-            <p>${item.variation}</p>
+            ${item.variation ? `<p>${item.variation}</p>` : ""}
             ${toppingsHTML}
             <div id="quantity-price">
                 <span class="quantity-bdr">${item.quantity}</span> 
@@ -470,20 +569,20 @@ function updateCartAndTotals() {
 
 function selectPaymentOption(element) {
     var paymentOptions = document.querySelectorAll(".payment-option");
-    paymentOptions.forEach(function(option) {
+    paymentOptions.forEach(function (option) {
         option.classList.remove("active");
     });
     element.classList.add("active");
     element.querySelector('input[type="radio"]').checked = true;
 }
 
-document.addEventListener("DOMContentLoaded", async() => {
+document.addEventListener("DOMContentLoaded", async () => {
     let loginData = localStorage.getItem("LoginStatus");
     if (loginData) {
         loginData = JSON.parse(loginData);
         await fetch("/registeredCustomer", {
-                method: "GET",
-            })
+            method: "GET",
+        })
             .then((response) => response.json())
             .then((data) => {
                 let userFound = false;
@@ -501,6 +600,7 @@ document.addEventListener("DOMContentLoaded", async() => {
                         loginStatus: loginData.loginStatus,
                         signupStatus: false,
                         email: loginData.email,
+                        LoginTime: null,
                     };
                     localStorage.setItem(
                         "LoginStatus",
@@ -514,6 +614,7 @@ document.addEventListener("DOMContentLoaded", async() => {
         if (loginData.loginStatus == true) {
             document.getElementById("username").textContent =
                 RegisteredCustomer["name"];
+            document.getElementById("username").style.width = "90px";
         }
     } else {
         console.error("LoginStatus is not available in localStorage.");
@@ -540,8 +641,7 @@ function checkPaymentMethod() {
 
 function loginUser(route) {
     const email = document.getElementById("loginEmail").value;
-    const phonePrefix = document.getElementById("countryCode").value;
-    const phoneNumber = document.getElementById("phoneNumber").value;
+    const password = document.getElementById("password").value;
     const csrfToken = document
         .querySelector('meta[name="csrf-token"]')
         .getAttribute("content");
@@ -551,24 +651,26 @@ function loginUser(route) {
 
     loginData = JSON.parse(loginData);
     fetch(route, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": csrfToken,
-            },
-            body: JSON.stringify({
-                email: email,
-                phone_number: phonePrefix + phoneNumber,
-            }),
-        })
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": csrfToken,
+        },
+        body: JSON.stringify({
+            email: email,
+            password: password,
+        }),
+    })
         .then((response) => response.json())
         .then((data) => {
             if (data.status === "success") {
                 hideLoginPopup();
+                let login_time = new Date().toISOString();
                 const updatedLoginData = {
                     loginStatus: true,
                     signupStatus: true,
                     email: data.user.email,
+                    LoginTime: login_time,
                 };
                 localStorage.setItem(
                     "LoginStatus",
@@ -636,13 +738,7 @@ function closeDropdownOnClickOutside(event) {
 }
 
 function logout() {
-    // const LoginStatus = localStorage.getItem("LoginStatus");
-    // const parsedLoginStatus = JSON.parse(LoginStatus);
-    // data = { loginStatus: false, signupStatus: parsedLoginStatus.signupStatus, email: parsedLoginStatus.email }
-    // localStorage.setItem("LoginStatus", JSON.stringify(data));
-    localStorage.removeItem("cartItems");
-    localStorage.removeItem("LoginStatus");
-    localStorage.removeItem("savedLocation");
+    localStorage.clear();
     var dropdown = document.getElementById("dropdownMenu");
     if (dropdown.style.display === "block") {
         dropdown.style.display = "none";
@@ -671,8 +767,9 @@ function checkAndRemoveData() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     checkAndRemoveData();
+    // checkIfSessionExpired();
 });
 document.addEventListener("DOMContentLoaded", () => {
     const searchInput = document.getElementById("search_bar");
@@ -694,9 +791,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             items.forEach((item) => {
                 const nameElement = item.querySelector(".product_name");
-                const nameText = nameElement ?
-                    nameElement.textContent.toLowerCase() :
-                    "";
+                const nameText = nameElement
+                    ? nameElement.textContent.toLowerCase()
+                    : "";
                 const isVisible = nameText.includes(filterText);
 
                 if (isVisible) {
@@ -745,12 +842,13 @@ function closeProfilePopup() {
 }
 
 async function getProfileData(route) {
-    const Email = JSON.parse(localStorage.getItem('LoginStatus'));
+    const Email = JSON.parse(localStorage.getItem("LoginStatus"));
     await fetch(`/profile/${Email.email}`)
         .then((response) => response.json())
         .then((data) => {
             const phoneNumber = data.user.phone_number;
-            const countryCode = phoneNumber.slice(0, 3);
+            // const countryCode = phoneNumber.slice(1, 3);
+            const countryCode = "03";
             const number = phoneNumber.slice(3);
             document.getElementById("customer_id").value = data.user.id;
             document.getElementById("edit_name").value = data.user.name;
@@ -758,10 +856,100 @@ async function getProfileData(route) {
             document.getElementById("edit_country_code").value = countryCode;
             document.getElementById("edit_phone_number").value = number;
 
-            route = route.replace(':customer_id', data.user.id);
-            document.getElementById('deleteCustomerProfile').setAttribute('href', route);
+            route = route.replace(":customer_id", data.user.id);
+            document
+                .getElementById("deleteCustomerProfile")
+                .setAttribute("data-route", route);
         })
         .catch((error) => {
             console.error("Error fetching customer data:", error);
         });
 }
+
+function showAlert(message) {
+    document.getElementById("popupOverlay").style.display = "block";
+    document.getElementById("popupOverlay").style.zIndex = "1000";
+    document.getElementById("alert").style.display = "flex";
+    document.getElementById("alert").style.zIndex = "1001";
+    document.getElementById("alert-message").textContent = message;
+    document.body.classList.add("no-scroll");
+    document.body.style.overflow = "hidden";
+    toggleClass(".whole", "active");
+}
+
+function closeAlert() {
+    document.getElementById("popupOverlay").style.display = "none";
+    document.getElementById("popupOverlay").style.zIndex = "999";
+    document.getElementById("alert").style.display = "none";
+    document.getElementById("alert").style.zIndex = "1000";
+    document.getElementById("alert-message").textContent = message;
+    document.body.classList.remove("no-scroll");
+    document.body.style.overflow = "initial";
+}
+
+function confirmationDelete() {
+    let route = document
+        .getElementById("deleteCustomerProfile")
+        .getAttribute("data-route");
+
+    closeProfilePopup();
+
+    let confirmDeletionOverlay = document.getElementById(
+        "confirmDeletionOverlay"
+    );
+    let confirmDeletionPopup = document.getElementById("confirmDeletion");
+    confirmDeletionOverlay.style.display = "block";
+    confirmDeletionPopup.style.display = "flex";
+
+    let deleteButton = document.getElementById("confirm");
+    deleteButton.disabled = true;
+    deleteButton.style.background = "#ed7680";
+
+    rndom.textContent = Math.random().toString(36).slice(2, 6).toUpperCase();
+
+    let confirmButton = document.getElementById("confirm");
+    confirmButton.onclick = function () {
+        // document.getElementById('loaderOverlay').style.display = 'block';
+        // document.getElementById('loader').style.display = 'flex';
+        confirmDeletionOverlay.style.display = "none";
+        confirmDeletionPopup.style.display = "none";
+        window.location.href = route;
+    };
+}
+
+function closeConfirmDelete() {
+    let confirmDeletionOverlay = document.getElementById(
+        "confirmDeletionOverlay"
+    );
+    let confirmDeletionPopup = document.getElementById("confirmDeletion");
+    confirmDeletionOverlay.style.display = "none";
+    confirmDeletionPopup.style.display = "none";
+    document.getElementById("formRandomString").value = "";
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("profilePopup").style.display = "flex";
+}
+
+function checkIfSessionExpired() {
+    let savedLoginTime = localStorage.getItem("loginStatus");
+
+    if (savedLoginTime) {
+        let savedTime = savedLoginTime.LoginTime; // Convert to milliseconds
+        let currentTime = new Date().toISOString();
+        let timeElapsed = currentTime - savedTime;
+
+        console.log(currentTime);
+        console.log(timeElapsed);
+
+        // Check if 30 minutes (in milliseconds) have passed
+        if (timeElapsed >= 30 * 60 * 1000) {
+            localStorage.clear(); // Clear local storage
+            alert("Session expired. Please log in again.");
+        }
+    }
+}
+
+setInterval(checkIfSessionExpired, 60 * 1000);
+
+// window.addEventListener('beforeunload', function() {
+//     localStorage.clear();
+// });

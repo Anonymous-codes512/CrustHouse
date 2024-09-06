@@ -88,19 +88,30 @@
                         <td>{{ $order->total_bill }}</td>
                         <td>{{ $order->salesman->name }}</td>
 
-                        @if ($order->status == 1) <td class="status">Completed</td>
-                        @elseif ($order->status == 2) <td class="status">Pending</td>
-                        @elseif ($order->status == 3) <td class="status">Canceled</td>
+                        @if ($order->status == 1)
+                            <td class="status">Completed</td>
+                        @elseif ($order->status == 2)
+                            <td class="status">Pending</td>
+                        @elseif ($order->status == 3)
+                            <td class="status">Canceled</td>
+                        @elseif ($order->status == 4)
+                            <td class="status">Send to chef</td>
+                        @elseif ($order->status == 5)
+                            <td class="status">order ready</td>
                         @endif
 
                         <td>
-                            <a id="view" href="{{ route('viewOrderProducts', [$branch_id ,$order->id]) }}">View</a>
+                            <a id="view" href="{{ route('viewOrderProducts', [$branch_id, $order->id]) }}">View</a>
                             @if ($order->status == 1)
                                 <a id="cancel-order" style="background-color:#4d4d4d; cursor: default;">Cancel</a>
                             @elseif($order->status == 2)
                                 <a id="cancel-order" href="{{ route('cancelorder', [$order->id, $user_id]) }}">Cancel</a>
                             @elseif($order->status == 3)
                                 <a id="cancel-order" style="background-color:#4d4d4d;  cursor: default;">Cancel</a>
+                            @elseif($order->status == 4)
+                                <a id="cancel-order" href="{{ route('cancelorder', [$order->id, $user_id]) }}">Cancel</a>
+                            @elseif($order->status == 5)
+                                <a id="cancel-order" href="{{ route('cancelorder', [$order->id, $user_id]) }}">Cancel</a>
                             @endif
                         </td>
                     </tr>
@@ -131,7 +142,6 @@
                                     <td>{{ $item->product_name }}</td>
                                     <td>{{ $item->product_quantity }}</td>
                                     <td>{{ $item->total_price }}</td>
-
                                 </tr>
                             @endforeach
                         </tbody>
@@ -156,7 +166,9 @@
         $(document).ready(function() {
             $('#ordersTable').DataTable({
                 "paging": true,
-                "lengthMenu": [5, 10, 25, 50, 100]
+                "lengthMenu": [5, 10, 25, 50, 100],
+                "order": [[0, "desc"]]
+
             });
         });
         document.addEventListener("DOMContentLoaded", function() {

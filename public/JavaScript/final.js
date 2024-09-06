@@ -60,20 +60,20 @@ function handleCartButtonClick() {
         .replace(",", "")
     );
     const quantity = parseInt(document.getElementById("quantity").innerText);
+
+    // Check if an option is selected
     const selectedOption = document.querySelector(
         'input[name="option"]:checked'
     );
-    const selectedSizeElement = selectedOption
-        .closest(".dropdown_2")
-        .querySelector(".sizee");
-    const selectedVariation = selectedSizeElement ?
-        selectedSizeElement.innerText.trim() :
-        "No variation selected";
-    const variationPrice = parseInt(
-        document
-        .querySelector('input[name="option"]:checked')
-        .getAttribute("value")
-    );
+    if (!selectedOption) {
+        let message = "Please select the variation first.";
+        showAlert(message);
+        return;
+    }
+
+    const selectedSizeElement = selectedOption.closest(".dropdown_2").querySelector(".sizee");
+    const selectedVariation = selectedSizeElement ? selectedSizeElement.innerText.trim() : "No variation selected";
+    const variationPrice = parseInt(document.querySelector('input[name="option"]:checked').getAttribute("value"));
 
     // Gather selected toppings
     const selectedToppings = [];
@@ -81,10 +81,7 @@ function handleCartButtonClick() {
         'input[name="addon"]:checked'
     );
     toppingCheckboxes.forEach((checkbox) => {
-        const toppingName = checkbox
-            .closest(".dropdown_2")
-            .querySelector(".sizee")
-            .innerText.trim();
+        const toppingName = checkbox.closest(".dropdown_2").querySelector(".sizee").innerText.trim();
         const toppingPrice = parseInt(checkbox.value);
         selectedToppings.push({
             name: toppingName,
@@ -106,6 +103,7 @@ function handleCartButtonClick() {
     });
     const cartItem = {
         name: title,
+        type: "product",
         originalPrice: Originalprice,
         price: price,
         quantity: quantity,
@@ -131,6 +129,7 @@ function handleCartButtonClick() {
     closeAddToCart();
 }
 
+
 // Function to toggle the visibility of the cart
 function toggleCart() {
     const cart = document.getElementById("cart");
@@ -141,7 +140,7 @@ function toggleCart() {
         // document.querySelector(".whole").style.filter = "initial";
         document.getElementById("overlay").style.display = "none";
     } else {
-        openCartSidebar();
+        updateCartUI();
         cart.classList.add("active");
         document.body.classList.add("no-scroll");
         document.body.style.overflow = "hidden";
@@ -150,10 +149,6 @@ function toggleCart() {
         document.querySelector(".whole").style.pointerEvents = "none";
         // document.querySelector(".whole").style.filter = "blur(2px)";
     }
-}
-
-function openCartSidebar() {
-    updateCartUI();
 }
 
 // Function to update the cart UI based on local storage
@@ -176,43 +171,43 @@ function updateCartUI() {
     const img = `${window.location.origin}/Images/OnlineOrdering/delete.png`;
 
     cartItems.forEach((item, index) => {
-        const cartItem = document.createElement("div");
-        cartItem.className = "cart-item";
+                const cartItem = document.createElement("div");
+                cartItem.className = "cart-item";
 
-        // Create the cart item HTML
-        let toppingsHTML = "";
-        if (item.topping && item.topping.length > 0) {
-            toppingsHTML = item.topping
-                .map(
-                    (topping) =>
-                    `<div>${topping.name}: Rs ${topping.price}</div>`
-                )
-                .join("");
-        } else {
-            toppingsHTML = "<div></div>";
-        }
+                // Create the cart item HTML
+                let toppingsHTML = "";
+                if (item.topping && item.topping.length > 0) {
+                    toppingsHTML = item.topping
+                        .map(
+                            (topping) =>
+                            `<div>${topping.name}: Rs ${topping.price}</div>`
+                        )
+                        .join("");
+                } else {
+                    toppingsHTML = "<div></div>";
+                }
 
-        cartItem.innerHTML = `
-            <img src="${item.imgSrc}" alt="${item.name}" class="cart-item-img">
-            <div class="cart-item-info">
-                <span class="cart-item-name">${item.name}</span>
-                <span class="cart-item-price" data-original-price="${item.originalPrice}">${item.price}</span>
-                <span class="variation">Variation: ${item.variation}</span>
-                <div class="cart-items-toppings">
-                    ${toppingsHTML}
-                </div>
-                <div class="cart-items-quantity">
-                    <div class="cart-quantity">
-                        <button class="q_btn decrease" data-index="${index}">-</button>
-                        <div class="quantity">${item.quantity}</div>
-                        <button class="q_btn increase" data-index="${index}">+</button>
+                cartItem.innerHTML = `
+                    <img src="${item.imgSrc}" alt="${item.name}" class="cart-item-img">
+                    <div class="cart-item-info">
+                        <span class="cart-item-name">${item.name}</span>
+                        <span class="cart-item-price" data-original-price="${item.originalPrice}">${item.price}</span>
+                        ${item.variation ? `<span class="variation">Variation: ${item.variation}</span>` : ''}
+                        <div class="cart-items-toppings">
+                            ${toppingsHTML}
+                        </div>
+                        <div class="cart-items-quantity">
+                            <div class="cart-quantity">
+                                <button class="q_btn decrease" data-index="${index}">-</button>
+                                <div class="quantity">${item.quantity}</div>
+                                <button class="q_btn increase" data-index="${index}">+</button>
+                            </div>
+                            <div class="delbtn">
+                                <img class="delete_img" src="${img}" alt="">
+                            </div>
+                        </div>
                     </div>
-                    <div class="delbtn">
-                        <img class="delete_img" src="${img}" alt="">
-                    </div>
-                </div>
-            </div>
-        `;
+                `;
 
         cartItemsContainer.appendChild(cartItem);
         attachDeleteHandler(cartItem, index);
@@ -259,7 +254,8 @@ function updateTotalPrice() {
 // clear button code
 document.querySelector(".cart_clear").onclick = function() {
     document.querySelector(".clear").style.display = "block";
-    document.querySelector(".cart_part1").style.filter = "blur(3px)";
+    document.querySelector(".cart_part1").style.backgroundColor = "#000000";
+    document.querySelector(".cart_part1").style.filter = "blur(10px)";
 };
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -272,10 +268,12 @@ document.addEventListener("DOMContentLoaded", function() {
         document.querySelector(".cart_clear").style.display = "none";
         document.querySelector(".emptycart").style.display = "flex";
         document.querySelector(".total").style.display = "none";
+        document.querySelector(".cart_part1").style.backgroundColor = "#fff";
         document.querySelector(".cart_part1").style.filter = "initial";
     });
     document.querySelector(".cancel").addEventListener("click", function() {
         document.querySelector(".clear").style.display = "none";
+        document.querySelector(".cart_part1").style.backgroundColor = "#fff";;
         document.querySelector(".cart_part1").style.filter = "initial";
     });
 });
@@ -324,16 +322,20 @@ function decreaseCartItemQuantity(event) {
 
     if (cartItem.quantity > 1) {
         cartItem.quantity -= 1;
-        // Update price based on variation and topping
-        cartItem.price =
-            (cartItem.variationPrice +
-                (cartItem.topping ?
-                    cartItem.topping.reduce(
-                        (total, topping) => total + topping.price,
-                        0
-                    ) :
-                    0)) *
-            cartItem.quantity;
+        if (cartItem.type === "product") {
+            const toppingPrice = cartItem.topping ?
+                cartItem.topping.reduce(
+                    (total, topping) => total + topping.price,
+                    0
+                ) :
+                0;
+            cartItem.price =
+                (cartItem.variationPrice + toppingPrice) * cartItem.quantity;
+        } else if (cartItem.type === 'deal') {
+            cartItem.price = parseInt(cartItem.originalPrice) * cartItem.quantity;
+        } else if (cartItem.type === 'Variation less product') {
+            cartItem.price = parseInt(cartItem.originalPrice) * cartItem.quantity;
+        }
         updateCartItemInLocalStorage(index, cartItem);
         updateCartUI();
     }
@@ -345,16 +347,22 @@ function increaseCartItemQuantity(event) {
     const cartItem = cartItems[index];
 
     cartItem.quantity += 1;
-    // Update price based on variation and topping
-    cartItem.price =
-        (cartItem.variationPrice +
-            (cartItem.topping ?
-                cartItem.topping.reduce(
-                    (total, topping) => total + topping.price,
-                    0
-                ) :
-                0)) *
-        cartItem.quantity;
+
+    if (cartItem.type === "product") {
+        const toppingPrice = cartItem.topping ?
+            cartItem.topping.reduce(
+                (total, topping) => total + topping.price,
+                0
+            ) :
+            0;
+        cartItem.price =
+            (cartItem.variationPrice + toppingPrice) * cartItem.quantity;
+    } else if (cartItem.type === "deal") {
+        cartItem.price = parseInt(cartItem.originalPrice) * cartItem.quantity;
+    } else if (cartItem.type === 'Variation less product') {
+        cartItem.price = parseInt(cartItem.originalPrice) * cartItem.quantity;
+    }
+
     updateCartItemInLocalStorage(index, cartItem);
     updateCartUI();
 }

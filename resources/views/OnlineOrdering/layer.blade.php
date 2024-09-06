@@ -6,11 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Crust-House</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="shortcut icon" href="{{ asset('Images/icon-512.png') }}" type="image/x-icon">
     <link rel="stylesheet" href="{{ asset('CSS/OnlineOrdering/layer.css') }}" class="css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
 </head>
 <script src="{{ asset('JavaScript/onlineOrdering.js') }}"></script>
+<script src="{{ asset('JavaScript/onlineOrderingDeal.js') }}"></script>
 <script>
     if (performance.navigation.type === 1) {
         window.location.href = "{{ route('onlineOrderPage') }}";
@@ -23,7 +26,22 @@
             {{ session('success') }}
         </div>
         <script>
-            localStorage.removeItem('cartItems');
+            setTimeout(() => {
+                document.getElementById('success').classList.add('alert-hide');
+            }, 2000);
+
+            setTimeout(() => {
+                document.getElementById('success').style.display = 'none';
+            }, 3000);
+        </script>
+    @endif
+
+    @if (session('Order_Place_Success'))
+        <div id="success" class="alert alert-success">
+            {{ session('success') }}
+        </div>
+        <script>
+            localStorage.removeItem("cartItems");
             setTimeout(() => {
                 document.getElementById('success').classList.add('alert-hide');
             }, 2000);
@@ -51,9 +69,7 @@
 
     @if (session('deleteSucceed'))
         <script>
-            localStorage.removeItem('LoginStatus');
-            localStorage.removeItem('cartItems');
-            localStorage.removeItem('savedLocation');
+            localStorage.clear();
         </script>
     @endif
 
@@ -75,13 +91,11 @@
                 <span class="imgmain">
                     <img src="{{ asset('Images/OnlineOrdering/image-1.png') }}" alt="">
                 </span>
-
-                <span class="text1">Select your order type</span>
             </div>
 
-            <div class="btndelivery">
+            {{-- <div class="btndelivery">
                 <button class="btndel">Delivery</button>
-            </div>
+            </div> --}}
             <div class="sub_items1">
                 <span class="text1">Please Select your Location</span>
                 <div class="btnlocation">
@@ -93,9 +107,9 @@
             <div class="fields">
                 <div class="inputfields">
                     <input class="subin_fields" type="text" name="" id="district"
-                        placeholder="Select City / Region " required>
+                        placeholder="Select City / Region " required readonly>
                     <input class="subin_fields" type="text" name="" id="address"
-                        placeholder="Select Area / Sub Region" required>
+                        placeholder="Select Area / Sub Region" required readonly>
                     <div id="location-message" class="error-message" style="display: none;"></div>
                     <button id="submit-btn" class="btnn" onclick="SelectLocation()">Select</button>
                 </div>
@@ -111,21 +125,21 @@
     <div class="whole">
         <div class="temp">
             <div class="popwhole">
-
                 <div class="nav">
                     <div class="location" onclick="changeLocation()">
                         <img class="locimg" src="{{ asset('Images/OnlineOrdering/locationpin.png') }}" alt="">
                         <div class="locelement">
                             <span class="ele1">Deliver to</span>
-                            <span class="ele1" id="addr"></span>
+                            <span class="ele1 truncate-text-address" id="addr"></span>
                         </div>
                     </div>
-                    <div class="mainimage">
-                        <img class="imgelement" src="{{ asset('Images/OnlineOrdering/image-1.png') }}" alt="">
+                    <div class="mainimage" onclick="window.location.href='{{ route('onlineOrderPage') }}'" style="cursor: pointer;">
+                        <img class="imgelement" src="{{ asset('Images/OnlineOrdering/image-1.png') }}" alt="Online Ordering">
                     </div>
+                    
                     <div class="icons">
                         <div id="search_bar_div" class="search_bar_div">
-                            <input type="text" id="search_bar" name="search" placeholder="Search.."
+                            <input type="text" id="search_bar" name="search" placeholder="Search by product name..."
                                 style="background-image: url('{{ asset('Images/search.png') }}');">
                         </div>
                         <div class="icons-btns">
@@ -148,7 +162,7 @@
                                 <div id="profile-image-name" onclick="checkProfile(event)">
                                     <img id="profileImg" class="locimgg"
                                         src="{{ asset('Images/OnlineOrdering/profile.png') }}" alt="">
-                                    <span id="username"></span>
+                                    <span id="username" class="truncate-text"></span>
                                 </div>
                                 <div id="dropdownMenu" class="dropdownMenu-content">
                                     <a
@@ -244,7 +258,9 @@
                                                             {{ $Deal->deal->dealDiscountedPrice }}</p>
                                                     </div>
                                                     <div class="btn">
-                                                        <button class="cartbtn">Add To
+                                                        <button class="cartbtn"
+                                                            onclick="addDealToCart({{ json_encode($Deal) }}, {{ json_encode($Deals) }}, {{ json_encode($AllProducts) }})">Add
+                                                            To
                                                             Cart</button>
                                                     </div>
                                                 </div>
@@ -335,11 +351,6 @@
 
     <!-- openpop -->
     <div class="openitems" id="popup" style="display: none; ">
-        <div class="cbtn" id="closeButton" style="display: none;">
-            <button class="clobtn" onclick="closeAddToCart()">
-                &times;
-            </button>
-        </div>
         <div class="itemss" id="itemss">
             <div class="hlfcontainer">
                 <div class="mini_halfcontainer">
@@ -415,13 +426,129 @@
                             </button>
 
                         </div>
-                        <button class="addcart" onclick="handleCartButtonClick() ">
-                            <div>
-                                <span id="originalprice" style="display: none;"></span>
-                                <span id="cart-price"></span>
+                        <div>
+                            <button type="button" onclick="closeAddToCart()" class="close_btn">Close</button>
+                            <button class="addcart" onclick="handleCartButtonClick() ">
+                                <div>
+                                    <span id="originalprice" style="display: none;"></span>
+                                    <span id="cart-price"></span>
+                                </div>
+                                <div>Add to Cart</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="openitems" id="dealPopup" style="display: none; ">
+        <div class="itemss" id="itemss">
+            <div class="hlfcontainer">
+                <div class="mini_halfcontainer">
+                    <div class="mini_items">
+                        <span class="img_item">
+                            <img class="popup-img" id="deal_popup-img" src="" alt="Product Image">
+                        </span>
+                    </div>
+                    <div class="textshow">
+                        <span class="popup_title" id="deal_popup-title"></span>
+                        <span class="popup_price" id="deal_popup-dealName"></span>
+                        <span class="popup_price" id="deal_popup-price"></span>
+                    </div>
+                </div>
+                <div class="extra_items">
+                    <div class="extra_1" style="display: flex; flex-direction: column; gap: 1vw;">
+                        <div id="extra_55" class="extra_4" onclick="toggleDropdown(this)">
+                            <div class="extra_5">
+                                <div class="extra_6">
+                                    <span class="size">Pizza Variation</span>
+                                    <span class="required">Required</span>
+                                </div>
+                                <div class="arrow" onclick="toggleDropdown()">
+                                    <img class="up" src="{{ asset('Images/OnlineOrdering/up.png') }}"
+                                        alt="">
+                                    <img class="down" src="{{ asset('Images/OnlineOrdering/down.png') }}"
+                                        alt="">
+                                </div>
                             </div>
-                            <div>Add to Cart</div>
-                        </button>
+                        </div>
+                        <div id="dropdown-content" class="dropdown-content">
+                            <div class="dropdown_1">
+                                <div>
+                                    <div class="dealDrop">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="extra_45" class="extra_4" onclick="toggleDropdown(this)">
+                            <div class="extra_5">
+                                <div class="extra_6">
+                                    <span class="size">Toppings</span>
+                                    <span class="required">Required</span>
+                                </div>
+                                <div class="arrow" onclick="toggleDropdown1()">
+                                    <img class="up" src="{{ asset('Images/OnlineOrdering/up.png') }}"
+                                        alt="">
+                                    <img class="down" src="{{ asset('Images/OnlineOrdering/down.png') }}"
+                                        alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dropdown-content1" class="dropdown-content">
+                            <div class="dropdown_1">
+                                <div>
+                                    <div class="dealAddonDrop">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="extra_65" class="extra_4" onclick="toggleDropdown(this)">
+                            <div class="extra_5">
+                                <div class="extra_6">
+                                    <span class="size">Drink Flavour</span>
+                                    <span class="required">Required</span>
+                                </div>
+                                <div class="arrow" onclick="toggleDropdown1()">
+                                    <img class="up" src="{{ asset('Images/OnlineOrdering/up.png') }}"
+                                        alt="">
+                                    <img class="down" src="{{ asset('Images/OnlineOrdering/down.png') }}"
+                                        alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dropdown-content1" class="dropdown-content">
+                            <div class="dropdown_1">
+                                <div>
+                                    <div class="dealDrinkDrop">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="bottom">
+                        <div class="bottom_1">
+                            <button onclick="decreaseQuantityy()" class="bottom_2" id="decrease">
+                                -
+                            </button>
+                            <span class="count" id="quantityy">1</span>
+
+                            <button onclick="increaseQuantityy()" class="bottom_2" id="increase">
+                                +
+                            </button>
+
+                        </div>
+                        <div>
+                            <button type="button" onclick="closeDealAddToCart()" class="close_btn">Close</button>
+                            <button id="dealaddcart" class="addcart" onclick="handleDealCartButtonClick()">
+                                <div>Add to Cart</div>
+                            </button>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -436,7 +563,7 @@
             enctype="multipart/form-data">
             @csrf
             <div class="textt">
-                <span class="details">Enter your mobile number</span>
+                <span class="details">Login</span>
             </div>
             <div class="phone-input">
                 <span class="select">Please enter email and confirm your country code and enter your mobile
@@ -446,10 +573,10 @@
                         placeholder="Enter your email">
                 </div>
             </div>
-            <div class="code">
-                <input id="countryCode" type="tel" name="phonePrefix" value="+92" max="3" readonly>
-                <input id="phoneNumber" type="tel" name="phone_number" required placeholder="Enter phone number"
-                    maxlength="10" pattern="\d{10}">
+            <div class="passwordField">
+                <input type="password" id="password" name="password" placeholder="Password" autocomplete="off"
+                    required>
+                <i class='bx bxs-show' onclick="showAndHidePswd('password')"></i>
             </div>
             <div id="login-response-message" class="error-message" style="display: none;"></div>
             <div class="privacy">This site is protected by reCAPTCHA and the Google
@@ -460,6 +587,8 @@
             </div>
             <div class="loginbtn">
                 <button type="submit" class="lobtn">Login</button>
+                <a id="forgotPassword" class="forgot-password" href="{{ route('customerForgotPassword') }}">Forgot
+                    Password?</a>
                 <div class="orline">
                     <span class="or">OR</span>
                 </div>
@@ -481,8 +610,8 @@
                     <div class="name">
                         <label class="s_label">Enter Name</label>
                         <div class="gap">
-                            <input class="s_input" type="text" id="name" name="name"
-                                placeholder="Enter your name">
+                            <input class="s_input" type="text" id="name" name="name" maxlength="25"
+                                placeholder="Enter your name" required>
                         </div>
                     </div>
 
@@ -490,7 +619,7 @@
                         <label class="s_label">Enter Email</label>
                         <div class="gap">
                             <input class="s_input" type="email" id="email" name="email"
-                                placeholder="Enter your email" oninput = "validateEmail()">
+                                placeholder="Enter your email" oninput = "validateEmail()" required>
                         </div>
                         <div id="email-error-message" class="error-message" style="display: none;"></div>
                     </div>
@@ -528,10 +657,27 @@
                                 max="3" readonly>
                             <input id="phoneNumberr" type="tel" name="phone_number" maxlength="10"
                                 pattern="\d{10}" title="Please enter a 10-digit phone number"
-                                placeholder="Enter phone number">
+                                placeholder="Enter phone number" required>
                         </div>
                     </div>
-
+                    <div style="display: flex; flex-direction:column;">
+                        <label for="signup-password">Password</label>
+                        <div class="passwordField">
+                            <input type="password" id="signup-password" name="password" placeholder="Password"
+                                autocomplete="off" required>
+                            <i class='bx bxs-show' onclick="showAndHidePswd('signup-password')"></i>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction:column;">
+                        <label for="signup-password">Confirm Password</label>
+                        <div class="passwordField CnfrmPswdField">
+                            <input type="password" id="cnfrmPswd" name="password_confirmation"
+                                placeholder="Confirm Password" autocomplete="off" oninput="validatePassword()"
+                                required>
+                            <i class='bx bxs-show' onclick="showAndHidePswd('cnfrmPswd')"></i>
+                        </div>
+                    </div>
+                    <div id="password-error-message" class="error-message" style="display: none;"></div>
                     <div class="registerbtn">
                         <button class="regbtn" id="regBtn">Register</button>
                     </div>
@@ -560,7 +706,7 @@
             <div class="total" style="display: none;">
                 <div class="main_total">
                     <div class="subtotal">
-                        <span>Subtotal</span>
+                        <span>Sub Total</span>
                         <span>Rs 0.00</span>
                     </div>
                     <div class="delichrge">
@@ -568,7 +714,7 @@
                         <span>Rs 0.00</span>
                     </div>
                     <div class="grandtotal">
-                        <span>Garnd Total</span>
+                        <span>Grand Total</span>
                         <span>Rs 0.00</span>
                     </div>
                     <button class="checkoutbtn" onclick="checkOut()">Checkout</button>
@@ -579,7 +725,7 @@
         </div>
         <div class="clear" style="display: none;">
             <div class="clear_Cart_itens">
-                <span>Are you sure?</span>
+                <span style="color: #fff; font-size:1.5rem;">Are you sure?</span>
                 <div class="clear_cart">
                     <button class="cancel">cancel</button>
                     <button class="clearbtn">Clear Cart</button>
@@ -616,13 +762,13 @@
                     </div>
                     <div class="input-div">
                         <label for="userPhone">Mobile Number</label>
-                        <input type="text" name="phone_number" id="userPhone" placeholder="+923000000000"
-                            required>
+                        <input type="tel" name="phone_number" id="userPhone" placeholder="+923000000000"
+                            maxlength="13" pattern="\+923[0-9]{9}" required>
                     </div>
                     <div class="input-div">
                         <label for="userEmail">Email Address</label>
                         <input type="text" name="email" id="userEmail" placeholder="Enter you email address"
-                            required>
+                            required readonly>
                     </div>
                     <div class="input-address-div">
                         <label for="userAddress">Your Address</label>
@@ -759,12 +905,10 @@
                             <button type="submit" class="checkOutBtn">Proceed</button>
                         </div>
                     </div>
-
                 </div>
             </div>
         </form>
     </div>
-
 
     {{-- Profile Update --}}
     <div id="profilePopup">
@@ -774,7 +918,7 @@
             @csrf
             <input type="hidden" id="customer_id" name="customer_id">
             <label for="edit_name">Full Name</label>
-            <input name="name" id="edit_name" type="text" required>
+            <input name="name" id="edit_name" type="text" maxlength="25" required>
             <label for="edit_email">Email</label>
             <input name="email" id="edit_email" type="email" readonly>
             <label for="edit_country_code">Phone Number</label>
@@ -783,16 +927,54 @@
                 <input name="phone_number" id="edit_phone_number" class="phoneNum" type="text" required>
             </div>
             <div class="Profilebtn">
-                <button onclick="closeProfilePopup()" class="profileCloseBtn">Close</button>
+                <button type="button" onclick="closeProfilePopup()" class="profileCloseBtn">Close</button>
                 <button type="submit" class="profileUpdateBtn">Update</button>
             </div>
         </form>
         <div class="deleteProfile">
-            <a id="deleteCustomerProfile" href="#">Delete Account</a>
+            <a id="deleteCustomerProfile" onclick="confirmationDelete()">Delete Account</a>
         </div>
     </div>
 
-    <!-- end of cart -->
+    <div class="popupOverlay" id="popupOverlay"></div>
+    <div id="alert">
+        <i class='bx bxs-error'></i>
+        <p id="alert-message">No alert message to show.</p>
+        <i class='bx bx-x' onclick="closeAlert()"></i>
+
+    </div>
+
+    <div id="confirmDeletionOverlay"></div>
+    <div class="confirmDeletion" id="confirmDeletion">
+        <h3 id="message-text">Are you sure you want to delete this Branch</h3>
+        <div class="inputdivs">
+            <label style="margin-bottom:15px;" for="formRandomString">Enter this Code: <span
+                    style="font-family:consolas; background-color:#000; padding:5px; color:#fff;border-radius:7px; font-size:18px; letter-spacing:5px;"
+                    id="rndom"></span></label>
+            <input type="text" id="formRandomString" name="random_string" autocomplete="off" required>
+        </div>
+        <div class="box-btns">
+            <button id="confirm">Delete</button>
+            <button id="close" onclick="closeConfirmDelete()">Close</button>
+        </div>
+        <script>
+            document.getElementById("formRandomString").addEventListener("input", function() {
+                let enteredString = this.value.trim();
+                let randomString = document.getElementById("rndom").textContent;
+                let deleteButton = document.getElementById("confirm");
+
+                if (enteredString === randomString) {
+                    deleteButton.disabled = false;
+                    deleteButton.style.background = '#b52828';
+                    deleteButton.style.cursor = 'pointer';
+                } else {
+                    deleteButton.style.background = '#ed7680';
+                    deleteButton.disabled = true;
+                }
+            });
+        </script>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
     <script src="{{ asset('JavaScript/frontend.js') }}"></script>
     <script src="{{ asset('JavaScript/location.js') }}"></script>

@@ -17,6 +17,7 @@ function changeLocation() {
     let frontModel = document.getElementById("frontModel");
     frontModel.classList.remove("hidden");
     frontModel.style.display = "flex";
+    document.body.style.overflow = "hidden";
 }
 
 function SelectLocation() {
@@ -93,7 +94,7 @@ function selectLocation(formattedAddress) {
     const hello = document.querySelector("#addr");
     hello.textContent = formattedAddress;
     localStorage.setItem("savedLocation", formattedAddress);
-    let loginData = { loginStatus: false, signupStatus: false, email: null };
+    let loginData = { loginStatus: false, signupStatus: false, email: null, LoginTime: null };
     localStorage.setItem("LoginStatus", JSON.stringify(loginData));
 }
 

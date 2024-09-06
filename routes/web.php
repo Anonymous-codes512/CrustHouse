@@ -277,3 +277,7 @@ Route::get('/registeredCustomer', [OnlineOrdersController::class, 'registeredCus
 Route::get('/profile/{email}', [OnlineOrdersController::class, 'Profile'])->name('profile');
 Route::post('/updateCustomerProfile', [OnlineOrdersController::class, 'updateCustomerProfile'])->name('updateCustomerProfile');
 Route::get('/deleteCustomer/{customer_id}', [OnlineOrdersController::class, 'deleteCustomer'])->name('deleteCustomer');
+Route::get('/customerForgotPassword', [OnlineOrdersController::class, 'customerForgotPassword'])->name('customerForgotPassword');
+Route::post('/customerSendPasswordReset', [OnlineOrdersController::class, 'customerSendPasswordReset'])->name('customerSendPasswordReset');
+Route::get('/customerResetPasswordPage/{email}', [OnlineOrdersController::class, 'customerResetPasswordPage'])->name('customerResetPasswordPage');
+Route::post('/customerResetPassword', [OnlineOrdersController::class, 'customerResetPassword'])->name('customerResetPassword');

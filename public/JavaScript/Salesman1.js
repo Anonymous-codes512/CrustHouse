@@ -59,6 +59,7 @@ function showAddToCart(product, deals, allProducts) {
 */
 
 function updateDealsDropdown(deal, deals, allProducts) {
+    console.log(deal);
     deal_price = deal.deal.dealDiscountedPrice;
 
     let pizzaFlavourDropdown = document.getElementById("prodVariation");

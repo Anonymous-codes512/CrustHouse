@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CustomerResetPassword;
 use App\Mail\EmailConfirmation;
+use App\Mail\ResetPassword;
 use App\Models\Branch;
 use App\Models\Category;
 use App\Models\OnlineNotification;
@@ -35,15 +37,17 @@ class OnlineOrdersController extends Controller
 
         $deals = handler::where(function ($query) use ($branch_ids) {
             $query->whereHas('product', function ($query) use ($branch_ids) {
-                $query->where('branch_id', $branch_ids);
-            })->orWhereHas('deal', function ($query) use ($branch_ids) {
-                $query->where('branch_id', $branch_ids);
-            });
-        })->with([
-                    'product' => function ($query) use ($branch_ids) {
-                        $query->where('branch_id', $branch_ids);
-                    }
-                ])
+                $query->whereIn('branch_id', $branch_ids);
+            })
+                ->orWhereHas('deal', function ($query) use ($branch_ids) {
+                    $query->whereIn('branch_id', $branch_ids);
+                });
+        })
+            ->with([
+                'product' => function ($query) use ($branch_ids) {
+                    $query->whereIn('branch_id', $branch_ids);
+                }
+            ])
             ->with('deal')
             ->get();
 
@@ -68,13 +72,17 @@ class OnlineOrdersController extends Controller
         $name = $request->input('name');
         $email = $request->input('email');
         $phone = $request->input('phonePrefix') . $request->input('phone_number');
+        $password = $request->input('password');
 
         $existingUser = User::where('email', $email)->first();
         if ($existingUser) {
-            if ($existingUser->role == "customer") {
+            if ($existingUser->email_verified_at == null) {
+                $existingUser->phone_number = $phone;
+                $existingUser->remember_token = Str::random(32);
+                $existingUser->save();
+                $confirmationUrl = route('customerEmailConfirmation', ['token' => $existingUser->remember_token]);
+                Mail::to($email)->send(new EmailConfirmation($existingUser, $confirmationUrl));
                 return redirect()->back()->with('error', 'Email already exists check you inbox for email verification');
-            } else if ($existingUser->phone_number == $phone) {
-                return redirect()->back()->with('error', 'Phone Number already exists');
             } else {
                 return redirect()->back()->with('error', 'Email already exists');
             }
@@ -84,8 +92,8 @@ class OnlineOrdersController extends Controller
         $newCustomer->name = $name;
         $newCustomer->email = $email;
         $newCustomer->phone_number = $phone;
-        $newCustomer->role = null;
-        $newCustomer->password = Hash::make('null');
+        $newCustomer->role = 'customer';
+        $newCustomer->password = Hash::make($password);
         $newCustomer->remember_token = Str::random(32);
 
         if ($newCustomer->save()) {
@@ -103,7 +111,6 @@ class OnlineOrdersController extends Controller
         if ($user) {
             $user->email_verified_at = now();
             $user->remember_token = null;
-            $user->role = 'customer';
             $user->save();
             return view('Auth.ConfirmationEmailPage');
         }
@@ -113,20 +120,23 @@ class OnlineOrdersController extends Controller
     {
         $user = User::where('email', $request->email)->first();
         if ($user) {
-            if ($user->phone_number === $request->phone_number) {
-                if ($user->role === 'customer') {
+            if (Hash::check($request->password, $user->password)) {
+                if ($user->email_verified_at !== null) {
                     return response()->json(['status' => 'success', 'message' => 'Login successful', 'user' => $user]);
                 } else {
+                    $user->remember_token = Str::random(32);
+                    $user->save();
+                    $confirmationUrl = route('customerEmailConfirmation', ['token' => $user->remember_token]);
+                    Mail::to($user->email)->send(new EmailConfirmation($user, $confirmationUrl));
                     return response()->json(['status' => 'error', 'message' => 'Please verify your email address.']);
                 }
             } else {
                 return response()->json(['status' => 'error', 'message' => 'Invalid credentials']);
             }
-        }else{
+        } else {
             return response()->json(['status' => 'error', 'message' => 'User not found. Please register your account first.']);
         }
     }
-
     public function registeredCustomer()
     {
         $users = User::where('role', 'customer')->get();
@@ -148,7 +158,7 @@ class OnlineOrdersController extends Controller
         $orderAddress = $request->input('address');
         $paymentMethod = $request->input('paymentMethod');
         $deliveryCharge = $request->input('deliveryCharge');
-        $totalBill = $request->input('grandTotal');
+        $totalBill = 'Rs.' . $request->input('grandTotal');
         $orderType = 'online';
         $order_initial = "OL-ORD";
         $newOrderNumber = 0;
@@ -196,7 +206,7 @@ class OnlineOrdersController extends Controller
         $notify->toast = 0;
         $notify->save();
 
-        return redirect()->back()->with('success', 'order placed Successfully');
+        return redirect()->back()->with('Order_Place_Success', 'order placed Successfully');
     }
 
     public function Profile($email)
@@ -224,5 +234,45 @@ class OnlineOrdersController extends Controller
         $user = User::find($customer_id);
         $user->delete();
         return redirect()->back()->with('deleteSucceed', 'User deleted');
+    }
+
+    public function customerForgotPassword()
+    {
+        return view('OnlineOrdering.CustomerForgotPassword');
+    }
+
+    public function customerSendPasswordReset(Request $request)
+    {
+        $user = User::where('email', $request->email)->first();
+
+        if ($user) {
+            if ($user->role === 'customer') {
+                Mail::to($request->email)->send(new CustomerResetPassword($user));
+                return redirect()->route('onlineOrderPage')->with('success', 'Password reset email sent successfully!');
+            } else if ($user->role === 'owner') {
+                return redirect()->back()->with('error', 'Owner is not allowed to reset password from here.');
+            } else if ($user->role === 'branchManager') {
+                return redirect()->back()->with('error', 'Branch managers are not allowed to reset password.');
+            } else if ($user->role === 'salesman') {
+                return redirect()->back()->with('error', 'Salesmen are not allowed to reset password.');
+            } else if ($user->role === 'chef') {
+                return redirect()->back()->with('error', 'Chefs are not allowed to reset password.');
+            }
+        } else {
+            return redirect()->back()->with('error', 'Email not found');
+        }
+    }
+
+    public function customerResetPasswordPage($email)
+    {
+        return view('OnlineOrdering.ResetPassword')->with('email', $email);
+    }
+
+    public function customerResetPassword(Request $request)
+    {
+        $user = User::where('email', $request->email)->first();
+        $user->password = Hash::make($request->password);
+        $user->save();
+        return redirect()->route('onlineOrderPage');
     }
 }

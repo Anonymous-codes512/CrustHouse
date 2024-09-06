@@ -131,8 +131,8 @@ class ManagerController extends Controller
 
         $categories = Category::all();
         foreach ($categories as $category) {
-        if (strtolower($category->categoryName) == strtolower($request->categoryName)) {
-            return redirect()->back()->with('error', 'Category already exists.');
+            if (strtolower($category->categoryName) == strtolower($request->categoryName)) {
+                return redirect()->back()->with('error', 'Category already exists.');
             }
         }
 
@@ -416,10 +416,10 @@ class ManagerController extends Controller
 
         $existingDeals = Deal::all();
         foreach ($existingDeals as $deal) {
-        if (strtolower($deal->dealTitle) == strtolower($request->input('dealTitle'))) {
-            return redirect()->back()->with('error', 'Deal already exists.');
+            if (strtolower($deal->dealTitle) == strtolower($request->input('dealTitle'))) {
+                return redirect()->back()->with('error', 'Deal already exists.');
             }
-        }   
+        }
 
 
         $deal = new Deal();
@@ -1024,7 +1024,10 @@ class ManagerController extends Controller
             return redirect()->route('viewLoginPage');
         }
         $settings = ThemeSetting::where('branch_id', $branch_id)->first();
-        $orders = Order::with('salesman')->where('branch_id', $branch_id)->get();
+        $orders = Order::with('salesman')
+            ->where('branch_id', $branch_id)
+            ->orderBy('id', 'desc')  // Sort by 'id' in descending order
+            ->get();
         return view('Manager.Order')->with(['orders' => $orders, 'orderItems' => null, 'ThemeSettings' => $settings]);
     }
     public function viewOrderProducts($branch_id, $order_id)

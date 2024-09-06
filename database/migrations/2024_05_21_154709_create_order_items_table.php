@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('order_id');
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
             $table->string('order_number');
-            $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('product_id')->nullable();
             $table->string('product_name');
             $table->string('product_variation')->nullable();
             $table->string('addons')->nullable();
