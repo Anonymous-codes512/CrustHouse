@@ -40,7 +40,7 @@
             background-color: #fff;
             box-shadow: 0px 1px 3px #3a3a3a;
             padding: 20px;
-            width: 20vw;
+            width: 40vw;
             border-radius: 0.50rem;
         }
 
@@ -49,7 +49,6 @@
             width: 90%;
             align-items: center;
             justify-content: center;
-        
             font-size: 2rem;
             color: #008fd3;
         }

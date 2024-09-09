@@ -190,13 +190,13 @@ class SalesmanController extends Controller
         }
         $newOrderNumber = 0;
         $user = User::with('branch')->find($salesman_id);
-        $branch_initials = $user->branch->branch_initials;
+        $branch_initial = $user->branch->branch_initial;
         $lastOrder = Order::where('branch_id', $user->branch_id)->orderBy('id', 'desc')->first();
         if ($lastOrder) {
             $lastOrderNumber = intval(substr($lastOrder->order_number, 3));
-            $newOrderNumber = $branch_initials . '-' . sprintf('%03d', $lastOrderNumber + 1);
+            $newOrderNumber = $branch_initial . '-' . sprintf('%03d', $lastOrderNumber + 1);
         } else {
-            $newOrderNumber = "$branch_initials-100";
+            $newOrderNumber = "$branch_initial-100";
         }
 
         $order = new Order();

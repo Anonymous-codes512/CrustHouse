@@ -105,7 +105,7 @@ class OwnerController extends Controller
         $newBranch->branch_state = $request->input('branch_state');
         $newBranch->branch_city = $request->input('branch_city');
         $newBranch->company_name = $request->input('company_name');
-        $newBranch->branch_initials = $request->input('branch_initial');
+        $newBranch->branch_initial = $request->input('branch_initial');
         $newBranch->branch_name = $request->input('branch_name');
         $newBranch->branch_code = $request->input('branch_code');
         $newBranch->branch_address = $request->input('branch_address');
@@ -144,7 +144,7 @@ class OwnerController extends Controller
         $branchData->branch_state = $request->input('branch_state');
         $branchData->branch_city = $request->input('branch_city');
         $branchData->company_name = $request->input('company_name');
-        $branchData->branch_initials = $request->input('branch_initial');
+        $branchData->branch_initial = $request->input('branch_initial');
         $branchData->branch_name = $request->input('branch_name');
         $branchData->branch_code = $request->input('branch_code');
         $branchData->branch_address = $request->input('branch_address');

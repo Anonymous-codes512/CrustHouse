@@ -220,7 +220,7 @@
             <div class="detail">
                 <p style="display:inline-block; width:45%;">BALANCE
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</p>
-                <p style="display:inline-block;">Rs. {{ $orderData->return_change + $orderData->discount}}</p>
+                <p style="display:inline-block;">Rs. {{ $orderData->return_change}}</p>
             </div>
             {{-- <div class="returnPolicy bold">
                             Returns with receipt, subject to CVS Return Policy, thru 08/30/2024

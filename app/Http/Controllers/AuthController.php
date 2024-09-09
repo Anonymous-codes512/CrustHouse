@@ -52,7 +52,7 @@ class AuthController extends Controller
         $user->password = Hash::make($req->password);
         $user->save();
 
-        if ($req->has('role')) {
+        if ($req->role !== 'owner') {
             return redirect()->back()->with('success', 'User registered successfully');
         } else {
             return redirect()->route('viewLoginPage')->with('success', 'User registered successfully');

@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 @push('styles')
     <link rel="stylesheet" href="{{ asset('CSS/Manager/category.css') }}">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
-@endpush
+@endpush 
 <style>
     #categoryTable_paginate,
     #categoryTable_filter,

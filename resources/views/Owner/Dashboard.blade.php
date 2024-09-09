@@ -226,7 +226,7 @@
                         document.getElementById('statisticsPopUpOverlay').style.display = 'none';
                         document.getElementById('statisticsPopUp').style.display = 'none';
                     };
-                </script> 
+                </script>
             </div>
         @endif
 
@@ -302,7 +302,7 @@
 
                 <div class="inputdivs" style="width: 49%; margin:0;">
                     <label for="branchcode">Branch Code</label>
-                    <input type="text" name="branch_code" id="branchcode" placeholder="Branch Code" readonly required
+                    <input type="text" name="branch_code" id="branchcode" placeholder="Branch Code" required readonly
                         style="background-color: #dadada">
                 </div>
             </div>
@@ -322,7 +322,7 @@
                 <label for="password">Password</label>
                 <div class="passwordField">
                     <input type="password" id="password" name="password" placeholder="Password" required>
-                    <i class='bx bxs-show' onclick="showAndHidePswd()"></i>
+                    <i class='bx bxs-show' onclick="showAndHideOwnerPswd()"></i>
                 </div>
             </div>
 
@@ -367,7 +367,7 @@
             |---------------------------------------------------------------|
             |================== Edit new Branch Overlay ====================|
             |---------------------------------------------------------------|
-        --}} 
+        --}}
 
         <div id="editBranchOverlay"></div>
         <form id="editBranch" action="{{ route('updateBranches') }}" method="Post" enctype="multipart/form-data">
@@ -525,10 +525,11 @@
             |---------------------------------------------------------------|
         --}}
         <div id="editOwnerProfileOverlay"></div>
-        <form id="editOwnerProfile" action="{{ route('UpdateOwnerProfile')}}" method="Post" enctype="multipart/form-data">
+        <form id="editOwnerProfile" action="{{ route('UpdateOwnerProfile') }}" method="Post"
+            enctype="multipart/form-data">
             @csrf
             <h3>Edit Owner Profile</h3>
-            <hr> 
+            <hr>
 
             <input type="hidden" name="owner_id" id="owner_id">
 
@@ -554,7 +555,8 @@
             <div class="inputdivs">
                 <label for="password">Password</label>
                 <div class="passwordField">
-                    <input type="password" id="ownerPassword" name="password" oninput="validatePassword()" placeholder="Password">
+                    <input type="password" id="ownerPassword" name="password" oninput="validatePassword()"
+                        placeholder="Password">
                     <i class='bx bxs-show' onclick="showAndHideOwnerPswd()"></i>
                 </div>
             </div>
@@ -1590,7 +1592,7 @@
                     updateCityOptions('editbranchstate', 'editbrancharea');
                     document.getElementById('editbrancharea').value = Branch.branch_city;
                     document.getElementById('editCompanyName').value = Branch.company_name;
-                    document.getElementById('editBranchInitial').value = Branch.branch_initials;
+                    document.getElementById('editBranchInitial').value = Branch.branch_initial;
                     document.getElementById('editBranchName').value = Branch.branch_name;
                     document.getElementById('editBranchCode').value = Branch.branch_code;
                     document.getElementById('editaddress').value = Branch.branch_address;
@@ -1674,7 +1676,7 @@
                 pswd.type = 'password';
             }
         }
-        
+
         function showAndHideOwnerPswd() {
             let pswd = document.getElementById('ownerPassword');
             if (pswd.type === 'password') {
@@ -1700,17 +1702,21 @@
             let codeNumber = number.toString().padStart(3, '0');
 
             let branch_Code = `${cityInitials}-${codeNumber}`;
-            branchData.forEach(branch => {
-                if (branch.branch_code == branch_Code) {
-                    BranchCode(value, branchData);
-                } else {
-                    document.getElementById('branchcode').value = branch_Code;
-                    document.getElementById('editBranchCode').value = branch_Code;
-                }
-            })
+            
+            if (branchData.length > 0) {
+                branchData.forEach(branch => {
+                    if (branch.branch_code == branch_Code) {
+                        BranchCode(value, branchData);
+                    } else {
+                        document.getElementById('branchcode').value = branch_Code;
+                        document.getElementById('editBranchCode').value = branch_Code;
+                    }
+                })
+            } else {
+                document.getElementById('branchcode').value = branch_Code;
+            }
         }
-
-
+        
         function GeneratePassword() {
             let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()~`{}[];:.,></?\|";
             let generatedPassword = "";
@@ -1779,7 +1785,7 @@
                 submitBtn.style.backgroundColor = '#034a6c';
                 return;
             }
-            var invalidChars =/[\*\/=\-+]/;
+            var invalidChars = /[\*\/=\-+]/;
             if (invalidChars.test(email)) {
                 emailErrorMessage.style.display = 'block';
                 emailErrorMessage.textContent = "Email contains invalid characters like *, /, =.";
@@ -1804,7 +1810,7 @@
                 emailErrorMessage.style.display = 'block';
                 emailErrorMessage.textContent = "Email must end with '.com'.";
                 submitBtn.disabled = true;
-                submitBtn.style.cursor ='not-allowed';
+                submitBtn.style.cursor = 'not-allowed';
                 return;
             }
             var invalidChars = /[\*\/=\-+]/;
@@ -1814,7 +1820,7 @@
                 submitBtn.disabled = true;
                 return;
             }
-            submitBtn.style.cursor ='pointer';
+            submitBtn.style.cursor = 'pointer';
             submitBtn.disabled = false;
             emailErrorMessage.style.display = 'none';
         }
@@ -1826,7 +1832,7 @@
             if (password.length < 8) {
                 message.textContent = "Password must be at least 8 characters long!";
                 message.style.display = 'block';
-            }else {
+            } else {
                 message.textContent = "Valid Password";
                 message.style.color = '#146c43';
                 setTimeout(() => {

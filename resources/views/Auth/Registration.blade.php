@@ -19,11 +19,11 @@
             </div>
             <hr>
             <div class="inputfields">
-
+                <input type="hidden" name="role" value="owner">
                 <div class="namefield">
                     <input type="text" name="name" placeholder="Enter your full name" autocomplete="off" required>
                     <i class='bx bxs-user'></i>
-                </div> 
+                </div>
 
                 @error('name')
                     <div class="error-message">{{ $message }}</div>

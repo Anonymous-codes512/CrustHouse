@@ -212,9 +212,10 @@
                             <p class="profilename">User Name</p>
                         @endif
                     </div>
-
-                    <input type="hidden"  id="branch_name" value="{{$branch->branch_name . ' - ' . $branch->branch_city}}">
-
+                    @if ($ThemeSettings)
+                        <input type="hidden" id="branch_name"
+                            value="{{ $branch->branch_name . ' - ' . $branch->branch_city }}">
+                    @endif
                     @php
                         $notifications = session('Notifications');
                     @endphp
