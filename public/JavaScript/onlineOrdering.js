@@ -203,7 +203,7 @@ function openProductPopup(product, allProducts, addons) {
     document.querySelector(".popwhole").style.pointerEvents = "none";
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const overlay = document.getElementById("overlay");
     if (overlay) {
         overlay.addEventListener("click", () => {
@@ -277,15 +277,15 @@ function handleCartButtonClick() {
     const imageSrc = document.getElementById("popup-img").src;
     const price = parseInt(
         document
-        .getElementById("cart-price")
-        .innerText.replace("Rs. ", "")
-        .replace(",", "")
+            .getElementById("cart-price")
+            .innerText.replace("Rs. ", "")
+            .replace(",", "")
     );
     const Originalprice = parseInt(
         document
-        .getElementById("originalprice")
-        .innerText.replace("Rs. ", "")
-        .replace(",", "")
+            .getElementById("originalprice")
+            .innerText.replace("Rs. ", "")
+            .replace(",", "")
     );
     const quantity = parseInt(document.getElementById("quantity").innerText);
     const selectedOption = document.querySelector(
@@ -294,13 +294,13 @@ function handleCartButtonClick() {
     const selectedSizeElement = selectedOption
         .closest(".dropdown_2")
         .querySelector(".sizee");
-    const selectedVariation = selectedSizeElement ?
-        selectedSizeElement.innerText.trim() :
-        "No variation selected";
+    const selectedVariation = selectedSizeElement
+        ? selectedSizeElement.innerText.trim()
+        : "No variation selected";
     const variationPrice = parseInt(
         document
-        .querySelector('input[name="option"]:checked')
-        .getAttribute("value")
+            .querySelector('input[name="option"]:checked')
+            .getAttribute("value")
     );
 
     let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -334,7 +334,6 @@ function handleCartButtonClick() {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
     showMessage();
     closeAddToCart();
-    closeDealAddToCart();
 }
 
 function closeAddToCart() {
@@ -394,9 +393,15 @@ function checkOut() {
             parsedLoginStatus.loginStatus === null
         ) {
             showCheckOutPopup();
+        } else if (
+            (parsedLoginStatus.loginStatus === true &&
+                parsedLoginStatus.signupStatus === false) ||
+            parsedLoginStatus.loginStatus === null
+        ) {
+            showCheckOutPopup();
+        } else {
+            showSignupPopup();
         }
-    } else {
-        showSignupPopup();
     }
 }
 
@@ -498,12 +503,12 @@ function closeCheckOut() {
 }
 
 function updateCartAndTotals() {
+    const RegisteredCustomer = JSON.parse(
+        localStorage.getItem("RegisteredCustomer")
+    );
     document.getElementById("userName").value = RegisteredCustomer["name"];
     document.getElementById("userPhone").value =
         RegisteredCustomer["Phone Number"];
-    console.log(document.getElementById("userPhone").value);
-    console.log(RegisteredCustomer["Phone Number"]);
-
     document.getElementById("userEmail").value = RegisteredCustomer["Email"];
 
     const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -513,20 +518,18 @@ function updateCartAndTotals() {
     let subTotal = 0;
     let deliveryCharge = 0;
     cartItems.forEach((item, key) => {
-                subTotal += parseInt(item.price);
-                console.log(item.price);
-                console.log(subTotal);
+        subTotal += parseInt(item.price);
 
-                const cartedItemDiv = document.createElement("div");
-                cartedItemDiv.id = "carted-item-div";
+        const cartedItemDiv = document.createElement("div");
+        cartedItemDiv.id = "carted-item-div";
 
-                // Handling toppings
-                let toppingsHTML = "";
-                if (item.topping && item.topping.length > 0) {
-                    toppingsHTML = item.topping.map((topping) => `<p>${topping.name}`);
-                }
+        // Handling toppings
+        let toppingsHTML = "";
+        if (item.topping && item.topping.length > 0) {
+            toppingsHTML = item.topping.map((topping) => `<p>${topping.name}`);
+        }
 
-                cartedItemDiv.innerHTML = `
+        cartedItemDiv.innerHTML = `
         <input type="hidden" name="cartedItem${key}" id="cartedItem${key}" value='${JSON.stringify(
             item
         )}'>
@@ -567,14 +570,59 @@ function updateCartAndTotals() {
     }
 }
 
-function selectPaymentOption(element) {
-    var paymentOptions = document.querySelectorAll(".payment-option");
-    paymentOptions.forEach(function (option) {
-        option.classList.remove("active");
-    });
-    element.classList.add("active");
-    element.querySelector('input[type="radio"]').checked = true;
+function selectPaymentOption(element, taxes) {
+    let selectedRadio = element.querySelector('input[type="radio"]');
+
+    if (!selectedRadio.checked) {
+        let paymentOptions = document.querySelectorAll(".payment-option");
+
+        paymentOptions.forEach(function (option) {
+            option.classList.remove("active");
+        });
+
+        element.classList.add("active");
+        selectedRadio.checked = true;
+
+        let total_bill_span = document.getElementById("subtotal-amount");
+        let total_bill = parseInt(total_bill_span.innerText.replace('Rs ', '').replace(/,/g, ''));
+
+        // Convert delivery charges to a number
+        let delivery_charges = parseInt(document.getElementById("delivery-charge").innerText.replace("Rs ", '').replace(/,/g, ''));
+
+        let tax_span = document.getElementById("tax-amount");
+        let tax = 0;
+        let tax_value = 0;
+        
+        if (selectedRadio.value === "Cash On Delivery") {
+            taxes.forEach((taxObj) => {
+                if(taxObj.tax_name.toUpperCase() === 'GST ON CASH') {
+                    tax_value = parseInt(taxObj.tax_value);
+                    tax = (tax_value / 100) * total_bill;
+                }
+            });
+            tax_span.textContent = tax_value + '%';
+            document.getElementById("taxAmount").value = tax_value;
+        } else if (selectedRadio.value === "Credit Card") {
+            taxes.forEach((taxObj) => {
+                if(taxObj.tax_name.toUpperCase() === 'GST ON CARD') {
+                    tax_value = parseInt(taxObj.tax_value);
+                    tax = (tax_value / 100) * total_bill;
+                }
+            });
+            tax_span.textContent = tax_value + '%';
+            document.getElementById("taxAmount").value = tax_value;
+        }
+        
+        // Calculate and update the grand total
+        let grand_total_bill_span = document.getElementById("grand-total");
+        let grand_total = total_bill + tax + delivery_charges; // Now delivery_charges is a number
+        console.log(total_bill + tax + delivery_charges); // For debugging
+        console.log(grand_total); // For debugging
+        grand_total_bill_span.textContent = "Rs " + parseInt(grand_total);
+        document.getElementById("grandTotal").value = parseInt(grand_total);
+    }
 }
+
 
 document.addEventListener("DOMContentLoaded", async () => {
     let loginData = localStorage.getItem("LoginStatus");
@@ -612,6 +660,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             .catch((error) => console.error("Error:", error));
 
         if (loginData.loginStatus == true) {
+            const RegisteredCustomer = JSON.parse(
+                localStorage.getItem("RegisteredCustomer")
+            );
             document.getElementById("username").textContent =
                 RegisteredCustomer["name"];
             document.getElementById("username").style.width = "90px";
@@ -679,6 +730,10 @@ function loginUser(route) {
                 RegisteredCustomer["name"] = data.user.name;
                 RegisteredCustomer["Phone Number"] = data.user.phone_number;
                 RegisteredCustomer["Email"] = data.user.email;
+                localStorage.setItem(
+                    "RegisteredCustomer",
+                    JSON.stringify(RegisteredCustomer)
+                );
                 document.getElementById("username").textContent =
                     data.user.name;
                 if (cartedItems) {

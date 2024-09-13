@@ -216,10 +216,11 @@
                 @php
                     $totalTaxes = 0.0;
                     foreach ($taxes as $tax) {
-                        $totalTaxes += $totalbill * ((float) $tax->tax_value / 100);
+                        if (strtoupper($tax->tax_name) === 'GST ON CASH') {
+                            $totalTaxes = $totalbill * ((float) $tax->tax_value / 100);
+                        }
                     }
-                    $totalbill += $totalTaxes;
-                    $totalbill = (int) $totalbill;
+                    $totalBillAfterTax = (int)($totalbill + $totalTaxes);
                 @endphp
 
                 <form action="{{ route('placeOrder', $staff_id) }}" method="post" enctype="multipart/form-data"
@@ -229,25 +230,11 @@
                         <div class="cash-fields">
                             <div class="paymentfields">
                                 <label for="totalbill">Total Amount</label>
-                                <input type="text" name="totalbill" id="totalbill" value="Rs {{ $totalbill }}"
+                                <input type="text" name="totalbill" id="totalbill" value="Rs {{ $totalBillAfterTax }}"
                                     readonly>
                                 <input type="hidden" name="totaltaxes" id="totaltaxes" value="{{ $totalTaxes }}"
                                     readonly>
                             </div>
-                            <div class="paymentfields">
-                                <label for="recievecash"> Cash Tendered
-                                </label>
-                                <input style="background-color: #fff" type="number" name="recievecash" id="recievecash"
-                                    placeholder="Rupees" oninput="validateNumericInput(this)" required>
-
-                            </div>
-
-                            <div class="paymentfields">
-                                <label for="change">Balance</label>
-                                <input type="number" name="change" id="change" min="0" placeholder="Rupees"
-                                    readonly>
-                            </div>
-
                             <div class="paymentfields">
                                 <label for="paymentMethod">Payment Method:</label>
                                 <div class="paymentfields"
@@ -260,7 +247,8 @@
                                     <span id="true-option0">Online</span>
                                 </div>
                                 <select style="display: none; background-color: #fff" name="payment_method"
-                                    id="paymentMethod">
+                                    id="paymentMethod"
+                                    onchange="adjustTax({{ json_encode($taxes) }}, {{ json_encode($totalbill) }})">
                                     @foreach ($payment_methods as $methods)
                                         @if ($methods->payment_method != null)
                                             <option value="{{ $methods->payment_method }}">{{ $methods->payment_method }}
@@ -288,6 +276,18 @@
                                         Takeaway
                                     @endif
                                 </span>
+                            </div>
+                            <div class="paymentfields">
+                                <label for="recievecash"> Cash Tendered
+                                </label>
+                                <input style="background-color: #fff" type="number" name="recievecash" id="recievecash"
+                                    placeholder="Rupees" oninput="validateNumericInput(this)" required>
+                            </div>
+
+                            <div class="paymentfields">
+                                <label for="change">Balance</label>
+                                <input type="number" name="change" id="change" min="0" placeholder="Rupees"
+                                    readonly>
                             </div>
                             <input type="hidden" name="orderType" id="orderTypeHidden">
                         </div>
@@ -890,6 +890,27 @@
         });
 
 
+        function adjustTax(taxes, totalbill) {
+            let paymentMethod = document.getElementById('paymentMethod').value;
+            let bill_with_tax = 0;
+            if (paymentMethod.toLowerCase() === 'card') {
+                taxes.forEach((tax) => {
+                    if (tax.tax_name.toUpperCase() === 'GST ON CARD') {
+                        bill_with_tax = totalbill * (tax.tax_value / 100);
+                        document.getElementById('totaltaxes').value=bill_with_tax;
+                    }
+                })
+            } else {
+                taxes.forEach((tax) => {
+                    if (tax.tax_name.toUpperCase() === 'GST ON CASH') {
+                        bill_with_tax = totalbill * (tax.tax_value / 100);
+                        document.getElementById('totaltaxes').value=bill_with_tax;
+                    }
+                })
+            }
+            document.getElementById('totalbill').value = "Rs . " + parseInt(totalbill + bill_with_tax)
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             let toggle = document.getElementById('order_type');
             const falsetext = document.getElementById('false-option').textContent;
@@ -1221,7 +1242,7 @@
                 <td>${item.total_price}</td>
             </tr>`;
 
-            orderItemsBody.insertAdjacentHTML('beforeend', row);
+                orderItemsBody.insertAdjacentHTML('beforeend', row);
             });
 
             let route = `{{ route('printrecipt', ':orderId') }}`;

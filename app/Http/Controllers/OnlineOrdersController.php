@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\OnlineNotification;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\tax;
 use App\Models\User;
 use App\Models\handler;
 use App\Models\Product;
@@ -17,7 +18,9 @@ use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
-
+use Stripe\Stripe;
+use Stripe\Checkout\Session as StripeSession;
+use Stripe\Checkout\Session;
 class OnlineOrdersController extends Controller
 {
 
@@ -34,7 +37,8 @@ class OnlineOrdersController extends Controller
         $products = Product::whereIn('branch_id', $branch_ids)->get();
 
         $categories = Category::whereIn('branch_id', $branch_ids)->get();
-
+        $taxes = tax::whereIn('branch_id', $branch_ids)->get();
+        
         $deals = handler::where(function ($query) use ($branch_ids) {
             $query->whereHas('product', function ($query) use ($branch_ids) {
                 $query->whereIn('branch_id', $branch_ids);
@@ -64,6 +68,7 @@ class OnlineOrdersController extends Controller
             'Deals' => $deals,
             'Categories' => $filteredCategories,
             'AllProducts' => $products,
+            'taxes' => $taxes,
         ]);
     }
 
@@ -144,6 +149,7 @@ class OnlineOrdersController extends Controller
     }
     public function addToCart(Request $request)
     {
+        $Request = $request->all();
         $products = [];
         foreach ($request->all() as $key => $value) {
             if (strpos($key, 'cartedItem') === 0) {
@@ -151,14 +157,67 @@ class OnlineOrdersController extends Controller
                 $products[$key] = $cartItem;
             }
         }
-
-        $name = $request->input('name');
-        $email = $request->input('email');
-        $phone = $request->input('phone_number');
-        $orderAddress = $request->input('address');
+        $order_details = [];
+        foreach ($products as $product) {
+            $order = $product['quantity'] . ' ' . $product['name'];
+            $order_details[] = $order;
+        }
+        $order_details_string = implode(',', $order_details);
         $paymentMethod = $request->input('paymentMethod');
-        $deliveryCharge = $request->input('deliveryCharge');
-        $totalBill = 'Rs.' . $request->input('grandTotal');
+        $totalBillPKR = (float) $request->input('grandTotal');
+
+        if ($paymentMethod === 'Credit Card') {
+            Stripe::setApiKey(config('services.stripe.secret'));
+
+            $conversionRate = 278.42;
+            $amountInCents = round(($totalBillPKR / $conversionRate) * 100);
+
+            // Create a Stripe Checkout session
+            $session = Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [
+                    [
+                        'price_data' => [
+                            'currency' => 'usd',
+                            'product_data' => [
+                                'name' => $order_details_string,
+                            ],
+                            'unit_amount' => $amountInCents, // Amount in cents
+                        ],
+                        'quantity' => 1,
+                    ]
+                ],
+                'mode' => 'payment',
+                'success_url' => route('payment.success'),
+                'cancel_url' => route('payment.cancel'),
+            ]);
+            session(['order_data' => json_encode($Request)]);
+            return redirect($session->url, 303);
+        } else {
+            session(['order_data' => json_encode($Request)]);
+            return redirect()->route('payment.success');
+        }
+    }
+    public function placeOrder()
+    {
+        $orderData = session('order_data');
+        $request = json_decode($orderData, true);
+        $products = [];
+        foreach ($request as $key => $value) {
+            if (strpos($key, 'cartedItem') === 0) {
+                $cartItem = json_decode($value, true);
+                $products[$key] = $cartItem;
+            }
+        }
+        $name = $request['name'];
+        $email = $request['email'];
+        $phone = $request['phone_number'];
+        $orderAddress = $request['address'];
+        $paymentMethod = $request['paymentMethod'];
+        $deliveryCharge = (float) $request['deliveryCharge'];
+        $taxPercentage =  (int) $request['taxAmount'];
+        $totalBillPKR = (float) $request['grandTotal'];
+        $taxAmount = ($taxPercentage / 100) * $totalBillPKR;
         $orderType = 'online';
         $order_initial = "OL-ORD";
         $newOrderNumber = 0;
@@ -166,6 +225,7 @@ class OnlineOrdersController extends Controller
         $user = User::where('email', $email)->where('phone_number', $phone)->first();
         $user_id = $user->id;
 
+        // Generate new order number
         $lastOnlineOrder = Order::where('ordertype', 'online')->orderBy('id', 'desc')->first();
         if ($lastOnlineOrder) {
             $lastOrderNumber = intval(substr($lastOnlineOrder->order_number, 7));
@@ -174,16 +234,21 @@ class OnlineOrdersController extends Controller
             $newOrderNumber = "$order_initial-100";
         }
 
+        // Create and save the order first
         $newOrder = new Order();
-
         $newOrder->order_number = $newOrderNumber;
         $newOrder->customer_id = $user_id;
-        $newOrder->total_bill = $totalBill;
+        $newOrder->total_bill = 'Rs.' . $totalBillPKR;
+        $newOrder->taxes = $taxAmount;
+        $newOrder->received_cash = $paymentMethod === 'Credit Card' ? $totalBillPKR : null;
+        $newOrder->return_change = $paymentMethod === 'Credit Card' ? 0.0 : null;
         $newOrder->delivery_charge = $deliveryCharge;
         $newOrder->payment_method = $paymentMethod;
         $newOrder->ordertype = $orderType;
         $newOrder->order_address = $orderAddress;
+        $newOrder->status = 2; // Set status as pending or appropriate value
         $newOrder->save();
+
         foreach ($products as $item) {
             $orderItem = new OrderItem();
             $orderItem->order_id = $newOrder->id;
@@ -206,7 +271,8 @@ class OnlineOrdersController extends Controller
         $notify->toast = 0;
         $notify->save();
 
-        return redirect()->back()->with('Order_Place_Success', 'order placed Successfully');
+        session()->flash('Order_Place_Success', 'Order placed successfully');
+        return redirect()->route('onlineOrderPage');
     }
 
     public function Profile($email)
@@ -274,5 +340,44 @@ class OnlineOrdersController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
         return redirect()->route('onlineOrderPage');
+    }
+
+    public function paymentSuccess(Request $request, $session_id)
+    {
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+        try {
+            // Retrieve the Stripe Checkout session
+            $session = StripeSession::retrieve($session_id);
+
+            // Retrieve additional information from the session
+            $paymentIntentId = $session->payment_intent;
+            $customerEmail = $session->customer_email;
+            $amountTotal = $session->amount_total;
+
+            // Optionally, retrieve the payment intent for more details
+            $paymentIntent = \Stripe\PaymentIntent::retrieve($paymentIntentId);
+
+            // Log or dump the payment details
+            dd([
+                'session_id' => $session_id,
+                'payment_intent_id' => $paymentIntentId,
+                'customer_email' => $customerEmail,
+                'amount_total' => $amountTotal,
+                'payment_intent_status' => $paymentIntent->status,
+            ]);
+
+            return redirect()->back()->with('Order_Place_Success', 'Order placed successfully');
+        } catch (\Exception $e) {
+            dd($e);
+            return redirect()->back()->with('error', 'Failed to retrieve payment details');
+        }
+    }
+
+
+    public function paymentCancel()
+    {
+        // Handle canceled payment
+        return view('onlineOrdering.cancel');
     }
 }

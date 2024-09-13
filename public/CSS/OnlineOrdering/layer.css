@@ -1832,14 +1832,7 @@ li {
     flex-direction: column;
 }
 
-.subtotal {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    font-size: 0.75rem;
-}
-
-.delichrge {
+.payment-div {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -1847,9 +1840,6 @@ li {
 }
 
 .grandtotal {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
     font-size: 1.2vw;
     font-weight: bold;
 }

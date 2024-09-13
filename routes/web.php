@@ -6,6 +6,8 @@ use App\Http\Controllers\KitchenController;
 use App\Http\Controllers\OnlineOrdersController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\SalesmanController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -281,3 +283,7 @@ Route::get('/customerForgotPassword', [OnlineOrdersController::class, 'customerF
 Route::post('/customerSendPasswordReset', [OnlineOrdersController::class, 'customerSendPasswordReset'])->name('customerSendPasswordReset');
 Route::get('/customerResetPasswordPage/{email}', [OnlineOrdersController::class, 'customerResetPasswordPage'])->name('customerResetPasswordPage');
 Route::post('/customerResetPassword', [OnlineOrdersController::class, 'customerResetPassword'])->name('customerResetPassword');
+Route::get('/payment-success', [OnlineOrdersController::class, 'placeOrder'])->name('payment.success');
+Route::get('/payment-cancel', [OnlineOrdersController::class, 'paymentCancel'])->name('payment.cancel');
+// Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
+

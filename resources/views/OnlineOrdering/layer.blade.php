@@ -35,10 +35,9 @@
             }, 3000);
         </script>
     @endif
-
     @if (session('Order_Place_Success'))
         <div id="success" class="alert alert-success">
-            {{ session('success') }}
+            {{ session('Order_Place_Success') }}
         </div>
         <script>
             localStorage.removeItem("cartItems");
@@ -79,6 +78,7 @@
         $Categories = $Categories;
         $count = $Categories->count();
         $AllProducts = $AllProducts;
+        $taxes = $taxes;
 
         $addons = $AllProducts->whereIn('category_name', ['Addons', 'addons', 'Addon', 'addon']);
 
@@ -624,32 +624,6 @@
                         <div id="email-error-message" class="error-message" style="display: none;"></div>
                     </div>
 
-                    {{-- <div class="gend-dob">
-                        {{-- <div class="main-GenDob"> --}}
-                    {{-- <div class="row1">
-                                <label class="s_label" for="gender">Gender</label>
-                                <select name="" id="gender">
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div> --/}}
-
-                            <div class="row2">
-                                <label class="s_label">Date of Birth</label>
-                                <div>
-                                    <input type="date" id="dob" placeholder="dd-mm-yyyy">
-                                </div>
-                                <script>
-                                    const today = new Date();
-                                    today.setDate(today.getDate() - 1);
-                                    const previousDay = today.toISOString().split('T')[0];
-                                    document.getElementById('dob').setAttribute('max', previousDay);
-                                </script>
-                            </div>
-                        {{-- </div> --/}}
-                    </div> --}}
-
                     <div id="mobileno" class="mobileno">
                         <label class="s_label">Mobile Number</label>
                         <div class="codee">
@@ -705,15 +679,15 @@
             </div>
             <div class="total" style="display: none;">
                 <div class="main_total">
-                    <div class="subtotal">
+                    <div class="subtotal payment-div">
                         <span>Sub Total</span>
                         <span>Rs 0.00</span>
                     </div>
-                    <div class="delichrge">
+                    <div class="delichrge payment-div">
                         <span>Delivery Charges</span>
                         <span>Rs 0.00</span>
                     </div>
-                    <div class="grandtotal">
+                    <div class="grandtotal payment-div">
                         <span>Grand Total</span>
                         <span>Rs 0.00</span>
                     </div>
@@ -780,7 +754,7 @@
 
                     <div class="payment-methods">
                         <!-- Cash On Delivery -->
-                        <label for="COD" class="payment-option" onclick="selectPaymentOption(this)">
+                        <label for="COD" class="payment-option" onclick="selectPaymentOption(this, {{json_encode($taxes)}})">
                             <input type="radio" class="payment" id="COD" name="paymentMethod"
                                 value="Cash On Delivery">
                             <span class="custom-radio"></span>
@@ -789,21 +763,13 @@
                         </label>
 
                         <!-- Credit Card -->
-                        <label for="CreditCard" class="payment-option" onclick="selectPaymentOption(this)">
+                        <label for="CreditCard" class="payment-option" onclick="selectPaymentOption(this, {{json_encode($taxes)}})">
                             <input type="radio" class="payment" id="CreditCard" name="paymentMethod"
                                 value="Credit Card">
                             <span class="custom-radio"></span>
                             <img src="{{ asset('Images/atm-card.png') }}" alt="Credit Card">
                             Credit Card
                         </label>
-
-                        <!-- PayPal -->
-                        {{-- <label for="PayPal" class="payment-option">
-                            <input type="radio" class="payment" id="PayPal" name="paymentMethod" value="PayPal">
-                            <span class="custom-radio"></span>
-                            <img src="{{ asset('Images/paypal.png') }}" alt="PayPal">
-                            PayPal
-                        </label> --}}
                     </div>
 
                 </div>
@@ -812,90 +778,26 @@
             <div id="rightSide">
                 <h4>Your Cart</h4>
                 <div id="center-div">
-                    {{-- <div id="carted-item-div">
-                        <input type="hidden" name="carteditem1" id="carteditem1">
-                        <div id="item-img">
-                            <img src="{{ asset('Images/3293465.jpg') }}" alt="">
-                        </div>
-                        <div id="item-data">
-                            <h5>Product Name</h5>
-                            <p>Product Variation</p>
-                            <p>Product Topping</p>
-                            <div id="quantity-price">
-                                <span class="quantity-bdr">19</span> <span>Rs. 12300.00</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="carted-item-div">
-                        <input type="hidden" name="carteditem1" id="carteditem1">
-                        <div id="item-img">
-                            <img src="{{ asset('Images/3293465.jpg') }}" alt="">
-                        </div>
-                        <div id="item-data">
-                            <h5>Product Name</h5>
-                            <p>Product Variation</p>
-                            <p>Product Topping</p>
-                            <div id="quantity-price">
-                                <span class="quantity-bdr">19</span> <span>Rs. 12300.00</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="carted-item-div">
-                        <input type="hidden" name="carteditem1" id="carteditem1">
-                        <div id="item-img">
-                            <img src="{{ asset('Images/3293465.jpg') }}" alt="">
-                        </div>
-                        <div id="item-data">
-                            <h5>Product Name</h5>
-                            <p>Product Variation</p>
-                            <p>Product Topping</p>
-                            <div id="quantity-price">
-                                <span class="quantity-bdr">19</span> <span>Rs. 12300.00</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="carted-item-div">
-                        <input type="hidden" name="carteditem1" id="carteditem1">
-                        <div id="item-img">
-                            <img src="{{ asset('Images/3293465.jpg') }}" alt="">
-                        </div>
-                        <div id="item-data">
-                            <h5>Product Name</h5>
-                            <p>Product Variation</p>
-                            <p>Product Topping</p>
-                            <div id="quantity-price">
-                                <span class="quantity-bdr">19</span> <span>Rs. 12300.00</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="carted-item-div">
-                        <input type="hidden" name="carteditem1" id="carteditem1">
-                        <div id="item-img">
-                            <img src="{{ asset('Images/3293465.jpg') }}" alt="">
-                        </div>
-                        <div id="item-data">
-                            <h5>Product Name</h5>
-                            <p>Product Variation</p>
-                            <p>Product Topping</p>
-                            <div id="quantity-price">
-                                <span class="quantity-bdr">19</span> <span>Rs. 12300.00</span>
-                            </div>
-                        </div>
-                    </div> --}}
+                    
                 </div>
                 <div class="total">
                     <div class="main_total">
-                        <div class="subtotal">
+                        <div class="subtotal payment-div">
                             <span>Subtotal</span>
                             <span id="subtotal-amount">Rs 0.00</span>
                             <input type="hidden" name="subTotal" id="subTotal">
                         </div>
-                        <div class="delichrge">
+                        <div class="delichrge payment-div">
                             <span>Delivery Charges</span>
                             <span id="delivery-charge">Rs 0.00</span>
                             <input type="hidden" name="deliveryCharge" id="deliveryCharge">
                         </div>
-                        <div class="grandtotal">
+                        <div class="tax payment-div">
+                            <span>Tax</span>
+                            <span id="tax-amount">0%</span>
+                            <input type="hidden" name="taxAmount" id="taxAmount" value="0">
+                        </div>
+                        <div class="grandtotal payment-div">
                             <span>Garnd Total</span>
                             <span id="grand-total">Rs 0.00</span>
                             <input type="hidden" name="grandTotal" id="grandTotal">

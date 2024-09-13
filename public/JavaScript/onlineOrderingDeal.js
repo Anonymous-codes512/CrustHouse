@@ -198,33 +198,6 @@ function updateDealOption(deal, pizzaVariation, drinkVariation, pizzaAddon) {
             document.getElementById("extra_65").style.display = "flex";
         }
     }
-
-    // const dealObject = {
-    //     dealName: deal.dealTitle,
-    //     dealPrice: deal.dealDiscountedPrice,
-    //     dealOriginalPrice: deal.dealDiscountedPrice,
-    //     dealProduct: productDetails,
-    //     dealQuantity: quantity,
-    // };
-
-    // let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-
-    // // Create a cartItem specifically for the deal
-    // const cartItem = {
-    //     name: null, // Nullify regular item properties
-    //     originalPrice: null,
-    //     price: null,
-    //     quantity: null,
-    //     imgSrc: null,
-    //     variation: null,
-    //     variationPrice: null,
-    //     topping: null,
-    //     deal: dealObject // Store the deal object here
-    // };
-
-    // cartItems.push(cartItem);
-    // console.log("carted items : ", cartItem);
-    // localStorage.setItem("cartItems", JSON.stringify(cartItems));
 }
 
 function dealPizzaVariation(pizzaVariation) {
