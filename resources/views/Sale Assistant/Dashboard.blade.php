@@ -16,7 +16,7 @@
     <script src="{{ asset('JavaScript/Salesman1.js') }}"></script>
 @endpush
 
-@section('main')
+@section('main') 
 
     @if (session('pdf_filename'))
         <input type="hidden" value="{{ session('pdf_filename') }}" id="pdf_link">
@@ -220,7 +220,7 @@
                             $totalTaxes = $totalbill * ((float) $tax->tax_value / 100);
                         }
                     }
-                    $totalBillAfterTax = (int)($totalbill + $totalTaxes);
+                    $totalBillAfterTax = (int) ($totalbill + $totalTaxes);
                 @endphp
 
                 <form action="{{ route('placeOrder', $staff_id) }}" method="post" enctype="multipart/form-data"
@@ -892,23 +892,24 @@
 
         function adjustTax(taxes, totalbill) {
             let paymentMethod = document.getElementById('paymentMethod').value;
+            document.getElementById('discount').value = ''
             let bill_with_tax = 0;
             if (paymentMethod.toLowerCase() === 'card') {
                 taxes.forEach((tax) => {
                     if (tax.tax_name.toUpperCase() === 'GST ON CARD') {
                         bill_with_tax = totalbill * (tax.tax_value / 100);
-                        document.getElementById('totaltaxes').value=bill_with_tax;
+                        document.getElementById('totaltaxes').value = parseInt(bill_with_tax);
                     }
                 })
             } else {
                 taxes.forEach((tax) => {
                     if (tax.tax_name.toUpperCase() === 'GST ON CASH') {
                         bill_with_tax = totalbill * (tax.tax_value / 100);
-                        document.getElementById('totaltaxes').value=bill_with_tax;
+                        document.getElementById('totaltaxes').value = parseInt(bill_with_tax);
                     }
                 })
             }
-            document.getElementById('totalbill').value = "Rs . " + parseInt(totalbill + bill_with_tax)
+            document.getElementById('totalbill').value = "Rs " + parseInt(totalbill + bill_with_tax)
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -984,12 +985,38 @@
         }
 
         function updateTotalONSwitch(total, discountLimit) {
+            // totalBill = @json($totalbill);
+            taxes = @json($taxes);
+            let paymentMTD = document.getElementById("paymentMethod").value;
+            let taxOnCard;
+            taxes.forEach((tax) => {
+                if(tax.tax_name.toUpperCase() === 'GST ON CASH'){
+                    taxOnCard = tax.tax_value;
+                }
+
+                if ((tax.tax_name.toUpperCase() === 'GST ON CASH' && (paymentMTD.toLowerCase() === 'cash'))) {
+                    selectedTax = tax.tax_value;
+                }
+                else if ((tax.tax_name.toUpperCase() === 'GST ON CARD' && (paymentMTD.toLowerCase() === 'card'))) {
+                    selectedTax = tax.tax_value;
+                }
+                else {
+                    selectedTax = taxOnCard;
+                }
+            });
+
+            let taxAmount = total + parseInt((selectedTax / 100) * total);
+            document.getElementById('totalbill').value = "Rs " + parseInt(taxAmount);
+            document.getElementById('totaltaxes').value = parseInt((selectedTax / 100) * total);
+
+
             discountTypeInput.value = toggleDiscountType.checked ? '-' : '%';
             document.getElementById("discount").value = '';
-            updateTotalONSwitchChange(total, discountLimit, discountTypeInput.value);
+            updateTotalONSwitchChange(taxAmount, discountLimit, discountTypeInput.value);
         };
 
         function updateTotalONInput(total, discountLimit) {
+            
             let discount = document.getElementById("discount");
             discount.addEventListener('input', () => {
                 let sanitizedValue = discount.value.match(/^\d*(?:\.\d*)?$/);
@@ -1004,13 +1031,15 @@
             let discountType = document.getElementById("discountType").value;
 
             let discountAmount = parseInt(discount.value);
-            let totalBill = parseInt(total);
+            let taxAmount = parseInt(document.getElementById("totaltaxes").value);
+            let totalBill = parseInt(total + taxAmount);
+
             let discountLimitValue = parseInt(discountLimit);
             if (isNaN(discountAmount)) {
                 document.getElementById("totalbill").value = `Rs ${totalBill}`;
                 return;
             }
-            let fixedDiscountAmount = parseInt((discountLimitValue / 100) * total);
+            let fixedDiscountAmount = parseInt((discountLimitValue / 100) * (total + taxAmount));
 
             if (discountType == "%" && discountAmount > discountLimitValue) {
                 alert(`Discount in Percentage should be less than or equal to ${discountLimitValue}.`);
@@ -1038,9 +1067,11 @@
             const falsetext1 = document.getElementById('false-option0').textContent;
             const truetext1 = document.getElementById('true-option0').textContent;
             let paymentMethodSelect = document.getElementById('paymentMethod');
+            let bill = parseInt(document.getElementById('totalbill').value.replace('Rs ', ''));
             let removedCashOption = null;
-
             function updatePaymentMethod() {
+                document.getElementById('discount').value = '';
+                document.getElementById('totalbill').value = 'Rs ' + bill;
                 if (togglePaymentMethod.checked) {
                     paymentMethodSelect.style.display = 'flex';
                     for (let i = paymentMethodSelect.options.length - 1; i >= 0; i--) {
@@ -1055,6 +1086,17 @@
                     }
 
                 } else {
+                    let selectedTax;
+                    totalBill = @json($totalbill);
+                    taxes = @json($taxes);
+                    taxes.forEach((tax) => {
+                        if (tax.tax_name === 'GST ON CASH') {
+                            selectedTax = tax.tax_value;
+                        }
+                    });
+                    let taxAmount = totalBill + parseInt((selectedTax / 100) * totalBill);
+                    document.getElementById('totalbill').value = "Rs " + parseInt(taxAmount);
+                    document.getElementById('totaltaxes').value = parseInt((selectedTax / 100) * totalBill);
                     paymentMethodSelect.style.display = 'none';
                     paymentMethodSelect.value = falsetext1;
                     if (removedCashOption) {

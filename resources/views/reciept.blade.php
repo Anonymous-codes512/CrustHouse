@@ -197,6 +197,15 @@
                 <p style="display:inline-block; width:45%;">ORIGINAL AMOUNT &nbsp;&nbsp;:</p>
                 <p style="display:inline-block;">Rs. {{ $subtotal }}</p>
             </div>
+
+            @php
+                $taxPercent = round(( $orderData->taxes * 100 ) / $subtotal);
+            @endphp
+
+            <div class="detail">
+                <p style="display:inline-block; width:45%;">TAX  APPLIED &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</p>
+                <p style="display:inline-block;">Rs. {{ $orderData->taxes}} ({{$taxPercent}}%)</p>
+            </div>
             {{-- <div class="detail">TAXES: {{ $orderData->taxes }}</div> --}}
             @if ($orderData->discount != 0)
                 <div class="detail">
