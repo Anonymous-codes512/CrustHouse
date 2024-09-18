@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\CustomerResetPassword;
 use App\Mail\EmailConfirmation;
+use App\Mail\OrderSummaryMail;
 use App\Mail\ResetPassword;
 use App\Models\Branch;
 use App\Models\Category;
@@ -221,10 +222,10 @@ class OnlineOrdersController extends Controller
         $orderType = 'online';
         $order_initial = "OL-ORD";
         $newOrderNumber = 0;
-
+        
         $user = User::where('email', $email)->where('phone_number', $phone)->first();
         $user_id = $user->id;
-
+        
         // Generate new order number
         $lastOnlineOrder = Order::where('ordertype', 'online')->orderBy('id', 'desc')->first();
         if ($lastOnlineOrder) {
@@ -248,7 +249,7 @@ class OnlineOrdersController extends Controller
         $newOrder->order_address = $orderAddress;
         $newOrder->status = 2; // Set status as pending or appropriate value
         $newOrder->save();
-
+        
         foreach ($products as $item) {
             $orderItem = new OrderItem();
             $orderItem->order_id = $newOrder->id;
@@ -264,7 +265,10 @@ class OnlineOrdersController extends Controller
             }
             $orderItem->addons = $toppingNames;
             $orderItem->save();
-        }
+        } 
+
+        $order = Order::with(['items', 'customers'])->where('order_number', $newOrder->order_number)->first();
+        Mail::to($order->customers->email)->send(new OrderSummaryMail($order));
 
         $notify = new OnlineNotification();
         $notify->message = "A new online order has been placed. Please refresh your page.";
@@ -373,7 +377,6 @@ class OnlineOrdersController extends Controller
             return redirect()->back()->with('error', 'Failed to retrieve payment details');
         }
     }
-
 
     public function paymentCancel()
     {
