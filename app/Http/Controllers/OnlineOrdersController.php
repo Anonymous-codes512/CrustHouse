@@ -64,7 +64,7 @@ class OnlineOrdersController extends Controller
             return $product->category_name === 'Addons';
         });
 
-        return view('OnlineOrdering.layer')->with([
+        return view('OnlineOrdering.online')->with([
             'Products' => $filteredProducts,
             'Deals' => $deals,
             'Categories' => $filteredCategories,
@@ -172,8 +172,6 @@ class OnlineOrdersController extends Controller
 
             $conversionRate = 278.42;
             $amountInCents = round(($totalBillPKR / $conversionRate) * 100);
-
-            // Create a Stripe Checkout session
             $session = Session::create([
                 'payment_method_types' => ['card'],
                 'line_items' => [

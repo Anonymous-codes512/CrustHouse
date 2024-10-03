@@ -83,49 +83,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
 //         arrow.classList.add('active');
 //     }
 // }
-function toggleDropdown(element) {
-    const dropdownContent = element.nextElementSibling;
-    const arrow = element.querySelector('.arrow');
-
-    // Close all other active dropdowns
-    const allDropdowns = document.querySelectorAll('.dropdown-content');
-    const allArrows = document.querySelectorAll('.arrow');
-
-    allDropdowns.forEach((content) => {
-        if (content !== dropdownContent) {
-            content.classList.remove('active');
-        }
-    });
-
-    allArrows.forEach((otherArrow) => {
-        if (otherArrow !== arrow) {
-            otherArrow.classList.remove('active');
-        }
-    });
-
-    // Toggle the selected dropdown
-    if (dropdownContent.classList.contains('active')) {
-        dropdownContent.classList.remove('active');
-        arrow.classList.remove('active');
-    } else {
-        dropdownContent.classList.add('active');
-        arrow.classList.add('active');
-    }
-
-    // Close dropdown when a radio button is selected
-    dropdownContent.querySelectorAll('input[type="radio"]').forEach((radio) => {
-        radio.addEventListener('change', () => {
-            dropdownContent.classList.remove('active');
-            arrow.classList.remove('active');
-            updateLabel(element, radio);
-        });
-    });
-    dropdownContent.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
-        checkbox.addEventListener('change', () => {
-            updateLabelForToppings(element, checkbox); // Update label for toppings
-        });
-    });
-}
 
 function updateLabel(element, radio) {
     const labelSpan = element.querySelector('.required');

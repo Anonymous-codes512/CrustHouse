@@ -8,17 +8,17 @@
     <title>Crust-House</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="shortcut icon" href="{{ asset('Images/icon-512.png') }}" type="image/x-icon">
-    <link rel="stylesheet" href="{{ asset('CSS/OnlineOrdering/layer.css') }}" class="css">
+    <link rel="stylesheet" href="{{ asset('CSS/OnlineOrdering/main.css') }}" class="css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
 </head>
-<script src="{{ asset('JavaScript/onlineOrdering.js') }}"></script>
-<script src="{{ asset('JavaScript/onlineOrderingDeal.js') }}"></script>
-<script>
+{{-- <script src="{{ asset('JavaScript/onlineOrdering.js') }}"></script>
+<script src="{{ asset('JavaScript/onlineOrderingDeal.js') }}"></script> --}}
+{{-- <script>
     if (performance.navigation.type === 1) {
         window.location.href = "{{ route('onlineOrderPage') }}";
     }
-</script>
+</script> --}}
 
 <body>
     @if (session('success'))
@@ -114,11 +114,10 @@
                     <button id="submit-btn" class="btnn" onclick="SelectLocation()">Select</button>
                 </div>
             </div>
-            {{-- <div class="close-button">
+            <div class="close-button">
                 <button class="closebtn" onclick="closeFrontModel()">&times;</button>
-            </div> --}}
+            </div>
         </div>
-
     </div>
     <!-- end of frontmodel -->
 
@@ -133,10 +132,12 @@
                             <span class="ele1 truncate-text-address" id="addr"></span>
                         </div>
                     </div>
-                    <div class="mainimage" onclick="window.location.href='{{ route('onlineOrderPage') }}'" style="cursor: pointer;">
-                        <img class="imgelement" src="{{ asset('Images/OnlineOrdering/image-1.png') }}" alt="Online Ordering">
+                    <div class="mainimage" onclick="window.location.href='{{ route('onlineOrderPage') }}'"
+                        style="cursor: pointer;">
+                        <img class="imgelement" src="{{ asset('Images/OnlineOrdering/image-1.png') }}"
+                            alt="Online Ordering">
                     </div>
-                    
+
                     <div class="icons">
                         <div id="search_bar_div" class="search_bar_div">
                             <input type="text" id="search_bar" name="search" placeholder="Search by product name..."
@@ -191,10 +192,11 @@
                 </div>
 
                 <div class="root">
-                    @foreach ($Categories as $key => $Category)
-                        <div id="section{{ $key + 1 }}" class="content-section">
-                            <h1>{{ $Category->categoryName }}</h1>
-                            <div class="items">
+
+                    <div id="section{{ $key + 1 }}" class="content-section">
+                        <h1>{{ $Category->categoryName }}</h1>
+                        <div class="items">
+                            @foreach ($Categories as $key => $Category)
                                 @php
                                     $CategoryProducts = $Products->where('category_id', $Category->id);
                                     $displayedProductNames = [];
@@ -219,7 +221,7 @@
                                                     </div>
                                                     <div class="btn">
                                                         <button
-                                                            onclick="addToCart({{ json_encode($Product) }}, {{ json_encode($CategoryProducts) }}, {{ json_encode($addons) }})"
+                                                            onclick="openProductPopup({{ json_encode($Product) }}, {{ json_encode($CategoryProducts) }}, {{ json_encode($addons) }})"
                                                             class="cartbtn">Add To Cart</button>
                                                     </div>
                                                 </div>
@@ -227,8 +229,8 @@
                                         </div>
                                     @endif
                                 @endforeach
-                            </div>
                         </div>
+                    </div>
                     @endforeach
 
                     <div id="section0" class="content-section">
@@ -347,10 +349,8 @@
             </div>
         </div>
     </div>
-    <!-- end of main page -->
 
-    <!-- openpop -->
-    <div class="openitems" id="popup" style="display: none; ">
+    {{-- <div class="openitems" id="popup" style="display: none; ">
         <div class="itemss" id="itemss">
             <div class="hlfcontainer">
                 <div class="mini_halfcontainer">
@@ -553,12 +553,9 @@
                 </div>
             </div>
         </div>
-    </div>
-    <!-- end of popup product -->
+    </div> --}}
 
-
-    <!-- login component -->
-    <div id="logincomponent" class="logincomponent">
+    {{-- <div id="logincomponent" class="logincomponent">
         <form class="popup-content" onsubmit="event.preventDefault(); loginUser('{{ route('customerLogin') }}');"
             enctype="multipart/form-data">
             @csrf
@@ -596,9 +593,9 @@
             </div>
         </form>
         <span class="close" onclick="hideLoginPopup()">&times;</span>
-    </div>
+    </div> --}}
 
-    <div id="signupcomponent" class="signupcomponent">
+    {{-- <div id="signupcomponent" class="signupcomponent">
         <form class="main" action="{{ route('customerSignup') }}" method="POST" enctype="multipart/form-data"
             onsubmit="return updateLoginStatus()">
             @csrf
@@ -663,10 +660,9 @@
             </div>
         </form>
         <span class="closee" onclick="hideSignupPopup()">&times;</span>
-    </div>
+    </div> --}}
 
-    <!-- cart div -->
-    <div id="cart" class="cart">
+    {{-- <div id="cart" class="cart">
         <div class="cart_part1">
             <div class="cartname">
                 <span class="cart_text">Your Cart</span>
@@ -711,8 +707,9 @@
             <span><img src="{{ asset('Images/OnlineOrdering/cart-empty.png') }}" alt=""></span>
             <span style="color: rgb(131, 143, 155);">Your Cart is Empty</span>
         </div>
-    </div>
-    <div class="msg">
+    </div> --}}
+
+    {{-- <div class="msg">
         <div class="msg1">
             <div class="msg_img">
                 <img src="{{ asset('Images/OnlineOrdering/addedcart.png') }}" alt="">
@@ -721,10 +718,9 @@
                 <span>Item Added to Cart</span>
             </div>
         </div>
-    </div>
+    </div> --}}
 
-    {{-- <div class="popupOverlay" id="popupOverlay" style="block"></div> --}}
-    <div class="checkOutDiv" id="checkOutDiv">
+    {{-- <div class="checkOutDiv" id="checkOutDiv">
         <form action="{{ route('addToCart') }}" method="POST" enctype="multipart/form-data"
             onsubmit="return checkPaymentMethod()">
             @csrf
@@ -810,10 +806,10 @@
                 </div>
             </div>
         </form>
-    </div>
+    </div> --}}
 
     {{-- Profile Update --}}
-    <div id="profilePopup">
+    {{-- <div id="profilePopup">
         <h2>Profile</h2>
         <form id="profileFileds" action="{{ route('updateCustomerProfile') }}" method="POST"
             enctype="multipart/form-data">
@@ -836,17 +832,17 @@
         <div class="deleteProfile">
             <a id="deleteCustomerProfile" onclick="confirmationDelete()">Delete Account</a>
         </div>
-    </div>
+    </div> --}}
 
-    <div class="popupOverlay" id="popupOverlay"></div>
+    {{-- <div class="popupOverlay" id="popupOverlay"></div>
     <div id="alert">
         <i class='bx bxs-error'></i>
         <p id="alert-message">No alert message to show.</p>
         <i class='bx bx-x' onclick="closeAlert()"></i>
 
-    </div>
+    </div> --}}
 
-    <div id="confirmDeletionOverlay"></div>
+    {{-- <div id="confirmDeletionOverlay"></div>
     <div class="confirmDeletion" id="confirmDeletion">
         <h3 id="message-text">Are you sure you want to delete this Branch</h3>
         <div class="inputdivs">
@@ -875,13 +871,12 @@
                 }
             });
         </script>
-    </div>
+    </div> --}}
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
     <script src="{{ asset('JavaScript/frontend.js') }}"></script>
     <script src="{{ asset('JavaScript/location.js') }}"></script>
-    <script src="{{ asset('JavaScript/final.js') }}"></script>
-
+    <script src="{{ asset('JavaScript/final.js') }}"></script> --}}
 
 </body>
 
