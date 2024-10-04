@@ -27,7 +27,7 @@ class OnlineOrdersController extends Controller
 
     public function viewOnlinePage()
     {
-        $branches = Branch::whereIn('company_name', ['CrustHouse', 'crusthouse, Crust-House', 'crust-house'])->get();
+        $branches = Branch::whereIn('company_name', ['CrustHouse', 'crusthouse, Crust-House', 'crust-house', 'crust house', 'Crust house' , 'Crust House'])->get();
         $branch_ids = [];
         foreach ($branches as $branch) {
             $branch_ids[] = $branch->id;
@@ -221,7 +221,7 @@ class OnlineOrdersController extends Controller
         $order_initial = "OL-ORD";
         $newOrderNumber = 0;
         
-        $user = User::where('email', $email)->where('phone_number', $phone)->first();
+        $user = User::where('email', $email)->first();
         $user_id = $user->id;
         
         // Generate new order number

@@ -215,10 +215,13 @@
                     </p>
                 </div>
             @endif
+            @php
+                $subTotalwithTax =  $subtotal + $orderData->taxes;
+            @endphp
             <div class="detail" style=" display: block; width:100%;">
                 <p style="display:inline-block; width:70%;">TOTAL AMOUNT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</p>
                 <p style="display:inline-block;">
-                    Rs.{{ $orderData->discount_type == '%' ? $subtotal - ($orderData->discount / 100) * $subtotal + $orderData->taxes : $subtotal + $orderData->taxes - $orderData->discount }}
+                    Rs. {{ $orderData->discount_type == '%' ?  (int)($subTotalwithTax - ($orderData->discount / 100) *  $subTotalwithTax) :  (int)($subTotalwithTax - $orderData->discount) }}
                 </p>
             </div>
             <div class="detail">

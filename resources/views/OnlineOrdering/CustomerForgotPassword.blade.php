@@ -11,6 +11,7 @@
 </head>
 <style>
     @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
 body {
     box-sizing: border-box;
     margin: 0;
@@ -36,8 +37,7 @@ body {
     margin: 0px 20px;
 }
 
-
-/* forgot Password */
+/* Forgot Password */
 
 #overlay {
     position: fixed;
@@ -78,14 +78,14 @@ body {
 #form {
     height: 100%;
     align-items: flex-start;
-    background-color: #ececec;
+    /* background-color: #ececec; */
     font-size: 1.2rem;
     border-radius: 10px 0 0 10px;
 }
 
 #form form {
     border: none;
-    background-color: #ececec;
+    /* background-color: #ececec; */
     box-shadow: none;
     margin-left: 20px;
     width: 90%;
@@ -165,13 +165,85 @@ h5 {
 
 #fgt-btn button:hover {
     background-color: #a97e06;
-    color: #ffffff
+    color: #ffffff;
 }
 
 #image img {
     display: flex;
     width: 90%;
 }
+
+/* Media Queries */
+@media (max-width: 1024px) {
+    #forgotOverlay {
+        width: 90vw;
+        height: 80vh;
+    }
+
+    #form {
+        width: 95%;
+        margin: 0.5rem auto;
+    }
+
+    #image {
+        display: none;
+    }
+
+    #fgt-btn button {
+        font-size: 1.4rem;
+        padding: .75rem 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    #forgotOverlay {
+        flex-direction: column;
+        height: auto;
+        width: 90vw;
+    }
+
+    #form,
+    #image {
+        width: 95%;
+        margin: 1rem auto;
+    }
+
+    #form {
+        align-items: center;
+    }
+
+    #fgt-btn button {
+        font-size: 1.2rem;
+        padding: 0.75rem 1.75rem;
+    }
+
+    #image {
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    #forgotOverlay {
+        height: auto;
+        width: 90vw;
+    }
+    
+    #form {
+        width: 95%;
+        margin: 1rem auto;
+        font-size: 1rem;
+    }
+
+    #fgt-btn button {
+        font-size: 1rem;
+        padding: 0.5rem 1.5rem;
+    }
+
+    #image img {
+        width: 70%;
+    }
+}
+
 </style>
 <body>
     <div class="container">
