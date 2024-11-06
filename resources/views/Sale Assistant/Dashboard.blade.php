@@ -12,12 +12,7 @@
     });
 </script>
 
-@push('scripts')
-    <script src="{{ asset('JavaScript/Salesman1.js') }}"></script>
-@endpush
-
-@section('main') 
-
+@section('main')
     @if (session('pdf_filename'))
         <input type="hidden" value="{{ session('pdf_filename') }}" id="pdf_link">
         <a id="orderRecipt" href="{{ asset('PDF/' . session('pdf_filename')) }}" download>Download PDF</a>
@@ -39,6 +34,7 @@
             {{ session('success') }}
         </div>
         <script>
+            localStorage.removeItem('ProductsInCart');
             setTimeout(() => {
                 document.getElementById('success').classList.add('alert-hide');
             }, 2000);
@@ -67,10 +63,19 @@
     <input id="orderNo" type="hidden" value="1">
     <main id="salesman">
         @php
-            $allProducts = $AllProducts;
+            $allProducts = $Products;
             $staff_id = $staff_id;
             $branch_id = $branch_id;
-            $cartProducts = $cartProducts;
+            $addons = $addons;
+            $servingProducts = $cartProducts
+                ->filter(function ($product) {
+                    return $product->order_status === 0;
+                })
+                ->groupBy('order_number');
+            $finalizeProducts = $cartProducts->filter(function ($product) {
+                return $product->order_status === null;
+            });
+
             $totalbill = 0;
             $taxes = $taxes;
             $discounts = $discounts;
@@ -109,17 +114,17 @@
                 @endphp
 
                 @if ($Products !== null)
-                    @foreach ($Products as $product)
-                        @if (!in_array($product->productName, $displayedProductNames))
+                    @foreach ($Products->items() as $product)
+                        @if ($product->category_name !== 'Addons' && !in_array($product->productName, $displayedProductNames))
                             @php
                                 $displayedProductNames[] = $product->productName;
                             @endphp
 
                             <div id="imageBox" class="imgbox"
-                                onclick="showAddToCart({{ json_encode($product) }} ,null, {{ json_encode($allProducts) }})">
-                                <img src="{{ asset('Images/ProductImages/' . $product->productImage) }}" alt="Product">
+                                onclick="showProductAddToCart({{ json_encode($product) }} , {{ json_encode($allProducts) }}, {{ json_encode($addons) }})">
+                                <img rel="preload" src="{{ asset('Images/ProductImages/' . $product->productImage) }}" alt="Product"
+                                    loading="lazy" as="image">
                                 <p class="product_name">{{ $product->productName }}</p>
-                                {{-- <p class="product_price">From Rs. {{ $product->productPrice }}</p> --}}
                             </div>
                         @endif
                     @endforeach
@@ -131,18 +136,17 @@
                             @endphp
                             @if ($deal->deal->dealStatus != 'not active')
                                 <div id='imageBox' class="imgbox"
-                                    onclick="showAddToCart({{ json_encode($deal) }}, {{ json_encode($Deals) }}, {{ json_encode($allProducts) }})">
-                                    <img src="{{ asset('Images/DealImages/' . $deal->deal->dealImage) }}" alt="Product">
+                                    onclick="showDealAddToCart({{ json_encode($deal) }}, {{ json_encode($Deals) }}, {{ json_encode($allProducts) }})">
+                                    <img rel="preload" src="{{ asset('Images/DealImages/' . $deal->deal->dealImage) }}" alt="Product"
+                                        loading="lazy" as="image">
                                     <p class="product_name">{{ $deal->deal->dealTitle }}</p>
-                                    {{-- <p class="product_price">{{ $deal->deal->dealDiscountedPrice }}</p> --}}
                                 </div>
                             @endif
                         @endif
                     @endforeach
                 @endif
-
             </div>
-            @if ($Products !== null)
+            {{-- @if ($Products !== null)
                 <div id="deals_seperate_section">
                     <h3 id="deals_seperate_section_heading">Deals</h3>
                     <div id="deals_seperate_section_imgDiv">
@@ -153,19 +157,84 @@
                                 @endphp
                                 @if ($deal->deal->dealStatus != 'not active')
                                     <div class="deal_imgbox"
-                                        onclick="showAddToCart({{ json_encode($deal) }}, {{ json_encode($Deals) }}, {{ json_encode($allProducts) }})">
+                                        onclick="showDealAddToCart({{ json_encode($deal) }}, {{ json_encode($Deals) }}, {{ json_encode($allProducts) }})">
                                         <img src="{{ asset('Images/DealImages/' . $deal->deal->dealImage) }}"
-                                            alt="Product">
+                                            alt="Product" loading="lazy">
                                         <p class="product_name">{{ $deal->deal->dealTitle }}</p>
-                                        {{-- <p class="product_price">{{ $deal->deal->dealDiscountedPrice }}</p> --}}
+                                        {{-- <p class="product_price">{{ $deal->deal->dealDiscountedPrice }}</p> -}}
                                     </div>
                                 @endif
                             @endif
                         @endforeach
                     </div>
                 </div>
+            @endif --}}
+            @if ($Deals === null || $Products !== null)
+                <div class="pagination_div">
+                    {{ $Products->links() }} <!-- Pagination links -->
+                </div>
             @endif
         </div>
+
+        <style>
+            .pagination_div {
+                display: flex;
+                justify-content: center;
+                margin: 7px 0;
+            }
+
+            .pagination {
+                display: flex;
+                align-items: center;
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .page-item {
+                margin: 0 5px;
+            }
+
+            .page-link {
+                display: block;
+                padding: 4px 12px;
+                font-size: 1rem;
+                background-color: transparent;
+                color: #000;
+                border: 1px solid transparent;
+                border-radius: 5px;
+                text-decoration: none;
+                transition: background-color 0.3s, transform 0.2s;
+            }
+
+            .page-link:hover {
+                background-color: #ffbb00;
+                transform: translateY(-2px);
+            }
+
+            .page-item.active .page-link {
+                background-color: #ffbb00;
+                color: #000;
+                border-color: #ffbb00;
+            }
+
+            .page-item.disabled .page-link {
+                background-color: transparent;
+                color: #000;
+                border: 1px solid black;
+                pointer-events: none;
+            }
+
+            .page-item a {
+                color: black;
+                border: 1px solid black;
+            }
+
+            .page-item.disabled a {
+                color: transparent;
+                border-color: black;
+            }
+        </style>
 
         <div id="receipt">
             <h4 id="heading">Receipt</h4>
@@ -173,67 +242,24 @@
 
                 <input type="hidden" name="salesman_id" id="salesman_id" value={{ $staff_id }}>
                 <div id="selectedProducts" name="products">
-                    @foreach ($cartProducts as $Value)
-                        @php
-                            $priceString = $Value->totalPrice;
-                            preg_match('/\d+(\.\d+)?/', $priceString, $matches);
-                            $numericPart = $matches[0];
-                            $totalbill = $totalbill + $numericPart;
-                        @endphp
-                        <div id="productdiv">
-                            <div class="product_name">
-                                @if ($Value->productAddon && strpos($Value->productName, $Value->productAddon) === false)
-                                    <p style="margin: 0; max-width:80%;" id="product-name">
-                                        {{ $Value->productName . ' with ' . $Value->productAddon }}</p>
-                                    <span id="product_price{{ $Value->id }}">{{ $Value->totalPrice }}</span>
-                                @else
-                                    <p style="margin: 0; max-width:80%;" id="product-name">{{ $Value->productName }}</p>
-                                    <span id="product_price{{ $Value->id }}">{{ $Value->totalPrice }}</span>
-                                @endif
-                            </div>
-                            <div class="product-controls">
-                                <button
-                                    onclick="window.location='{{ route('removeOneProduct', [$Value->id, $Value->salesman_id, $branch_id]) }}'"
-                                    id="remove-product"><i class='bx bxs-trash'></i></button>
-                                <div class="quantity-control">
-                                    <a class="quantity-decrease-btn"
-                                        href="{{ route('decreaseQuantity', [$Value->id, $Value->salesman_id, $branch_id]) }}">
-                                        <i class='bx bxs-checkbox-minus'></i>
-                                    </a>
-                                    <input class="quantity-display-field" type="text"
-                                        name="prodQuantity{{ $Value->id }}" id="product_quantity{{ $Value->id }}"
-                                        value="{{ $Value->productQuantity }}" readonly>
-                                    <a class="quantity-increase-btn"
-                                        href="{{ route('increaseQuantity', [$Value->id, $Value->salesman_id, $branch_id]) }}">
-                                        <i class='bx bxs-plus-square'></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
                 </div>
 
-                @php
-                    $totalTaxes = 0.0;
-                    foreach ($taxes as $tax) {
-                        if (strtoupper($tax->tax_name) === 'GST ON CASH') {
-                            $totalTaxes = $totalbill * ((float) $tax->tax_value / 100);
-                        }
-                    }
-                    $totalBillAfterTax = (int) ($totalbill + $totalTaxes);
-                @endphp
+                <script>
+                    let taxes = @json($taxes);
+                </script>
 
                 <form action="{{ route('placeOrder', $staff_id) }}" method="post" enctype="multipart/form-data"
                     onsubmit="return validateDiscount()">
                     @csrf
+                    <input type="hidden" name="cartItems" id="cartItems">
+                    <input type="hidden" name="branch_id" value="{{ $branch_id }}">
+
                     <div class="payment-div">
                         <div class="cash-fields">
                             <div class="paymentfields">
                                 <label for="totalbill">Total Amount</label>
-                                <input type="text" name="totalbill" id="totalbill" value="Rs {{ $totalBillAfterTax }}"
-                                    readonly>
-                                <input type="hidden" name="totaltaxes" id="totaltaxes" value="{{ $totalTaxes }}"
-                                    readonly>
+                                <input type="text" name="totalbill" id="totalbill" readonly>
+                                <input type="hidden" name="totaltaxes" id="totaltaxes" readonly>
                             </div>
                             <div class="paymentfields">
                                 <label for="paymentMethod">Payment Method:</label>
@@ -247,8 +273,7 @@
                                     <span id="true-option0">Online</span>
                                 </div>
                                 <select style="display: none; background-color: #fff" name="payment_method"
-                                    id="paymentMethod"
-                                    onchange="adjustTax({{ json_encode($taxes) }}, {{ json_encode($totalbill) }})">
+                                    id="paymentMethod" onchange="adjustTax()">
                                     @foreach ($payment_methods as $methods)
                                         @if ($methods->payment_method != null)
                                             <option value="{{ $methods->payment_method }}">{{ $methods->payment_method }}
@@ -291,6 +316,7 @@
                             </div>
                             <input type="hidden" name="orderType" id="orderTypeHidden">
                         </div>
+
                         <div style="display: flex; flex-direction:column; width: 48%;">
                             <div class="discount-field">
                                 <div class="paymentfields" style="flex-direction:row;align-items: center;">
@@ -299,35 +325,9 @@
                                     <input type="checkbox" name="discount" id="discountEnableDisable"
                                         onclick="toggleDiscount()">
                                 </div>
-                                <script>
-                                    function toggleDiscount() {
-                                        togglebtn = document.getElementById('discountEnableDisable').checked;
-                                        if (togglebtn == true) {
-                                            document.getElementById('toggle-text').textContent = "Disable Discount";
-                                            document.getElementById('toggle-text').style.width = "250px";
-                                            document.getElementById('discount').disabled = false;
-                                            document.getElementById('discount_reason').disabled = false;
-                                            document.getElementById('discountType').disabled = false;
-
-                                            document.getElementById('discount-Type-div').style.display = "flex";
-                                            document.getElementById('discountFieldDiv').style.display = "flex";
-                                            document.getElementById('discountReasonDiv').style.display = "flex";
-                                            document.getElementById('discountReasonDiv').required = true;
-                                            document.getElementById('discountTypeDiv').style.display = "flex";
-                                        } else {
-                                            document.getElementById('toggle-text').textContent = "Enable Discount";
-                                            document.getElementById('toggle-text').style.width = "200px";
-                                            document.getElementById('discount').disabled = true;
-                                            document.getElementById('discount_reason').disabled = true;
-                                            document.getElementById('discountType').disabled = true;
-
-                                            document.getElementById('discount-Type-div').style.display = "none";
-                                            document.getElementById('discountFieldDiv').style.display = "none";
-                                            document.getElementById('discountReasonDiv').style.display = "none";
-                                            document.getElementById('discountTypeDiv').style.display = "none";
-                                        }
-                                    }
-                                </script>
+                                {{-- <div>
+                                    <h3>Execution Time: {{ $executionTime }} seconds</h3>
+                                </div> --}}
 
                                 <div id="discount-Type-div" class="paymentfields" style="display:none">
                                     <label for="discountType">Type of Discount</label>
@@ -342,7 +342,7 @@
                                         </span>
                                         <label class="switch">
                                             <input id="discounttype" type="checkbox" value="%"
-                                                onclick="updateTotalONSwitch({{ json_encode($totalbill) }}, {{ json_encode($maximum_discount_percentage_value) }})">>
+                                                onclick="updateTotalONSwitch({{ json_encode($maximum_discount_percentage_value) }})">>
                                             <span class="slider round"></span>
                                         </label>
                                         <span id="true-option2">
@@ -360,7 +360,7 @@
                                     <label for="discount">Discount Applied</label>
                                     <input style="background-color: #fff" type="number" name="discount" id="discount"
                                         min="0" placeholder="Rupees" disabled step="any"
-                                        oninput="updateTotalONInput({{ json_encode($totalbill) }},{{ json_encode($maximum_discount_percentage_value) }})">
+                                        oninput="updateTotalONInput({{ json_encode($maximum_discount_percentage_value) }})">
                                 </div>
 
                                 <div class="paymentfields" id="discountReasonDiv" style="display: none">
@@ -377,11 +377,15 @@
                                 </div>
                             </div>
                             <div id="TablesList" class="tablesList">
-                                <label for="tables_list">Select Table Number</label>
-                                <select name="table_number" id="tables_list">
+                                <label for="tables_list">Available Tables</label>
+                                <select name="table_number" id="tables_list" onchange="handleTableChange()">
+                                    <option value="">Select Tables</option>
                                     @foreach ($dineInTables as $table)
-                                        <option value="{{ $table->table_number }}">{{ $table->table_number }}</option>
+                                        @if ($table->table_status === 1)
+                                            <option value="{{ $table->id }}">{{ $table->table_number }}</option>
+                                        @endif
                                     @endforeach
+                                    <option value="0">Finalize Order</option>
                                 </select>
                             </div>
                         </div>
@@ -397,46 +401,97 @@
             </div>
         </div>
 
+        {{--  
+            |---------------------------------------------------------------|
+            |========================= Add to cart UI ======================|
+            |---------------------------------------------------------------|
+        --}}
+
         <div id="overlay"></div>
-        <form id="addToCart" action="{{ route('saveToCart') }}" method="post" enctype="multipart/form-data">
+        <div id="addToCart" class="addTocart">
             @csrf
             <input type="hidden" id="product_id" name="product_id">
             <input type="hidden" name="branch_id" value="{{ $branch_id }}">
             <input type="hidden" name="salesman_id" id="salesman_id" value={{ $staff_id }}>
 
             <p id="headTitle" class="head1">Customize Item</p>
-            <input id="prodName" name="productname" style="border: none; display:none;" readonly>
+            <input id="prodName" class="prodName" name="productname" style="border: none; display:none;" readonly>
             <div style="display: none;margin: 10px 0.5vw; border-bottom:1px solid #393939" id="productCustomDiv">
-                <span id="prodPrice" style="width: 50%;"> </span>
+                <span id="prodPrice" class="prodPrice" style="width: 50%;"> </span>
                 <input name="productprice" style="border: none; text-align:right; font-size:0.9vw;" id="price"
                     readonly>
             </div>
             {{-- <p class="head1">Please Select</p> --}}
 
-            <label id="prodVariationLabel" for="prodVariation">Product Variation</label>
-            <select tabindex="0" name="prodVariation" id="prodVariation"></select>
+            <label id="prodVariationLabel" class="prodVariationLabel" for="prodVariation">Product Variation</label>
+            <select tabindex="0" name="prodVariation" id="prodVariation" class="prodVariation"></select>
 
-            <label id="addOnsLabel" for="addons">Add Ons</label>
-            <select name="addOn" id="addons"></select>
+            <label id="addOnsLabel" class="addOnsLabel" for="addons" style="display:none;">AddOns</label>
+            <select name="addOn" id="addons" class="addons" style="display:none;">
 
-            <label id="drinkFlavourLabel" for="drinkFlavour">Drink Flavour</label>
-            <select name="drinkFlavour" id="drinkFlavour"></select>
+            </select>
 
-            <div id="quantity">
+            {{-- <label id="drinkFlavourLabel" class="drinkFlavourLabel" for="drinkFlavour">Drink Flavour</label>
+            <select name="drinkFlavour" id="drinkFlavour" class="drinkFlavour"></select> --}}
+
+            <div id="quantity" class="quantity">
                 <p>Quantity</p>
-                <i onclick="decrease()" class='bx bxs-checkbox-minus'></i>
-                <input type="number" name="prodQuantity" id="prodQuantity" value="1" min="0">
-                <i onclick="increase()" class='bx bxs-plus-square'></i>
+                <i onclick="decreaseQuantity()" class='bx bxs-checkbox-minus'></i>
+                <input type="number" name="prodQuantity" id="prodQuantity" value="1" min="1">
+                <i onclick="increaseQuantity()" class='bx bxs-plus-square'></i>
             </div>
 
-            <p id="bottom">Total Price <input name="totalprice"
+            <p id="bottom" class="bottom">Total Price <input name="totalprice"
                     style="background-color:transparent; border: none; text-align:right;" id="totalprice" readonly></p>
 
             <div id="buttons">
                 <button type="button" onclick="closeAddToCart()">Close</button>
-                <input id="addbtn" type="submit" value="Add">
+                <input id="addbtn" type="button" onclick="addProductToCart()" value="Add">
             </div>
-        </form>
+        </div>
+
+        <div id="addDealToCart" class="addTocart">
+            @csrf
+            <input type="hidden" id="deal_id" name="deal_id">
+            <input type="hidden" name="branch_id" value="{{ $branch_id }}">
+            <input type="hidden" name="salesman_id" id="salesman_id" value={{ $staff_id }}>
+
+            <p id="dealTitle" class="head1">Customize Item</p>
+            <input id="dealName" class="prodName" name="productname" style="border: none; display:none;" readonly>
+            <div style="display: none; margin: 10px 0.5vw; border-bottom:1px solid #393939" id="dealCustomDiv">
+                <span id="prodPrice" class="prodPrice" style="width: 50%;"> </span>
+                <input name="productprice" style="border: none; text-align:right; font-size:0.9vw;" id="dealPrice"
+                    readonly>
+            </div>
+            {{-- <p class="head1">Please Select</p> --}}
+
+            <label id="pizzaVariationLabel" class="prodVariationLabel" for="prodVariation">Pizza Variation</label>
+            <select tabindex="0" name="prodVariation" id="pizzaVariation" class="prodVariation"></select>
+
+            <label id="toppingLabel" class="addOnsLabel" for="addons" style="display:none;">Select Topping</label>
+            <select name="addOn" id="topping" class="addons" style="display:none;">
+
+            </select>
+
+            <label id="drinkFlavourLabel" class="drinkFlavourLabel" for="drinkFlavour">Select Drink Flavour</label>
+            <select name="drinkFlavour" id="drinkFlavour" class="drinkFlavour"></select>
+
+            <div id="dealquantity" class="quantity">
+                <p>Quantity</p>
+                <i onclick="decreaseDealQuantity()" class='bx bxs-checkbox-minus'></i>
+                <input type="number" name="prodQuantity" id="dealQuantity" value="1" min="1">
+                <i onclick="increaseDealQuantity()" class='bx bxs-plus-square'></i>
+            </div>
+
+            <p id="dealBottom" class="bottom">Total Price <input name="totalprice"
+                    style="background-color:transparent; border: none; text-align:right;" id="totalDealPrice" readonly>
+            </p>
+
+            <div id="buttons">
+                <button type="button" onclick="closeDealAddToCart()">Close</button>
+                <input id="addbtn" type="button" onclick="addDealToCart()" value="Add">
+            </div>
+        </div>
 
         {{--  
             |---------------------------------------------------------------|
@@ -457,43 +512,52 @@
                         <thead>
                             <tr>
                                 <th>Table #</th>
+                                <th>Table Number</th>
                                 <th>Order #</th>
                                 <th>Order Items</th>
+                                <th>Item Qty</th>
                                 <th>Item Price</th>
                                 <th>Total Bill</th>
                                 <th>Action</th>
-
                             </tr>
                         </thead>
                         <tbody>
-                            {{-- @foreach ($orders as $order) --}}
-                            <tr class="table-row">
-                                <td id="table-number">
-                                    1
-                                </td>
-                                <td>
-                                    CH102
-                                </td>
-                                <td>
-                                    <div>Pizza</div>
-                                    <div>Calzon</div>
-                                    <div>Pasta</div>
-                                </td>
-                                <td>
-                                    <div>Rs. 1200</div>
-                                    <div>Rs. 1500</div>
-                                    <div>Rs. 1100</div>
-                                </td>
-                                <td>
-                                    Rs. 3800
-                                </td>
-                                <td>
-                                    <a title="Add New Prduct"><i class='bx bxs-cart-add'></i></a>
-                                    <a title="Proceed to Payment"><i class='bx bxs-right-arrow-square'></i></a>
-                                </td>
-                            </tr>
-                            {{-- @endforeach --}}
+                            @foreach ($servingProducts as $orderNumber => $orders)
+                                <tr class="table-row">
+                                    <td id="table-number"> {{ $orders->first()->table_id }}</td>
+                                    <td id="table-number"> {{ $orders->first()->dineInTable->table_number }}</td>
+                                    <!-- Assuming table_id is used for table number -->
+                                    <td>{{ $orderNumber }}</td>
+                                    <td>
+                                        @foreach ($orders as $order)
+                                            <div>{{ $order->productName }}</div>
+                                        @endforeach
+                                    </td>
+                                    <td>
+                                        @foreach ($orders as $order)
+                                            <div>{{ $order->productQuantity }}</div>
+                                        @endforeach
+                                    </td>
+                                    <td>
+                                        @foreach ($orders as $order)
+                                            <div>{{ $order->totalPrice }}</div>
+                                        @endforeach
+                                    </td>
+                                    <td>Rs.
+                                        {{ $orders->sum(fn($order) => floatval(str_replace('Rs. ', '', $order->totalPrice))) }}
+                                    </td> <!-- Sum up the total price for all items -->
+                                    <td>
+                                        <a title="Add New Product"
+                                            onclick="addNewProductToDineInOrder({{ json_encode($orders) }}, '{{ route('addNewProductToDineInOrder', [$orderNumber, $orders->first()->table_id]) }}')"><i
+                                                class='bx bxs-cart-add'></i></a>
+                                        <a title="Proceed to Payment"
+                                            href="{{ route('addNewProductToDineInOrder', [$orderNumber, $orders->first()->table_id]) }}"><i
+                                                class='bx bxs-right-arrow-square'></i></a>
+                                    </td>
+                                </tr>
+                            @endforeach
                         </tbody>
+
                     </table>
                 </div>
             </div>
@@ -776,6 +840,18 @@
             <button id="enable-sound" onclick="playAudio()" style="display: none;">Enable Sound</button>
             <audio id="notification-sound" src="{{ asset('Sound/notification.mp3') }}" allow="autoplay"></audio>
         </div>
+
+        <div class="msg">
+            <div class="msg1">
+                <div class="msg_img">
+                    <img rel="preload" src="{{ asset('Images/OnlineOrdering/addedcart.png') }}" alt="" loading="lazy" as="image">
+                </div>
+                <div class="msg_text">
+                    <span>Item Added to Cart</span>
+                </div>
+            </div>
+        </div>
+
         <style>
             #custom-popup {
                 position: fixed;
@@ -800,15 +876,20 @@
         </style>
 
     </main>
+    @push('scripts')
+        <script src="{{ asset('JavaScript/salesman.js') }}"></script>
+    @endpush
 
     <script>
-        let interval = 10000; // 10 seconds
+        let interval = 10000;
         let remainingTime = interval;
         let previousData = [];
-
         async function fetchData() {
             try {
-                const response = await fetch("http://127.0.0.1:8000/getNotificationData");
+                // const response = await fetch("http://192.168.1.108:7000/getNotificationData");
+                // const response = await fetch("http://192.168.1.108:8000/getNotificationData");
+                // const response = await fetch("http://192.168.100.7:8000/getNotificationData");
+                const response = await fetch("http://192.168.100.7:7000/getNotificationData");
                 const data = await response.json();
 
                 if (JSON.stringify(data.collection) !== JSON.stringify(previousData)) {
@@ -828,7 +909,7 @@
             try {
                 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                const response = await fetch(`http://127.0.0.1:8000/deleteOnlineNotification/${messageId}`, {
+                const response = await fetch(`http://192.168.100.7:7000/deleteOnlineNotification/${messageId}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': token,
@@ -885,241 +966,18 @@
 
         startCountdown();
 
-        document.addEventListener("DOMContentLoaded", function() {
-            fetchData();
-        });
+        // document.getElementById('serving_tables').addEventListener('change', function() {
+        //     const selectedTable = this.value;
+        //     if (selectedTable != 0) {
+        //         window.location.href = this.options[this.selectedIndex].getAttribute('data-url');
+        //     }
+        // });
 
 
-        function adjustTax(taxes, totalbill) {
-            let paymentMethod = document.getElementById('paymentMethod').value;
-            document.getElementById('discount').value = ''
-            let bill_with_tax = 0;
-            if (paymentMethod.toLowerCase() === 'card') {
-                taxes.forEach((tax) => {
-                    if (tax.tax_name.toUpperCase() === 'GST ON CARD') {
-                        bill_with_tax = totalbill * (tax.tax_value / 100);
-                        document.getElementById('totaltaxes').value = parseInt(bill_with_tax);
-                    }
-                })
-            } else {
-                taxes.forEach((tax) => {
-                    if (tax.tax_name.toUpperCase() === 'GST ON CASH') {
-                        bill_with_tax = totalbill * (tax.tax_value / 100);
-                        document.getElementById('totaltaxes').value = parseInt(bill_with_tax);
-                    }
-                })
-            }
-            document.getElementById('totalbill').value = "Rs " + parseInt(totalbill + bill_with_tax)
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            let toggle = document.getElementById('order_type');
-            const falsetext = document.getElementById('false-option').textContent;
-            const truetext = document.getElementById('true-option').textContent;
-            let orderTypeHidden = document.getElementById('orderTypeHidden');
-
-            function updateHiddenInput() {
-                orderTypeHidden.value = toggle.checked ? truetext : falsetext;
-                if (orderTypeHidden.value.trim() == "Dine-In") {
-                    document.getElementById('TablesList').style.display = 'flex';
-                } else {
-                    document.getElementById('TablesList').style.display = 'none';
-                }
-            }
-
-            updateHiddenInput();
-
-            toggle.addEventListener('change', function() {
-                updateHiddenInput();
-            });
-        });
-
-        function validateDiscount() {
-            const discountEnabled = document.getElementById('discountEnableDisable').checked;
-            const discountReason = document.getElementById('discount_reason').value;
-
-            if (discountEnabled && !discountReason) {
-                alert('Please select a reason for the discount.');
-                return false;
-            }
-            return true;
-        }
-        let discountTypeInput = document.getElementById('discountType');
-        let toggleDiscountType = document.getElementById('discounttype');
-
-        function updateTotalONSwitchChange(total, discountLimit, discountType) {
-            let discount = parseInt(document.getElementById("discount"));
-            let discountAmount = parseInt(discount.value);
-
-            let totalBill = parseInt(total);
-            let discountLimitValue = parseInt(discountLimit);
-            if (isNaN(discountAmount)) {
-                document.getElementById("totalbill").value = `Rs ${totalBill}`;
-                return;
-            }
-            let fixedDiscountAmount = parseInt((discountLimitValue / 100) * total);
-
-            if (discountType == "%" && discountAmount > discountLimitValue) {
-                alert(`Discount in Percentage should be less than or equal to ${discountLimitValue}.`);
-                discount.value = discountLimitValue;
-                discountAmount = discountLimitValue;
-            }
-
-            if (discountType == "-" && discountAmount > fixedDiscountAmount) {
-                alert(
-                    `Discount amount should be less than or equal to ${fixedDiscountAmount} (${discountLimitValue}% of total bill.)`
-                );
-                discount.value = fixedDiscountAmount;
-                discountAmount = fixedDiscountAmount;
-            }
-
-            if (discountType == "%") {
-                let discountedBill = parseInt(totalBill - ((discountAmount / 100) * totalBill));
-                document.getElementById("totalbill").value = `Rs ${discountedBill}`;
-            }
-
-            if (discountType == "-") {
-                let discountedBill = parseInt(totalBill - discountAmount);
-                document.getElementById("totalbill").value = `Rs ${discountedBill}`;
-            }
-        }
-
-        function updateTotalONSwitch(total, discountLimit) {
-            // totalBill = @json($totalbill);
-            taxes = @json($taxes);
-            let paymentMTD = document.getElementById("paymentMethod").value;
-            let taxOnCard;
-            taxes.forEach((tax) => {
-                if(tax.tax_name.toUpperCase() === 'GST ON CASH'){
-                    taxOnCard = tax.tax_value;
-                }
-
-                if ((tax.tax_name.toUpperCase() === 'GST ON CASH' && (paymentMTD.toLowerCase() === 'cash'))) {
-                    selectedTax = tax.tax_value;
-                }
-                else if ((tax.tax_name.toUpperCase() === 'GST ON CARD' && (paymentMTD.toLowerCase() === 'card'))) {
-                    selectedTax = tax.tax_value;
-                }
-                else {
-                    selectedTax = taxOnCard;
-                }
-            });
-
-            let taxAmount = total + parseInt((selectedTax / 100) * total);
-            document.getElementById('totalbill').value = "Rs " + parseInt(taxAmount);
-            document.getElementById('totaltaxes').value = parseInt((selectedTax / 100) * total);
-
-
-            discountTypeInput.value = toggleDiscountType.checked ? '-' : '%';
-            document.getElementById("discount").value = '';
-            updateTotalONSwitchChange(taxAmount, discountLimit, discountTypeInput.value);
-        };
-
-        function updateTotalONInput(total, discountLimit) {
-            
-            let discount = document.getElementById("discount");
-            discount.addEventListener('input', () => {
-                let sanitizedValue = discount.value.match(/^\d*(?:\.\d*)?$/);
-                if (sanitizedValue) {
-                    sanitizedValue = sanitizedValue[0];
-                } else {
-                    sanitizedValue = '';
-                }
-                discount.value = sanitizedValue;
-            })
-
-            let discountType = document.getElementById("discountType").value;
-
-            let discountAmount = parseInt(discount.value);
-            let taxAmount = parseInt(document.getElementById("totaltaxes").value);
-            let totalBill = parseInt(total + taxAmount);
-
-            let discountLimitValue = parseInt(discountLimit);
-            if (isNaN(discountAmount)) {
-                document.getElementById("totalbill").value = `Rs ${totalBill}`;
-                return;
-            }
-            let fixedDiscountAmount = parseInt((discountLimitValue / 100) * (total + taxAmount));
-
-            if (discountType == "%" && discountAmount > discountLimitValue) {
-                alert(`Discount in Percentage should be less than or equal to ${discountLimitValue}.`);
-                discount.value = discountLimitValue;
-                discountAmount = discountLimitValue;
-            } else if (discountType == "-" && discountAmount > fixedDiscountAmount) {
-                alert(
-                    `Discount amount should be less than or equal to ${fixedDiscountAmount} (${discountLimitValue}% of total bill.)`
-                );
-                discount.value = fixedDiscountAmount;
-                discountAmount = fixedDiscountAmount;
-            }
-
-            if (discountType == "%") {
-                let discountedBill = parseInt(totalBill - ((discountAmount / 100) * totalBill));
-                document.getElementById("totalbill").value = `Rs ${discountedBill}`;
-            } else if (discountType == "-") {
-                let discountedBill = parseInt(totalBill - discountAmount);
-                document.getElementById("totalbill").value = `Rs ${discountedBill}`;
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            let togglePaymentMethod = document.getElementById('paymentmethod');
-            const falsetext1 = document.getElementById('false-option0').textContent;
-            const truetext1 = document.getElementById('true-option0').textContent;
-            let paymentMethodSelect = document.getElementById('paymentMethod');
-            let bill = parseInt(document.getElementById('totalbill').value.replace('Rs ', ''));
-            let removedCashOption = null;
-            function updatePaymentMethod() {
-                document.getElementById('discount').value = '';
-                document.getElementById('totalbill').value = 'Rs ' + bill;
-                if (togglePaymentMethod.checked) {
-                    paymentMethodSelect.style.display = 'flex';
-                    for (let i = paymentMethodSelect.options.length - 1; i >= 0; i--) {
-                        if (paymentMethodSelect.options[i].value.toLowerCase() === 'cash') {
-                            removedCashOption = paymentMethodSelect.options[i];
-                            paymentMethodSelect.remove(i);
-                        }
-                    }
-                    paymentMethodSelect.value = truetext1;
-                    if (!paymentMethodSelect.value) {
-                        paymentMethodSelect.selectedIndex = 0;
-                    }
-
-                } else {
-                    let selectedTax;
-                    totalBill = @json($totalbill);
-                    taxes = @json($taxes);
-                    taxes.forEach((tax) => {
-                        if (tax.tax_name === 'GST ON CASH') {
-                            selectedTax = tax.tax_value;
-                        }
-                    });
-                    let taxAmount = totalBill + parseInt((selectedTax / 100) * totalBill);
-                    document.getElementById('totalbill').value = "Rs " + parseInt(taxAmount);
-                    document.getElementById('totaltaxes').value = parseInt((selectedTax / 100) * totalBill);
-                    paymentMethodSelect.style.display = 'none';
-                    paymentMethodSelect.value = falsetext1;
-                    if (removedCashOption) {
-                        let cashOption = document.createElement('option');
-                        cashOption.value = removedCashOption.value;
-                        cashOption.textContent = removedCashOption.textContent;
-                        paymentMethodSelect.add(cashOption, paymentMethodSelect.options[
-                            0]);
-                        removedCashOption = null;
-                    }
-                }
-            }
-            updatePaymentMethod();
-
-            togglePaymentMethod.addEventListener('change', function() {
-                updatePaymentMethod();
-            });
-        });
-
-        document.getElementById('deals_seperate_section_imgDiv').addEventListener('wheel', function(event) {
-            event.preventDefault();
-            this.scrollLeft += event.deltaY;
-        });
+        // document.getElementById('deals_seperate_section_imgDiv').addEventListener('wheel', function(event) {
+        //     event.preventDefault();
+        //     this.scrollLeft += event.deltaY;
+        // });
 
         function selectCategory(route, element) {
             let categoryLinks = document.getElementsByClassName('category_link');
@@ -1135,7 +993,7 @@
         function getCookie(name) {
             let value = "; " + document.cookie;
             let parts = value.split("; " + name + "=");
-            if (parts.length == 2) return parts.pop().split(";").shift();
+            if (parts.length === 2) return parts.pop().split(";").shift();
         }
 
         window.onload = function() {
@@ -1152,35 +1010,6 @@
                 }
             }
         };
-
-        function validateNumericInput(input) {
-            let sanitizedValue = input.value.match(/^\d*(?:\.\d*)?$/);
-            if (sanitizedValue) {
-                sanitizedValue = sanitizedValue[0];
-            } else {
-                sanitizedValue = '';
-            }
-            input.value = sanitizedValue;
-            calculateChange(input.value);
-        }
-
-        function calculateChange(receivedBill) {
-            let totalBillStr = document.getElementById('totalbill').value;
-            let totalBill = parseInt(totalBillStr.replace('Rs', '').trim());
-
-            receivedBill = parseInt(receivedBill);
-
-            if (isNaN(receivedBill)) {
-                document.getElementById('change').value = '';
-            }
-
-            if (isNaN(totalBill)) {
-                totalBill = 0;
-            }
-            let change = receivedBill - totalBill;
-            document.getElementById('proceed').disabled = change < 0;
-            document.getElementById('change').value = change.toFixed(2);
-        }
 
 
         document.addEventListener('DOMContentLoaded', function() {

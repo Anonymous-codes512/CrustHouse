@@ -10,7 +10,7 @@ function closeProductPopup() {
     document.body.style.overflow = "auto";
 }
 function addToCart(product, allProducts, addons) {
-    const productArray = Object.values(allProducts);
+    const productArray = Object.values(allProducts); 
     let productVariations = [];
 
     productArray.forEach((element) => {

@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 |---------------------------------------------------------------|
 */
 
-Route::get('/', function () {
+Route::get('/', function () { 
     return view('index');
 })->name('welcome');
 
@@ -238,7 +238,7 @@ Route::get('/deleteReportPDF/{file_name}', [ManagerController::class, 'deleteRep
 |---------------------------------------------------------------|
 */
  
-Route::get('salesman/dashboard/{id}/{branch_id}', [SalesmanController::class,'viewSalesmanDashboard'])->name('salesman_dashboard');
+Route::get('salesman/dashboard/{id}/{branch_id}', [SalesmanController::class,'viewSalesmanDashboard'])->name('salesman_dashboard')->middleware('log.execution');;
 Route::get('salesman/dashboard/{categoryName}/{id}/{branch_id}', [SalesmanController::class,'salesmanCategoryDashboard'])->name('salesman_dash');
 Route::get('salesman/deals/', [SalesmanController::class,'deals'])->name('deals');
 Route::post('salesman/placeOrder/{salesman_id}', [SalesmanController::class,'placeOrder'])->name('placeOrder');
@@ -249,6 +249,9 @@ Route::get('salesman/increaseQuantity/{id}/{salesman_id}/{branch_id}', [Salesman
 Route::get('salesman/decreaseQuantity/{id}/{salesman_id}/{branch_id}', [SalesmanController::class,'decreaseQuantity'])->name('decreaseQuantity');
 Route::get('salesman/deleteReceiptPDF/{file_name}', [SalesmanController::class,'deleteReceiptPDF'])->name('deleteReceiptPDF');
 Route::get('salesman/confirmOnlineOrder/{branch_id}/{salesman_id}/{order_id}', [SalesmanController::class,'confirmOnlineOrder'])->name('confirmOnlineOrder');
+
+Route::get('salesman/addNewProductToDineInOrder/{order_Number}/{table_id}', [SalesmanController::class,'addNewProductToDineInOrder'])->name('addNewProductToDineInOrder');
+// Route::get('salesman/finalizeDineInOrder/{order_Number}/{table_id}', [SalesmanController::class,'finalizeDineInOrder'])->name('finalizeDineInOrder');
 
 // Route::post('/sendNotification/{message}', [SalesmanController::class, 'sendNotification'])->name('sendNotification');
 Route::get('/getNotificationData', [SalesmanController::class, 'getNotificationData'])->name('getNotificationData');

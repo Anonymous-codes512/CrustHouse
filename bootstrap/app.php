@@ -11,8 +11,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+           'log.execution' => \App\Http\Middleware\LogExecutionTime::class,
+        ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->withCommands([
+        \App\Console\Commands\ClearLogs::class,  // Register the ClearLogs command
+    ])->create();

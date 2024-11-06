@@ -47,7 +47,6 @@
     /* padding: 0.51vw; */
     /* border: 1px solid #000; */
 }
-
 #category_bar {
     display: flex;
     flex-direction: row;
@@ -76,8 +75,8 @@
     padding: 5px;
     background-color: transparent;
     cursor: pointer;
-    text-decoration: none;
-    color: #000;
+    text-decoration: none; /* No underline by default */
+    color: #000; /* Default color */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -86,13 +85,15 @@
 }
 
 #category_bar div:hover a {
-    background-color: #ffbb00;
-    color: #fff;
+    background-color: #ffbb00; /* Change background on hover */
+    color: #fff; /* Change text color on hover */
 }
 
 #category_bar div a.selected {
-    border-bottom: 2px solid #ffbb00;
+    border-bottom: 2px solid #ffbb00; /* Border for selected link */
+    color: #ffbb00; /* Optional: change color for selected link */
 }
+
 
 #products {
     display: flex;
@@ -102,8 +103,8 @@
     margin: 0 1vw;
     justify-content: start;
     overflow-y: auto;
-    width: 100%;
-    height: 72%;
+    /* width: 100%; */
+    height: 95%;
     scrollbar-width: thin;
     /* border: 1px solid #000; */
 }
@@ -152,7 +153,7 @@
     background-color: #dadada;
     border-top: 1px solid #9d9d9d;
 }
-
+/* 
 #deals_seperate_section_imgDiv {
     display: flex;
     flex-direction: row;
@@ -191,7 +192,7 @@
     margin: 0;
     font-weight: 500;
     text-align: center;
-}
+} */
 
 #receipt {
     width: 23.5%;
@@ -237,7 +238,8 @@
     align-items: center;
     justify-content: space-between;
     font-size: 0.9vw;
-    padding: 0 4px;
+    padding: 0;
+    margin: 0;
 }
 
 #productdiv .product-controls {
@@ -472,7 +474,7 @@
     z-index: 999;
 }
 
-#addToCart {
+.addToCart {
     display: none;
     flex-direction: column;
     background-color: #ffffff;
@@ -487,19 +489,19 @@
 }
 
 .head1,
-#bottom {
+.bottom {
     text-align: center;
     font-size: 1.3vw;
     font-weight: 500;
     background-color: #cccccc;
 }
 
-#addToCart select {
+.addToCart select {
     font-size: 1vw;
     font-family: "Poppins", sans-serif;
 }
 
-#bottom {
+.bottom {
     display: flex;
     justify-content: space-between;
     font-weight: normal;
@@ -508,31 +510,31 @@
     padding: 0 0.5vw;
 }
 
-#prodName,
-#prodPrice {
+.prodName,
+.prodPrice {
     display: flex;
     justify-content: space-between;
     margin: 0 0.5vw;
     font-size: 1vw;
 }
 
-#prodVariation,
-#addons,
-#drinkFlavour {
+.prodVariation,
+.addons,
+.drinkFlavour {
     margin: 10px 0.5vw;
     margin-top: 0;
     border: none;
     border-bottom: 1px solid #000;
 }
 
-#addOnsLabel,
-#prodVariationLabel,
-#drinkFlavourLabel {
+.addOnsLabel,
+.prodVariationLabel,
+.drinkFlavourLabel {
     margin: 0 0.5vw;
     font-size: 1vw;
 }
 
-#quantity {
+.quantity {
     margin: 10px 0.5vw;
     display: flex;
     justify-content: space-between;
@@ -544,7 +546,7 @@
     margin-right: 1vw;
 }
 
-#quantity input {
+.quantity input {
     /* width: ; */
     text-align: center;
 }
@@ -916,7 +918,7 @@ input:checked+.slider:before {
     color: #fbfbfb;
     background-color: #bcbcbc;
     text-decoration: none;
-    font-weight: 400;
+    font-weight: 400; 
     white-space: nowrap;
     text-align: center;
     vertical-align: middle;
@@ -937,4 +939,41 @@ input:checked+.slider:before {
 
 #printbtn:hover {
     background-color: #41bb41;
+}
+
+.msg {
+    position: fixed;
+    z-index: 10000;
+    padding: 1vw;
+    border-radius: 1vw;
+    background-color: #ffbb00;
+    opacity: 0;
+    left: 50%;
+    bottom: 10%;
+    transform: translate(-50%, -50%);
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.msg.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+.msg.hide {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.msg1 {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1vw;
+}
+
+.msg_img img {
+    width: 30px;
+    height: 30px;
 }

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="An POS fro a salesman for ordering in place orders.">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title id="dynamic-title"></title>
     <link rel="stylesheet" href="{{ asset('CSS/Salesman/salesman.css') }}">
@@ -48,7 +49,7 @@
                 <button id="online-btn" type="button" onclick="showOnlineOrders()">Online Orders</button>
                 <button id="allOrders-btn" type="button" onclick="showAllOrders()">All Orders</button>
                 <div class="search_bar_div">
-                    <input type="text" id="search_bar" name="search" placeholder="Search.."
+                    <input type="text" id="search_bar" name="search" placeholder="Search on current page."
                         style="background-image: url('{{ asset('Images/search.png') }}');">
                 </div>
             </div>

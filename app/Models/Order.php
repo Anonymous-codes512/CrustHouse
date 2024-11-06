@@ -7,16 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    use HasFactory;
+
+    public function dineInTable()
+    {
+        return $this->belongsTo(DineInTable::class, 'table_id');
+    }
     public function items()
     {
         return $this->hasMany(OrderItem::class);
     }
-    
+
     public function salesman()
     {
         return $this->belongsTo(User::class, 'salesman_id');
     }
- 
+
     public function customers()
     {
         return $this->belongsTo(User::class, 'customer_id');

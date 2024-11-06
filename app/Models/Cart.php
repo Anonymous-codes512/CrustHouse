@@ -11,5 +11,11 @@ class Cart extends Model
     public function salesman()
     {
         return $this->belongsTo(User::class, 'salesman_id');
+
+    } 
+    public function dineInTable()
+    {
+        return $this->belongsTo(DineInTable::class, 'table_id'); // Assuming you have a 'table_id' in the Cart table
     }
+
 }

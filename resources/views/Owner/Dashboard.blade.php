@@ -322,7 +322,7 @@
                 <label for="password">Password</label>
                 <div class="passwordField">
                     <input type="password" id="password" name="password" placeholder="Password" required>
-                    <i class='bx bxs-show' onclick="showAndHideOwnerPswd()"></i>
+                    <i class='bx bxs-show' onclick="showAndHidePswd('password')"></i>
                 </div>
             </div>
 
@@ -441,7 +441,7 @@
                 <label for="password">Password</label>
                 <div class="passwordField">
                     <input type="password" id="editPassword" name="password" placeholder="Password">
-                    <i class='bx bxs-show' onclick="showAndHideEditPswd()"></i>
+                    <i class='bx bxs-show' onclick="showAndHidePswd('editPassword')"></i>
                 </div>
             </div>
 
@@ -557,7 +557,7 @@
                 <div class="passwordField">
                     <input type="password" id="ownerPassword" name="password" oninput="validatePassword()"
                         placeholder="Password">
-                    <i class='bx bxs-show' onclick="showAndHideOwnerPswd()"></i>
+                    <i class='bx bxs-show' onclick="showAndHidePswd('ownerPassword')"></i>
                 </div>
             </div>
             <div id="password-error-message" class="error-message" style="display: none;"></div>
@@ -1668,17 +1668,8 @@
 
         updateCityOptions('branchstate', 'brancharea');
 
-        function showAndHideEditPswd() {
-            let pswd = document.getElementById('editPassword');
-            if (pswd.type === 'password') {
-                pswd.type = 'text';
-            } else {
-                pswd.type = 'password';
-            }
-        }
-
-        function showAndHideOwnerPswd() {
-            let pswd = document.getElementById('ownerPassword');
+        function showAndHidePswd(password) {
+            let pswd = document.getElementById(password);
             if (pswd.type === 'password') {
                 pswd.type = 'text';
             } else {
@@ -1702,7 +1693,7 @@
             let codeNumber = number.toString().padStart(3, '0');
 
             let branch_Code = `${cityInitials}-${codeNumber}`;
-            
+
             if (branchData.length > 0) {
                 branchData.forEach(branch => {
                     if (branch.branch_code == branch_Code) {
@@ -1716,7 +1707,7 @@
                 document.getElementById('branchcode').value = branch_Code;
             }
         }
-        
+
         function GeneratePassword() {
             let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()~`{}[];:.,></?\|";
             let generatedPassword = "";
@@ -1732,8 +1723,12 @@
         function copyPassword() {
             const passwordField = document.getElementById('password');
             passwordField.select();
-            text = document.execCommand('copy');
-            alert('Password copied to clipboard!', text);
+            navigator.clipboard.writeText(passwordField.value).then(() => {
+                    alert("successfully copied");
+                })
+                .catch(() => {
+                    alert("something went wrong");
+                });
         }
 
         function showLoader(route) {

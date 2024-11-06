@@ -8,4 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class DineInTable extends Model
 {
     use HasFactory;
+    public function carts()
+    {
+        return $this->hasMany(Cart::class, 'table_id');
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'table_id');
+    }
 }
+ 
