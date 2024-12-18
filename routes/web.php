@@ -7,6 +7,7 @@ use App\Http\Controllers\OnlineOrdersController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\SalesmanController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\RiderController;
 use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -249,6 +250,8 @@ Route::get('salesman/increaseQuantity/{id}/{salesman_id}/{branch_id}', [Salesman
 Route::get('salesman/decreaseQuantity/{id}/{salesman_id}/{branch_id}', [SalesmanController::class,'decreaseQuantity'])->name('decreaseQuantity');
 Route::get('salesman/deleteReceiptPDF/{file_name}', [SalesmanController::class,'deleteReceiptPDF'])->name('deleteReceiptPDF');
 Route::get('salesman/confirmOnlineOrder/{branch_id}/{salesman_id}/{order_id}', [SalesmanController::class,'confirmOnlineOrder'])->name('confirmOnlineOrder');
+Route::get('salesman/assignToRider/{branch_id}/{staff_id}/{order_id}', [SalesmanController::class,'assignToRider'])->name('assignToRider');
+Route::get('salesman/assignOrder/{branch_id}/{rider_id}/{order_id}/{salesman_id}', [SalesmanController::class,'assignOrder'])->name('assignOrder');
 
 Route::get('salesman/addNewProductToDineInOrder/{order_Number}/{table_id}', [SalesmanController::class,'addNewProductToDineInOrder'])->name('addNewProductToDineInOrder');
 // Route::get('salesman/finalizeDineInOrder/{order_Number}/{table_id}', [SalesmanController::class,'finalizeDineInOrder'])->name('finalizeDineInOrder');
@@ -256,6 +259,7 @@ Route::get('salesman/addNewProductToDineInOrder/{order_Number}/{table_id}', [Sal
 // Route::post('/sendNotification/{message}', [SalesmanController::class, 'sendNotification'])->name('sendNotification');
 Route::get('/getNotificationData', [SalesmanController::class, 'getNotificationData'])->name('getNotificationData');
 Route::delete('/deleteOnlineNotification/{id}', [SalesmanController::class, 'deleteNotification'])->name('deleteOnlineNotification');
+Route::get('/search', [SalesmanController::class, 'search'])->name('search');
 
 /*
 |---------------------------------------------------------------|
@@ -290,3 +294,17 @@ Route::get('/payment-success', [OnlineOrdersController::class, 'placeOrder'])->n
 Route::get('/payment-cancel', [OnlineOrdersController::class, 'paymentCancel'])->name('payment.cancel');
 // Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
 
+/*
+|---------------------------------------------------------------|
+|======================== Rider Routes =========================|
+|---------------------------------------------------------------|
+*/
+
+Route::get('rider_dashboard/{rider_id}/{branch_id}', [RiderController::class,'viewDashboard'])->name('rider_dashboard');
+Route::get('rider_orders/{rider_id}/{branch_id}', [RiderController::class,'viewOrders'])->name('riderOrders');
+Route::get('rider_profile/{rider_id}/{branch_id}', [RiderController::class,'viewProfile'])->name('riderProfile');
+Route::post('Update_profile_picture', [RiderController::class,'updateProfilePicture'])->name('updateProfilePicture');
+Route::post('Update_rider_profile', [RiderController::class,'updateProfile'])->name('updateRiderProfile');
+Route::get('view_order_details/{order_number}/{rider_id}', [RiderController::class,'viewOrderDetails'])->name('viewOrderDetails');
+Route::get('delivery_cancelled/{order_number}/{rider_id}', [RiderController::class,'deliveryCancelled'])->name('deliveryCancelled');
+Route::get('delivery_completed/{order_number}/{rider_id}', [RiderController::class,'deliveryCompleted'])->name('deliveryCompleted');

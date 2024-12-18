@@ -84,9 +84,17 @@ class AuthController extends Controller
             } else if ($user->role === 'salesman') {
                 session()->put('salesman', true);
                 return redirect()->route('salesman_dashboard', ['id' => $user->id, 'branch_id' => $user->branch_id]);
-            } else if ($user->role === 'chef') {
+            }else if ($user->role === 'chef') {
                 session()->put('chef', true);
                 return redirect()->route('chef_dashboard', ['user_id' => $user->id, 'branch_id' => $user->branch_id]);
+            }else if ($user->role === 'rider') {
+                session()->put('rider', true);
+                if($user->phone_number === null) {
+                    return redirect()->route('riderProfile', ['rider_id' => $user->id, 'branch_id' => $user->branch_id]);
+                }
+                else{
+                    return redirect()->route('rider_dashboard', ['rider_id' => $user->id, 'branch_id' => $user->branch_id]);
+                }
             }
         } else {
             return redirect()->back()->withErrors(['email' => 'Invalid credentials']);
@@ -129,7 +137,7 @@ class AuthController extends Controller
 
     public function logout()
     {
-        session()->forget(['username', 'owner', 'owner_id', 'branchManager', 'salesman', 'chef', 'id', 'branch_id']);
+        session()->forget(['username', 'owner', 'owner_id', 'branchManager', 'salesman', 'chef', 'rider','id', 'branch_id']);
         return redirect()->route('viewLoginPage');
     }
 }

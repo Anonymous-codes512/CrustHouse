@@ -69,6 +69,7 @@ class ManagerController extends Controller
             'ThemeSettings' => $settings
         ]);
     }
+
     public function readNotification($user_id, $branch_id, $id)
     {
         if (!session()->has('branchManager')) {
@@ -79,6 +80,7 @@ class ManagerController extends Controller
         $notification->save();
         return Redirect()->route('viewStockPage', [$user_id, $branch_id]);
     }
+
     public function deleteNotification($user_id, $branch_id, $id)
     {
         if (!session()->has('branchManager')) {
@@ -515,46 +517,6 @@ class ManagerController extends Controller
         session(['id' => $deal->id]);
         return redirect()->route('viewDealPage', [$user_id, $branch_id]);
     }
-    // public function addDealProduct(Request $request)
-    // {
-    //     if (!session()->has('branchManager')) {
-    //         return redirect()->route('viewLoginPage');
-    //     }
-    //     $productDetails = [];
-    //     $index = 0;
-
-    //     $user_id = $request->user_id;
-    //     $branch_id = $request->branch_id;
-
-    //     while ($request->has("product_name_{$index}")) {
-    //         $productDetails[] = [
-    //             'product_id' => $request->input("product_id{$index}"),
-    //             'quantity' => $request->input("product_quantity_{$index}"),
-    //             'total_price' => $request->input("product_total_price_{$index}"),
-    //         ];
-    //         $index++;
-    //     }
-
-    //     $deal = Deal::find($request->id);
-
-    //     $deal->dealActualPrice = $request->input('currentDealPrice');
-    //     $deal->dealDiscountedPrice = $request->input('dealFinalPrice') . ' Pkr';
-
-    //     foreach ($productDetails as $productDetail) {
-    //         $handler = new handler();
-
-    //         $handler->deal_id = $request->id;
-    //         $handler->product_id = $productDetail['product_id'];
-    //         $handler->product_quantity = $productDetail['quantity'];
-    //         $handler->product_total_price = $productDetail['total_price'];
-
-    //         $handler->save();
-    //     }
-
-    //     $deal->save();
-
-    //     return redirect()->route('viewDealPage', [$user_id, $branch_id]);
-    // }
 
     public function addDealProduct(Request $request)
     {
@@ -1114,7 +1076,7 @@ class ManagerController extends Controller
         $branches = Branch::where('id', $branch_id)->get();
         $staff = User::with('branch')
             ->where('branch_id', $branch_id)
-            ->whereIn('role', ['salesman', 'chef', 'branchManager'])
+            ->whereIn('role', ['salesman', 'chef', 'rider','branchManager'])
             ->get();
         return view('Manager.Staff')->with(['Staff' => $staff, 'branches' => $branches, 'ThemeSettings' => $settings]);
     }

@@ -149,6 +149,7 @@
                     <option value="" selected disabled>Select the Role</option>
                     <option value="salesman">Sales Man</option>
                     <option value="chef">Chef</option>
+                    <option value="rider">Rider</option>
                 </select>
             </div>
 
@@ -230,6 +231,7 @@
                 <select name="role" id="editrole">
                     <option value="salesman">Sales Man</option>
                     <option value="chef">Chef</option>
+                    <option value="rider">Rider</option>
                 </select>
             </div>
 

@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Models\tax;
 use App\Models\Discount;
 use App\Models\Recipe;
+use App\Models\Rider;
 use App\Models\Stock;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request;
@@ -28,111 +29,12 @@ use Illuminate\Pagination\Paginator;
 
 class SalesmanController extends Controller
 {
-    // public function viewSalesmanDashboard($id, $branch_id)
-    // {
-    //     if (!session()->has('salesman')) {
-    //         return redirect()->route('viewLoginPage');
-    //     }
-
-    //     // Start time measurement
-    //     $startTime = microtime(true);
-
-    //     // Cache key prefix
-    //     $cacheKeyPrefix = "salesman_dashboard_{$id}_{$branch_id}";
-
-    //     // Cache settings
-    //     $settings = Cache::remember("{$cacheKeyPrefix}_settings", 60, function () use ($branch_id) {
-    //         return ThemeSetting::where('branch_id', $branch_id)->with(['branch.users'])->first();
-    //     });
-
-    //     $products = Cache::remember("{$cacheKeyPrefix}_products", 60, function () use ($branch_id) {
-    //         return Product::where('branch_id', $branch_id)->paginate(10);
-    //     });
-
-    //     $categories = Cache::remember("{$cacheKeyPrefix}_categories", 60, function () use ($branch_id) {
-    //         return Category::where('branch_id', $branch_id)->get();
-    //     });
-
-    //     $branch = Cache::remember("{$cacheKeyPrefix}_branch", 60, function () use ($branch_id) {
-    //         return Branch::find($branch_id);
-    //     });
-
-    //     $discounts = Cache::remember("{$cacheKeyPrefix}_discounts", 60, function () use ($branch_id) {
-    //         return Discount::where('branch_id', $branch_id)->get();
-    //     });
-
-    //     $taxes = Cache::remember("{$cacheKeyPrefix}_taxes", 60, function () use ($branch_id) {
-    //         return Tax::where('branch_id', $branch_id)->get();
-    //     });
-
-    //     $payment_methods = Cache::remember("{$cacheKeyPrefix}_payment_methods", 60, function () use ($branch_id) {
-    //         return PaymentMethod::where('branch_id', $branch_id)->get();
-    //     });
-
-    //     // Queries that should not be cached
-    //     $tables = DineInTable::where('branch_id', $branch_id)->get();
-    //     $allOrders = Order::with(['salesman', 'items'])->where('branch_id', $branch_id)->where('salesman_id', $id)->get();
-    //     $onlineOrders = Order::with(['items', 'customers'])->where('ordertype', 'online')->get();
-    //     $cartproducts = Cart::with('dineInTable')->where('salesman_id', $id)->get();
-
-    //     $deals = Cache::remember("{$cacheKeyPrefix}_deals", 60, function () use ($branch_id) {
-    //         return Handler::where(function ($query) use ($branch_id) {
-    //             $query->whereHas('product', function ($query) use ($branch_id) {
-    //                 $query->where('branch_id', $branch_id);
-    //             })
-    //             ->orWhereHas('deal', function ($query) use ($branch_id) {
-    //                 $query->where('branch_id', $branch_id);
-    //             });
-    //         })
-    //         ->with([
-    //             'product' => function ($query) use ($branch_id) {
-    //                 $query->where('branch_id', $branch_id);
-    //             }
-    //         ])
-    //         ->with('deal')
-    //         ->paginate(10);
-    //     });
-
-    //     $filteredCategories = $categories->filter(function ($category) use ($products) {
-    //         return $products->contains('category_id', $category->id) && $category->categoryName !== 'Addons';
-    //     });
-
-    //     $filteredProducts = $products->reject(function ($product) {
-    //         return $product->category_name === 'Addons';
-    //     });
-
-    //     // End time measurement
-    //     $endTime = microtime(true);
-    //     $executionTime = $endTime - $startTime;
-    //     $formattedExecutionTime = number_format($executionTime, 2) . 's';
-
-    //     // Log the execution time
-    //     Log::info('DataBase execution time: ' .  $formattedExecutionTime . ' seconds');
-
-    //     return view('Sale Assistant.Dashboard')->with([
-    //         'Products' => $filteredProducts,
-    //         'Deals' => $deals,
-    //         'Categories' => $filteredCategories,
-    //         'AllProducts' => $products,
-    //         'staff_id' => $id,
-    //         'branch_id' => $branch_id,
-    //         'cartProducts' => $cartproducts,
-    //         'taxes' => $taxes,
-    //         'discounts' => $discounts,
-    //         'payment_methods' => $payment_methods,
-    //         'branch_data' => $branch,
-    //         'orders' => $allOrders,
-    //         'ThemeSettings' => $settings,
-    //         'dineInTables' => $tables,
-    //         'onlineOrders' => $onlineOrders,
-    //         'executionTime' => $formattedExecutionTime
-    //     ]);
-    // }
-    public function viewSalesmanDashboard($id, $branch_id){
+    public function viewSalesmanDashboard($id, $branch_id)
+    {
         if (!session()->has('salesman')) {
             return redirect()->route('viewLoginPage');
         }
-    
+
         $startTime = microtime(true);
         $settings = ThemeSetting::where('branch_id', $branch_id)->with(['branch.users'])->first();
         $products = Product::where('branch_id', $branch_id)->paginate(40); // Paginate products here 
@@ -142,36 +44,36 @@ class SalesmanController extends Controller
         $discounts = Discount::where('branch_id', $branch_id)->get();
         $taxes = tax::where('branch_id', $branch_id)->get();
         $payment_methods = PaymentMethod::where('branch_id', $branch_id)->get();
-    
+
         $tables = DineInTable::where('branch_id', $branch_id)->get();
         $allOrders = Order::with(['salesman', 'items'])->where('branch_id', $branch_id)->where('salesman_id', $id)->get();
-        $onlineOrders = Order::with(['items', 'customers'])->where('ordertype', 'online')->get();
+        $onlineOrders = Order::with(['items', 'customers'])->where('ordertype', 'online')->whereNot('status', [1,3])->get();
         $cartproducts = Cart::with('dineInTable')->where('salesman_id', $id)->get();
-    
+
         $deals = handler::where(function ($query) use ($branch_id) {
             $query->whereHas('product', function ($query) use ($branch_id) {
                 $query->where('branch_id', $branch_id);
             })
-            ->orWhereHas('deal', function ($query) use ($branch_id) {
-                $query->where('branch_id', $branch_id);
-            });
+                ->orWhereHas('deal', function ($query) use ($branch_id) {
+                    $query->where('branch_id', $branch_id);
+                });
         })
-        ->with([
-            'product' => function ($query) use ($branch_id) {
-                $query->where('branch_id', $branch_id);
-            }
-        ])
-        ->with('deal')
-        ->get();
-    
+            ->with([
+                'product' => function ($query) use ($branch_id) {
+                    $query->where('branch_id', $branch_id);
+                }
+            ])
+            ->with('deal')
+            ->get();
+
         $endTime = microtime(true);
         $executionTime = $endTime - $startTime;
         $formattedExecutionTime = number_format($executionTime, 2) . 's';
-    
+
         Log::info('DataBase execution time: ' .  $formattedExecutionTime . ' seconds');
-    
+
         return view('Sale Assistant.Dashboard')->with([
-            'Products' => $products, // Pass the paginated products directly
+            'Products' => $products,
             'Deals' => $deals,
             'Categories' => $categories,
             'addons' =>  $addons,
@@ -190,7 +92,7 @@ class SalesmanController extends Controller
             'executionTime' => $formattedExecutionTime
         ]);
     }
-    
+
     public function salesmanCategoryDashboard($categoryName, $id, $branch_id)
     {
         if (!session()->has('salesman')) {
@@ -198,7 +100,7 @@ class SalesmanController extends Controller
         }
 
         $settings = ThemeSetting::where('branch_id', $branch_id)->with(['branch.users'])->first();
-        $allProducts = Product::where('branch_id', $branch_id)->paginate(50); 
+        $allProducts = Product::where('branch_id', $branch_id)->paginate(50);
         $addons =  Product::where('branch_id', $branch_id)->whereIn('category_name', ['Addons', 'addons', 'Addon', 'addon'])->get();
         $categories = Category::where('branch_id', $branch_id)->whereNotIn('categoryName', ['Addons', 'addons', 'Addon', 'addon'])->get();
 
@@ -217,12 +119,13 @@ class SalesmanController extends Controller
         if ($categoryName != 'Addons') {
 
             if ($categoryName == 'Deals') {
+                $products = Product::where('branch_id', $branch_id)->get();
                 return view('Sale Assistant.Dashboard')->with([
                     'Products' => null,
                     'Deals' => $deals,
                     'addons' =>  $addons,
                     'Categories' => $categories,
-                    // 'AllProducts' => $allProducts,
+                    'AllProducts' => $products,
                     'staff_id' => $id,
                     'branch_id' => $branch_id,
                     'cartProducts' => $cartproducts,
@@ -237,7 +140,7 @@ class SalesmanController extends Controller
                 ]);
             } else {
                 $products = Product::where('branch_id', $branch_id)->where('category_name', $categoryName)->paginate(50);
-                
+
                 return view('Sale Assistant.Dashboard')->with([
                     'Products' => $products,
                     'Deals' => $deals,
@@ -278,6 +181,14 @@ class SalesmanController extends Controller
             ->get();
 
         return $deals;
+    }
+
+    // Search Function
+    public function search(Request $request)
+    {
+        $query = $request->query('query');
+        $products = Product::where('productName', 'like', '%' . $query . '%')->get();
+        return response()->json($products);
     }
 
     public function addNewProductToDineInOrder($order_Number, $table_id)
@@ -538,9 +449,9 @@ class SalesmanController extends Controller
         $table_id = $CartedData['table_id'] ?? null;
         // Fetch currently serving products for the given table and salesman
         $servingProducts = Cart::where('table_id', $table_id)
-        ->where('salesman_id', $salesman_id)
-        ->whereNull('order_status')
-        ->get();
+            ->where('salesman_id', $salesman_id)
+            ->whereNull('order_status')
+            ->get();
 
         $order_number = $servingProducts->isNotEmpty() ? $servingProducts->first()->order_number : null;
         foreach ($CartedData as $item) {
@@ -565,16 +476,16 @@ class SalesmanController extends Controller
                 $productVariation
             ) {
                 return $servingProduct->product_id == $product_id &&
-                $servingProduct->productName == $productName &&
-                $servingProduct->productAddon == $productAddon &&
-                $servingProduct->productVariation == $productVariation;
+                    $servingProduct->productName == $productName &&
+                    $servingProduct->productAddon == $productAddon &&
+                    $servingProduct->productVariation == $productVariation;
             });
 
             // If already in serving products, skip this product
             if ($isAlreadyServed) {
                 continue;
             }
-     
+
             // Create new product entry in the cart
             $productOrder = new Cart();
             $productOrder->salesman_id = $salesman_id;
@@ -593,7 +504,6 @@ class SalesmanController extends Controller
             $productOrder->save();
         }
     }
-
 
     public function deductStock($order_id)
     {
@@ -782,6 +692,42 @@ class SalesmanController extends Controller
         }
     }
 
+    public function assignToRider($branch_id, $staff_id, $order_id)
+    {
+        if (!session()->has('salesman')) {
+            return redirect()->route('viewLoginPage');
+        }
+        $riders = User::where('branch_id', $branch_id)->with('rider')->where('role', 'rider')->get();
+        return view('Sale Assistant.ShowRider')->with([
+            'Riders' => $riders,
+            'Order_id' => $order_id,
+            'Salesman_id' => $staff_id,
+            'Branch_id' => $branch_id
+        ]);
+    }
+
+    public function assignOrder($branch_id, $rider_id, $order_id, $salesman_id)
+    {
+        $order = Order::find($order_id);
+        if (!$order) {
+            return redirect()->back()->with('error', 'Order not found');
+        }
+
+        $rider = Rider::find($rider_id);
+        if (!$rider) {
+            return redirect()->back()->with('error', 'Rider not found');
+        }
+
+        $order->assign_to_rider = $rider_id;
+        $order->status = 1;
+        $order->save();
+
+        $rider->status = 0;
+        $rider->save();
+
+        return redirect()->route('salesman_dashboard', [$salesman_id, $branch_id])->with('success', 'Order successfully assign to rider.');
+    }
+
     public function getNotificationData()
     {
         try {
@@ -849,396 +795,3 @@ unlink($customerPdfPath);
 unlink($kitchenPdfPath);
 
 return response()->download($combinedPdfPath)->deleteFileAfterSend(true);*/
-
-
-// public function viewSalesmanDashboard($id, $branch_id){
-//     if (!session()->has('salesman')) {
-//         return redirect()->route('viewLoginPage');
-//     }
-//   $startTime = microtime(true);
-//     $settings = ThemeSetting::where('branch_id', $branch_id)->with(['branch.users'])->first();
-//     $products = Product::where('branch_id', $branch_id)->get();
-//     $categories = Category::where('branch_id', $branch_id)->get();
-//     $branch = Branch::find($branch_id);
-//     $discounts = Discount::where('branch_id', $branch_id)->get();
-//     $taxes = tax::where('branch_id', $branch_id)->get();
-//     $payment_methods = PaymentMethod::where('branch_id', $branch_id)->get();
-
-//     $tables = DineInTable::where('branch_id', $branch_id)->get();
-//     $allOrders = Order::with(['salesman', 'items'])->where('branch_id', $branch_id)->where('salesman_id', $id)->get();
-//     $onlineOrders = Order::with(['items', 'customers'])->where('ordertype', 'online')->get();
-//     $cartproducts = Cart::with('dineInTable')->where('salesman_id', $id)->get();
-
-//     $deals = handler::where(function ($query) use ($branch_id) {
-//         $query->whereHas('product', function ($query) use ($branch_id) {
-//             $query->where('branch_id', $branch_id);
-//         })
-//             ->orWhereHas('deal', function ($query) use ($branch_id) {
-//                 $query->where('branch_id', $branch_id);
-//             });
-//     })
-//         ->with([
-//             'product' => function ($query) use ($branch_id) {
-//                 $query->where('branch_id', $branch_id);
-//             }
-//         ])
-//         ->with('deal')
-//         ->get();
-
-//     $filteredCategories = $categories->filter(function ($category) use ($products) {
-//         return $products->contains('category_id', $category->id) && $category->categoryName !== 'Addons';
-//     });
-
-//     $filteredProducts = $products->reject(function ($product) {
-//         return $product->category_name === 'Addons';
-//     });
-
-//     $endTime = microtime(true);
-//     $executionTime = $endTime - $startTime;
-//     $formattedExecutionTime = number_format($executionTime, 2) . 's';
-
-//     Log::info('DataBase execution time: ' .  $formattedExecutionTime . ' seconds');
-
-//     return view('Sale Assistant.Dashboard')->with([
-//         'Products' => $filteredProducts,
-//         'Deals' => $deals,
-//         'Categories' => $filteredCategories,
-//         'AllProducts' => $products,
-//         'staff_id' => $id,
-//         'branch_id' => $branch_id,
-//         'cartProducts' => $cartproducts,
-//         'taxes' => $taxes,
-//         'discounts' => $discounts,
-//         'payment_methods' => $payment_methods,
-//         'branch_data' => $branch,
-//         'orders' => $allOrders,
-//         'ThemeSettings' => $settings,
-//         'dineInTables' => $tables,
-//         'onlineOrders' => $onlineOrders,
-//         'executionTime' => $formattedExecutionTime
-//     ]);
-// }
-
-
-
-// public function placeOrder($salesman_id, Request $request)
-// {
-//     if (!session()->has('salesman')) {
-//         return redirect()->route('viewLoginPage');
-//     }
-
-//     $servingProducts = Cart::where('salesman_id', $salesman_id)->whereNull('order_status')->whereNotNull('order_number')->whereNotNull('table_id')->get();
-//     if ($servingProducts->isEmpty()) {
-//         return redirect()->back()->with('error', 'No products currently being served.');
-//     }
-
-//     $order_number = $servingProducts->groupBy('order_number')->keys()->first();
-//     $table_id = $servingProducts->groupBy('table_id')->keys()->first();
-
-//     dd($request->all(), $order_number, $table_id, $servingProducts);
-
-//     $ordertype = $request->input('orderType');
-//     $table_id = null;
-
-//     if ($ordertype == 'Dine-In') {
-//         $table_id = $request->input('table_number');
-//         $table = DineInTable::find($table_id);
-//         $table->table_status = 0;
-//         $table->save();
-
-//         if (empty($table_id)) {
-//             return redirect()->back()->with('error', 'Table number is required for Dine-In orders.');
-//         }
-//     }
-
-//     $cartedProducts = Cart::where('salesman_id', $salesman_id)->get();
-//     if ($ordertype !== 'Dine-In' && $cartedProducts->whereNull('order_status')->isEmpty()) {
-//         return redirect()->back()->with('error', 'Select Product First');
-//     }
-
-//     // $servingProducts = Cart::whereNull('order_status')->whereNotNull('order_number')->whereNotNull('table_id')->get();
-//     // if ($servingProducts->isEmpty()) {
-//     //     return redirect()->back()->with('error', 'No products currently being served.');
-//     // }
-
-
-//     $user = User::with('branch')->find($salesman_id);
-//     $branch_initial = $user->branch->branch_initials;
-//     $lastOrder = Order::where('branch_id', $user->branch_id)->orderBy('id', 'desc')->first();
-
-//     $newOrderNumber = $this->generateOrderNumber($lastOrder, $branch_initial);
-
-//     $order = new Order();
-//     $order->order_number = $newOrderNumber;
-//     $order->salesman_id = $salesman_id;
-//     $order->branch_id = $user->branch_id;
-//     $order->total_bill = 0.0;
-//     $order->taxes = $request->input('totaltaxes');
-//     $order->discount = $request->input('discount');
-//     $order->discount_reason = $request->input('discount_reason');
-//     $order->discount_type = $request->input('discount_type');
-//     $order->payment_method = $request->input('payment_method');
-
-//     if ($ordertype == 'Dine-In') {
-//         $order->table_id = $table_id;
-//         $order->received_cash = null;
-//     } else {
-//         $order->received_cash = $request->input('recievecash');
-//     }
-
-//     $order->ordertype = $ordertype;
-//     $order->save();
-
-//     $totalBill = 0.0;
-//     foreach ($cartedProducts as $cartItem) {
-//         $totalProductPrice = floatval(str_replace('Rs. ', '', $cartItem->totalPrice));
-//         $quantity = intval($cartItem->productQuantity);
-//         $totalBill += $totalProductPrice;
-
-//         if ($ordertype == 'Dine-In') {
-//             Cart::whereNull('order_number')->update([
-//                 'table_id' => $table_id,
-//                 'order_number' => $newOrderNumber,
-//                 'order_status' => 0,
-//             ]);
-//         }
-
-//         $orderItem = new OrderItem();
-//         $orderItem->order_id = $order->id;
-//         $orderItem->order_number = $newOrderNumber;
-//         $orderItem->product_id = $cartItem->product_id;
-//         $orderItem->product_name = $cartItem->productName;
-//         $orderItem->product_variation = $cartItem->productVariation;
-//         $orderItem->addons = $cartItem->productAddon;
-//         $orderItem->product_price = 'Rs. ' . ($totalProductPrice / $quantity);
-//         $orderItem->product_quantity = $quantity;
-//         $orderItem->total_price = $cartItem->totalPrice;
-//         $orderItem->save();
-//     }
-
-//     $discount = $request->input('discount');
-//     $discount_type = $request->input('discount_type');
-//     if ($discount_type == "%") {
-//         $discountValue = (float) (($discount / 100) * $totalBill);
-//         $totalBill = $totalBill - $discountValue;
-//     } elseif ($discount_type == "-") {
-//         $totalBill = $totalBill - $discount;
-//     }
-//     $totalBill += $request->input('totaltaxes');
-//     $order->total_bill = 'Rs. ' . $totalBill;
-//     $order->save();
-
-//     if ($ordertype !== 'Dine-In') {
-//         foreach ($cartedProducts as $cartItem) {
-//             if ($cartItem->order_status !== 0) {
-//                 $cartItem->delete();
-//             }
-//         }
-//     }
-//     $this->deductStock($order->id);
-//     $orderData = Order::with(['salesman.branch'])->find($order->id);
-
-//     $products = OrderItem::where('order_id', $order->id)->get();
-//     $customerRecipt = view('reciept', ['products' => $products, 'orderData' => $orderData])->render();
-//     $dompdf = new Dompdf();
-//     $dompdf->loadHtml($customerRecipt);
-//     $height = $dompdf->getCanvas()->get_height();
-//     $dompdf->setPaper([0, 0, 300, $height / 2], 'portrait');
-//     $dompdf->render();
-//     $output = $dompdf->output();
-//     $pdfFileName = $order->order_number . '.pdf';
-//     $pdfFilePath = public_path('PDF/' . $pdfFileName);
-//     file_put_contents($pdfFilePath, $output);
-//     return redirect()->back()->with([
-//         'success' => 'Order placed successfully.',
-//         'pdf_filename' => $pdfFileName
-//     ]);
-// }
-
-
-
-
-
-// public function placeOrder($salesman_id, Request $request)
-// {
-//     if (!session()->has('salesman')) {
-//         return redirect()->route('viewLoginPage');
-//     }
-//     $newOrderNumber = 0;
-//     $user = User::with('branch')->find($salesman_id);
-//     $branch_initial = $user->branch->branch_initials;
-//     $lastOrder = Order::where('branch_id', $user->branch_id)->orderBy('id', 'desc')->first();
-//     if ($lastOrder) {
-//         $lastOrderNumber = intval(substr($lastOrder->order_number, 3));
-//         $newOrderNumber = $branch_initial . '-' . sprintf('%03d', $lastOrderNumber + 1);
-//     } else {
-//         $newOrderNumber = "$branch_initial-100";
-//     }
-
-//     $order = new Order();
-//     $cartedProducts = Cart::with('salesman')->where('salesman_id', $salesman_id)->get();
-//     if (!$cartedProducts->isEmpty()) {
-//         $user = User::find($salesman_id);
-//         $totalBill = 0.0;
-
-//         $order->order_number = $newOrderNumber;
-//         $order->salesman_id = $salesman_id;
-//         $order->branch_id = $user->branch_id;
-//         $order->total_bill = $totalBill;
-//         $order->taxes = $request->input('totaltaxes');
-//         $order->discount = $request->input('discount');
-//         $order->discount_reason = $request->input('discount_reason');
-//         $order->discount_type = $request->input('discount_type');
-//         $order->payment_method = $request->input('payment_method');
-//         $order->received_cash = $request->input('recievecash');
-//         $order->return_change = $request->input('change');
-//         $order->ordertype = $request->input('orderType');
-//         $order->save();
-
-//         foreach ($cartedProducts as $cartItem) {
-//             preg_match('/\d+(\.\d+)?/', $cartItem->totalPrice, $matches);
-//             $numericPart = $matches[0];
-//             $totalProductPrice = floatval($numericPart);
-//             $quantity = intval($cartItem->productQuantity);
-//             $totalBill += $totalProductPrice;
-
-//             $orderItem = new OrderItem();
-//             $orderItem->order_id = $order->id;
-//             $orderItem->order_number = $newOrderNumber;
-//             $orderItem->product_id = $cartItem->product_id;
-//             $orderItem->product_name = $cartItem->productName;
-//             $orderItem->product_variation = $cartItem->productVariation;
-//             $orderItem->addons = $cartItem->productAddon;
-//             $orderItem->product_price = 'Rs. ' . ($totalProductPrice / $quantity);
-//             $orderItem->product_quantity = $quantity;
-//             $orderItem->total_price = $cartItem->totalPrice;
-//             $orderItem->save();
-//         }
-
-//         foreach ($cartedProducts as $cartItem) {
-//             $cartItem->delete();
-//         }
-
-//         $discount = $request->input('discount');
-//         $discount_type = $request->input('discount_type');
-//         if ($discount_type == "%") {
-//             $discountValue = (float) (($discount / 100) * $totalBill);
-//             $totalBill = $totalBill - $discountValue;
-//         } elseif ($discount_type == "-") {
-//             $totalBill = $totalBill - $discount;
-//         }
-//         $totalBill += $request->input('totaltaxes');
-//         $order->total_bill = 'Rs. ' . $totalBill;
-//         $order->save();
-
-//         $this->deductStock($order->id);
-//         $orderData = Order::with(['salesman.branch'])->find($order->id);
-
-//         $products = OrderItem::where('order_id', $order->id)->get();
-//         $customerRecipt = view('reciept', ['products' => $products, 'orderData' => $orderData])->render();
-//         $dompdf = new Dompdf();
-//         $dompdf->loadHtml($customerRecipt);
-//         $height = $dompdf->getCanvas()->get_height();
-//         $dompdf->setPaper([0, 0, 300, $height / 2], 'portrait');
-//         $dompdf->render();
-//         $output = $dompdf->output();
-//         $pdfFileName = $order->order_number . '.pdf';
-//         $pdfFilePath = public_path('PDF/' . $pdfFileName);
-//         file_put_contents($pdfFilePath, $output);
-//         return redirect()->back()->with([
-//             'success' => 'Order placed successfully.',
-//             'pdf_filename' => $pdfFileName
-//         ]);
-//     } else {
-//         return redirect()->back()->with('error', 'Select Product First');
-//     }
-// }
-
-
-
-
-//     public function saveToCart($CartedData)
-//     {
-//         if (!session()->has('salesman')) {
-//             return redirect()->route('viewLoginPage');
-//         }
-// dd($CartedData);
-//         $savedOrder = Cart::whereNotNull(['table_id', 'order_number'])
-//         ->whereNull('order_status')
-//         ->get();
-
-//         $order_Number = null;
-//         $table_id = null;
-
-//         if (!$savedOrder->isEmpty()) {
-//             foreach ($savedOrder as $order) {
-//                 $order_Number = $order->order_number;
-//                 $table_id = $order->table_id;
-//             }
-//         }
-
-//         $salesman_id = $request->input('salesman_id');
-//         $branch_id = $request->input('branch_id');
-
-//         $drinkFlavour = explode(' (Rs. ', rtrim($request->input('drinkFlavour'), ')'));
-//         $addon = explode(' (Rs. ', rtrim($request->input('addOn'), ')'));
-//         $variations = explode(' (Rs. ', rtrim($request->input('prodVariation'), ')'));
-
-//         $product_id = $request->input('product_id');
-//         $productName = $request->input('productname');
-//         $productPrice = $request->input('productprice');
-//         $productAddon = $addon[0] ?? null;
-//         $addonPrice = isset($addon[1]) ? 'Rs. ' . $addon[1] : null;
-//         $parts = explode('-', $variations[0]);
-//         $productVariation = $parts[1] ?? null;
-//         $variationPrice = isset($variations[1]) ? 'Rs. ' . $variations[1] : null;
-//         $drinkFlavour = $drinkFlavour[0] ?? null;
-//         $drinkFlavourPrice = isset($drinkFlavour[1]) ? 'Rs. ' . $drinkFlavour[1] : null;
-//         $productQuantity = (int) $request->input('prodQuantity');
-
-//         $totalPrice = (float) str_replace('Rs. ', '', $request->input('totalprice'));
-
-//         $existingProductOrder = Cart::where('salesman_id', $salesman_id)
-//             ->where('branch_id', $branch_id)
-//             ->where('product_id', $product_id)
-//             ->where('table_id', $table_id)
-//             ->where('order_number', $order_Number)
-//             ->where('productName', $productName)
-//             ->where('productPrice', $productPrice)
-//             ->where('productAddon', $productAddon)
-//             ->where('addonPrice', $addonPrice)
-//             ->where('productVariation', $productVariation)
-//             ->where('variationPrice', $variationPrice)
-//             ->where('drinkFlavour', $drinkFlavour)
-//             ->where('drinkFlavourPrice', $drinkFlavourPrice)
-//             ->first();
-
-//         if ($existingProductOrder) {
-//             $existingTotalPrice = (float) str_replace('Rs. ', '', $existingProductOrder->totalPrice);
-//             $existingProductOrder->productQuantity += $productQuantity;
-//             $existingProductOrder->totalPrice = 'Rs. ' . ($existingTotalPrice + $totalPrice);
-//             $existingProductOrder->save();
-//         } else {
-//             $productOrder = new Cart();
-//             $productOrder->salesman_id = $salesman_id;
-//             $productOrder->branch_id = $branch_id;
-//             $productOrder->product_id = $product_id;
-
-//             $productOrder->table_id = $table_id;
-//             $productOrder->order_number = $order_Number;
-
-//             $productOrder->productName = $productName;
-//             $productOrder->productPrice = $productPrice;
-//             $productOrder->productAddon = $productAddon;
-//             $productOrder->addonPrice = $addonPrice;
-//             $productOrder->productVariation = $productVariation;
-//             $productOrder->variationPrice = $variationPrice;
-//             $productOrder->drinkFlavour = $drinkFlavour;
-//             $productOrder->drinkFlavourPrice = $drinkFlavourPrice;
-//             $productOrder->productQuantity = $productQuantity;
-//             $productOrder->totalPrice = 'Rs. ' . $totalPrice;
-//             $productOrder->save();
-//         }
-
-//         return redirect()->route('salesman_dashboard', ['id' => $salesman_id, 'branch_id' => $branch_id]);
-//     }

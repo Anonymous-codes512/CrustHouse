@@ -57,4 +57,8 @@ class User extends Authenticatable
         return $this->belongsTo(Branch::class);
         // return $this->has(Branch::class);
     }
+    public function rider()
+    {
+        return $this->hasOne(Rider::class);
+    }
 }

@@ -1,7 +1,15 @@
-order status
-
+order status:
 1 for Complete Order.
 2 for Pending Order.
 3 for Cancel Order.
 4 for Online Order Confirm by Salesman.
-5 for Order Ready by the Chef
+5 for Order Ready by the Chef.
+
+rider status:
+1 for Available.
+0 for Not Available.
+
+Delivered Order Status:
+-1 for Cancelled.
+0 for Pending delivery.
+1 for Complete delivery.

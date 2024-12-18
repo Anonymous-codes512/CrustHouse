@@ -63,10 +63,11 @@
     <input id="orderNo" type="hidden" value="1">
     <main id="salesman">
         @php
-            $allProducts = $Products;
+            $allProducts = $Products ? $Products->items() : $Products;
             $staff_id = $staff_id;
             $branch_id = $branch_id;
             $addons = $addons;
+
             $servingProducts = $cartProducts
                 ->filter(function ($product) {
                     return $product->order_status === 0;
@@ -90,19 +91,23 @@
                 }
             }
         @endphp
-
+        <script>
+            var allProducts = @json($allProducts);
+            var addons = @json($addons);
+        </script>
         <div id="productsSide">
             <div id="category_bar">
-                <div onclick="selectCategory('{{ route('salesman_dashboard', [$staff_id, $branch_id]) }}', this)">
+                <div onclick="selectCategory(`{{ route('salesman_dashboard', [$staff_id, $branch_id]) }}`, this)">
                     <a id="all_category" class="category_link">All</a>
                 </div>
+
                 @foreach ($Categories as $category)
                     <div
-                        onclick="selectCategory('{{ route('salesman_dash', [$category->categoryName, $staff_id, $branch_id]) }}', this)">
+                        onclick="selectCategory(`{{ route('salesman_dash', [$category->categoryName, $staff_id, $branch_id]) }}`, this)">
                         <a class="category_link">{{ $category->categoryName }}</a>
                     </div>
                 @endforeach
-                <div onclick="selectCategory('{{ route('salesman_dash', ['Deals', $staff_id, $branch_id]) }}', this)">
+                <div onclick="selectCategory(`{{ route('salesman_dash', ['Deals', $staff_id, $branch_id]) }}` , this)">
                     <a class="category_link">Deals</a>
                 </div>
             </div>
@@ -114,7 +119,7 @@
                 @endphp
 
                 @if ($Products !== null)
-                    @foreach ($Products->items() as $product)
+                    @foreach ($Products as $product)
                         @if ($product->category_name !== 'Addons' && !in_array($product->productName, $displayedProductNames))
                             @php
                                 $displayedProductNames[] = $product->productName;
@@ -122,8 +127,8 @@
 
                             <div id="imageBox" class="imgbox"
                                 onclick="showProductAddToCart({{ json_encode($product) }} , {{ json_encode($allProducts) }}, {{ json_encode($addons) }})">
-                                <img rel="preload" src="{{ asset('Images/ProductImages/' . $product->productImage) }}" alt="Product"
-                                    loading="lazy" as="image">
+                                <img rel="preload" src="{{ asset('Images/ProductImages/' . $product->productImage) }}"
+                                    alt="Product" loading="lazy" as="image">
                                 <p class="product_name">{{ $product->productName }}</p>
                             </div>
                         @endif
@@ -136,9 +141,9 @@
                             @endphp
                             @if ($deal->deal->dealStatus != 'not active')
                                 <div id='imageBox' class="imgbox"
-                                    onclick="showDealAddToCart({{ json_encode($deal) }}, {{ json_encode($Deals) }}, {{ json_encode($allProducts) }})">
-                                    <img rel="preload" src="{{ asset('Images/DealImages/' . $deal->deal->dealImage) }}" alt="Product"
-                                        loading="lazy" as="image">
+                                    onclick="showDealAddToCart({{ json_encode($deal) }}, {{ json_encode($Deals) }}, {{ json_encode($AllProducts) }})">
+                                    <img rel="preload" src="{{ asset('Images/DealImages/' . $deal->deal->dealImage) }}"
+                                        alt="Product" loading="lazy" as="image">
                                     <p class="product_name">{{ $deal->deal->dealTitle }}</p>
                                 </div>
                             @endif
@@ -393,9 +398,7 @@
 
                     <div id="buttons">
                         <input type="submit" id="proceed" value="Proceed">
-                        <button onclick="window.location='{{ route('clearCart', $staff_id) }}'" type="button"
-                            id="clearCart">Clear
-                            Cart</button>
+                        <button type="button" id="clearCart" onclick="clearCartedItems()">Clear Cart</button>
                     </div>
                 </form>
             </div>
@@ -705,8 +708,7 @@
                                                 <i style="background-color:#4d4d4d; cursor: default;"
                                                     class='bx bx-check'></i>
                                             </a>
-                                            <a href="{{ route('confirmOnlineOrder', [$branch_id, $staff_id, $order->id]) }}"
-                                                title="Assign to Rider">
+                                            <a title="Assign to Rider" href="{{route('assignToRider', [$branch_id, $staff_id, $order->id])}}">
                                                 <i class='bx bxs-right-arrow-square'></i>
                                             </a>
                                         @else
@@ -844,7 +846,8 @@
         <div class="msg">
             <div class="msg1">
                 <div class="msg_img">
-                    <img rel="preload" src="{{ asset('Images/OnlineOrdering/addedcart.png') }}" alt="" loading="lazy" as="image">
+                    <img rel="preload" src="{{ asset('Images/OnlineOrdering/addedcart.png') }}" alt=""
+                        loading="lazy" as="image">
                 </div>
                 <div class="msg_text">
                     <span>Item Added to Cart</span>
@@ -889,7 +892,8 @@
                 // const response = await fetch("http://192.168.1.108:7000/getNotificationData");
                 // const response = await fetch("http://192.168.1.108:8000/getNotificationData");
                 // const response = await fetch("http://192.168.100.7:8000/getNotificationData");
-                const response = await fetch("http://192.168.100.7:7000/getNotificationData");
+                // const response = await fetch("http://192.168.100.7:7000/getNotificationData");
+                const response = await fetch("http://127.0.0.1:8000/getNotificationData");
                 const data = await response.json();
 
                 if (JSON.stringify(data.collection) !== JSON.stringify(previousData)) {
@@ -909,7 +913,7 @@
             try {
                 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                const response = await fetch(`http://192.168.100.7:7000/deleteOnlineNotification/${messageId}`, {
+                const response = await fetch(`http://127.0.0.1:8000/deleteOnlineNotification/${messageId}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': token,
@@ -966,19 +970,6 @@
 
         startCountdown();
 
-        // document.getElementById('serving_tables').addEventListener('change', function() {
-        //     const selectedTable = this.value;
-        //     if (selectedTable != 0) {
-        //         window.location.href = this.options[this.selectedIndex].getAttribute('data-url');
-        //     }
-        // });
-
-
-        // document.getElementById('deals_seperate_section_imgDiv').addEventListener('wheel', function(event) {
-        //     event.preventDefault();
-        //     this.scrollLeft += event.deltaY;
-        // });
-
         function selectCategory(route, element) {
             let categoryLinks = document.getElementsByClassName('category_link');
             for (let i = 0; i < categoryLinks.length; i++) {
@@ -1010,25 +1001,6 @@
                 }
             }
         };
-
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('search_bar');
-            const productDivs = document.querySelectorAll('#imageBox');
-
-            searchInput.addEventListener('input', function() {
-                const filter = searchInput.value.toLowerCase();
-                productDivs.forEach(function(div) {
-                    const productName = div.querySelector('.product_name').textContent
-                        .toLowerCase();
-                    if (productName.includes(filter)) {
-                        div.style.display = 'flex';
-                    } else {
-                        div.style.display = 'none';
-                    }
-                });
-            });
-        });
 
         document.addEventListener('DOMContentLoaded', () => {
             let search_input = document.getElementById('searchBar');
@@ -1130,5 +1102,37 @@
             document.getElementById('orderItems').style.display = 'none';
             document.getElementById('allOrdersDiv').style.display = 'flex';
         }
+
+        // Live Search on Database.
+        $(document).ready(function() {
+            $('#search_bar').on('input', function() {
+                let query = $(this).val();
+                $.ajax({
+                    url: '{{ route('search') }}',
+                    type: 'GET',
+                    data: {
+                        query: query
+                    },
+                    success: function(products) {
+                        allProducts = products;
+                        $('#products').html('');
+                        products.forEach(function(product) {
+                            if (product.category_name !== 'Addons') {
+                                $('#products').append(`
+                                    <div id="imageBox" class="imgbox" 
+                                        data-product='${JSON.stringify(product)}'
+                                        data-all-products='${JSON.stringify(allProducts)}'
+                                        data-addons='${JSON.stringify(addons)}'
+                                        onclick="showSearchProduct(this)">
+                                        <img rel="preload" src="{{ asset('Images/ProductImages/') }}/${product.productImage}" alt="Product" loading="lazy" as="image">
+                                        <p class="product_name">${product.productName}</p>
+                                    </div>
+                                `);
+                            }
+                        });
+                    }
+                });
+            });
+        });
     </script>
 @endsection

@@ -257,7 +257,7 @@
                         </div>
                     @endif
 
-                    <a href="{{ route('logout') }}" class="logout" onclick="clearCookies()">
+                    <a class="logout" onclick="logout('{{ route('logout') }}')">
                         <i class='bx bx-log-out-circle' title="logout"></i>
                     </a>
                     {{-- </div> --}}
@@ -265,7 +265,7 @@
             </header>
 
             <script>
-                function clearCookies() {
+                function logout(route) {
                     const cookies = document.cookie.split(";");
                     for (let i = 0; i < cookies.length; i++) {
                         const cookie = cookies[i];
@@ -273,7 +273,7 @@
                         const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
                         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
                     }
-                    window.location.href = "{{ route('logout') }}";
+                    window.location.href = route;
                 }
             </script>
 
