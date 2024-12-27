@@ -239,7 +239,8 @@ Route::get('/deleteReportPDF/{file_name}', [ManagerController::class, 'deleteRep
 |---------------------------------------------------------------|
 */
  
-Route::get('salesman/dashboard/{id}/{branch_id}', [SalesmanController::class,'viewSalesmanDashboard'])->name('salesman_dashboard')->middleware('log.execution');;
+// Route::get('salesman/dashboard/{id}/{branch_id}', [SalesmanController::class,'viewSalesmanDashboard'])->name('salesman_dashboard')->middleware('log.execution');;
+Route::get('salesman/dashboard/{id}/{branch_id}', [SalesmanController::class,'viewSalesmanDashboard'])->name('salesman_dashboard');
 Route::get('salesman/dashboard/{categoryName}/{id}/{branch_id}', [SalesmanController::class,'salesmanCategoryDashboard'])->name('salesman_dash');
 Route::get('salesman/deals/', [SalesmanController::class,'deals'])->name('deals');
 Route::post('salesman/placeOrder/{salesman_id}', [SalesmanController::class,'placeOrder'])->name('placeOrder');
