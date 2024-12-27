@@ -76,6 +76,7 @@
                     <th>Salesman</th>
                     {{-- <th>Chef</th> --}}
                     <th>Status</th>
+                    {{-- <th>Reason</th> --}}
                     <th>Action</th>
 
                 </tr>
@@ -88,7 +89,9 @@
                         <td>{{ $order->total_bill }}</td>
                         <td>{{ $order->salesman->name }}</td>
 
-                        @if ($order->status == 1)
+                        @if ($order->status == 0)
+                            <td class="status">Request for cancellation</td>
+                        @elseif ($order->status == 1)
                             <td class="status">Completed</td>
                         @elseif ($order->status == 2)
                             <td class="status">Pending</td>
@@ -100,9 +103,16 @@
                             <td class="status">order ready</td>
                         @endif
 
+                        {{-- @if ($order->status == 0)
+                        <td>{{$order->cancellation_reason}}</td>
+                        @else
+                        <td>Nill</td>
+                        @endif --}}
                         <td>
                             <a id="view" href="{{ route('viewOrderProducts', [$branch_id, $order->id]) }}">View</a>
-                            @if ($order->status == 1)
+                            @if ($order->status == 0)
+                                <a id="cancel-order" href="{{ route('cancelorder', [$order->id, $user_id]) }}">Cancel</a>
+                            @elseif ($order->status == 1)
                                 <a id="cancel-order" style="background-color:#4d4d4d; cursor: default;">Cancel</a>
                             @elseif($order->status == 2)
                                 <a id="cancel-order" href="{{ route('cancelorder', [$order->id, $user_id]) }}">Cancel</a>
@@ -113,11 +123,24 @@
                             @elseif($order->status == 5)
                                 <a id="cancel-order" href="{{ route('cancelorder', [$order->id, $user_id]) }}">Cancel</a>
                             @endif
+
+                            @if ($order->status == 0)
+                                <a id="view" style="cursor: pointer;" onclick="viewReason('{{$order->cancellation_reason}}')">View Reason</a>
+                            @endif
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
+
+        <div id="showCancellationReasonOverlay"></div>
+        <div id="showCancellationReason">
+            <h2>Reason for Order Cancellation.</h2>
+            <p id="reason">Customer reject the order due to bad food taste.</p>
+            <div id="btn-div">
+                <button onclick="closeCancellationReason()">Close</button>
+            </div>
+        </div>
 
         @if ($orderItems != null)
             <div id="orderItemsOverlay"></div>
@@ -167,7 +190,9 @@
             $('#ordersTable').DataTable({
                 "paging": true,
                 "lengthMenu": [5, 10, 25, 50, 100],
-                "order": [[0, "desc"]]
+                "order": [
+                    [0, "desc"]
+                ]
 
             });
         });
@@ -184,6 +209,17 @@
                 }
             });
         });
+
+        function viewReason(cancellation_reason){
+            document.getElementById('showCancellationReasonOverlay').style.display = 'block';
+            document.getElementById('showCancellationReason').style.display = 'flex';
+            document.getElementById('reason').textContent = cancellation_reason;
+        }
+
+        function closeCancellationReason(cancellation_reason){
+            document.getElementById('showCancellationReasonOverlay').style.display = 'none';
+            document.getElementById('showCancellationReason').style.display = 'none';
+        }
     </script>
 
 @endsection

@@ -77,9 +77,9 @@ table tbody tr td {
     font-size: 1.3vw;
 }
 
-table tbody tr td:last-child {
+/* table tbody tr td:last-child {
     text-align: center;
-}
+} */
 
 table tbody tr td a {
     padding: 0.3vw 0.6vw;
@@ -102,7 +102,8 @@ table tbody tr td a:hover {
     background-color: #a97e05;
 }
 
-#orderItemsOverlay {
+#orderItemsOverlay,
+#showCancellationReasonOverlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -112,8 +113,12 @@ table tbody tr td a:hover {
     display: block;
     z-index: 999;
 }
+#showCancellationReasonOverlay {
+    display: none;
+}
 
-#orderItems {
+#orderItems,
+#showCancellationReason {
     display: flex;
     justify-content: center;
     flex-direction: column;
@@ -129,6 +134,51 @@ table tbody tr td a:hover {
     z-index: 1000;
     justify-content: space-around;
     padding: 20px 30px;
+}
+#showCancellationReason {
+    display: none;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 0.75rem;
+    width: 50%;
+    height: 22%;
+}
+#showCancellationReason h2 {
+    margin: 0;
+    padding: 0;
+}
+
+#showCancellationReason p {
+    text-align: center;
+    color: #ed1728;
+}
+#showCancellationReason #btn-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+#showCancellationReason #btn-div button{
+    display: flex;
+    font-size: 1.2vw;
+    margin: 0.5vw;
+    border: none;
+    color: #fbfbfb;
+    background-color: #dc3545;
+    font-weight: 600;
+    font-size: 1rem;
+    white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    padding: 0.375rem 0.75rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+#showCancellationReason #btn-div button:hover {
+    background-color: #d21c2e;
 }
 
 #itemtable {
@@ -201,7 +251,6 @@ table tbody tr td a:hover {
 #printbtn:hover {
     background-color: #41bb41;
 }
-
 
 /* .truncate-text {
     white-space: nowrap;

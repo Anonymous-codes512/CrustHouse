@@ -43,7 +43,7 @@
                     @foreach ($orders as $order)
                         <tr>
                             <td>{{ $order->order_number }}</td>
-                            <td>{{ $order->customers->name }}</td>
+                            <td>{{ $order->customers->name ?? 'Unknown Customer' }}</td>
                             <td>{{ $order->order_address }}</td>
                             <td>{{ \Carbon\Carbon::parse($order->updated_at)->format('d-m-Y') }}</td>
                             <td>

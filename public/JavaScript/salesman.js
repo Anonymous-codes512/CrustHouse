@@ -859,7 +859,7 @@ function increaseCartedItemQuantity(index) {
 }
 
 function clearCartedItems() {
-    localStorage.removeItem('ProductsInCart');
+    localStorage.removeItem("ProductsInCart");
     displayProducts();
 }
 
@@ -1099,8 +1099,13 @@ function validateDiscount() {
     document.getElementById("cartItems").value =
         JSON.stringify(finalizeProducts);
 
-    let productDiv = document.getElementById("productdiv");
+    let order_type = document.getElementById("orderTypeHidden").value.trim();
+    if (order_type.toLowerCase() === "takeaway") {
+        showOrderTypeConfirmationPopUp();
+        return false;
+    }
 
+    let productDiv = document.getElementById("productdiv");
     if (productDiv === null) {
         alert("Select the Product First.");
         return false;
@@ -1289,4 +1294,60 @@ function addNewProductToDineInOrder(cartedProduct, route) {
     localStorage.setItem("ProductsInCart", JSON.stringify(ProductsInCart));
     displayProducts();
     window.location.href = route; // Use = instead of parentheses
+}
+
+function showOrderTypeConfirmationPopUp() {
+    document.getElementById("orderTypeConfirmationOverlay").style.display =
+        "block";
+    document.getElementById("orderTypeConfirmation").style.display = "flex";
+}
+function hideOrderTypeConfirmationPopUp() {
+    document.getElementById("orderTypeConfirmationOverlay").style.display =
+        "none";
+    document.getElementById("orderTypeConfirmation").style.display = "none";
+}
+
+function chnageOrderType() {
+    const form = document.getElementById("placeOrder");
+    const orderType = document.getElementById("type-confirmation").value;
+    if (orderType === "Takeaway - Rider") {
+        const requiredFields = document.querySelectorAll(
+            "#input-div input[required]"
+        );
+        let allValid = true;
+        requiredFields.forEach((field) => {
+            if (!field.value.trim()) {
+                allValid = false;
+                field.style.border = "1px solid red";
+            } else {
+                field.style.border = "";
+            }
+        });
+
+        if (!allValid) {
+            alert("Please fill all required fields.");
+            return false;
+        }
+        requiredFields.forEach((field) => {
+            hiddenField = document.createElement("input");
+            hiddenField.type = "hidden";
+            hiddenField.name = field.name;
+            hiddenField.value = field.value;
+            form.appendChild(hiddenField);
+        });
+        document.getElementById("orderTypeHidden").value = "online";
+    }
+    else{
+        document.getElementById("orderTypeHidden").value = "Takeaway - self";
+    }
+    validateDiscount();
+    hideOrderTypeConfirmationPopUp();
+}
+
+function toggleDetailsFields(selectElement) {
+    if (selectElement.value === "Takeaway - Rider") {
+        document.getElementById("input-div").style.display = "flex";
+    } else {
+        document.getElementById("input-div").style.display = "none";
+    }
 }

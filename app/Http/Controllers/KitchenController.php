@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ThemeSetting;
 use Dompdf\Dompdf;
+use Illuminate\Support\Facades\Log;
 
 class KitchenController extends Controller
 {
@@ -18,19 +19,19 @@ class KitchenController extends Controller
 
         // $branch = Branch::find($branch_id);
         $settings = ThemeSetting::where('branch_id', $branch_id)->with(['branch.users'])->first();
-       
+
         $newOrders = Order::with('items')
-        ->where('branch_id', $branch_id)
-        ->where(function ($query) {
-            $query->where('ordertype', 'online')
-                  ->where('status', 4)
-                  ->orWhere(function ($query) {
-                      $query->where('ordertype', '!=', 'online')
+            ->where('branch_id', $branch_id)
+            ->where(function ($query) {
+                $query->where('ordertype', 'online')
+                    ->where('status', 4)
+                    ->orWhere(function ($query) {
+                        $query->where('ordertype', '!=', 'online')
                             ->where('status', 2);
-                  });
-        })
-        ->get();
-    
+                    });
+            })
+            ->get();
+
         $completeOrders = Order::with('items')
             ->where('branch_id', $branch_id)
             ->where('status', 1)
@@ -75,5 +76,23 @@ class KitchenController extends Controller
         $dompdf->setPaper([0, 0, 300, $height / 2.5], 'portrait');
         $dompdf->render();
         $dompdf->stream($order->order_number . '.pdf');
+    }
+
+    public function getOrderNotification()
+    {
+        // Fetch the latest orders from the database (e.g., last 5 minutes or based on an updated column)
+        $latestOrders = Order::where('created_at', '>', now()->subMinutes(1))->get();
+        
+        if (!$latestOrders->isEmpty()) {
+            return response()->json([
+                'status' => 'success',
+                'collection' => $latestOrders,
+            ]);
+        }else{
+            return response()->json([
+                'status' => 'error',
+                'collection' => $latestOrders,
+            ]);
+        }
     }
 }

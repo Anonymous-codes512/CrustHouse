@@ -181,5 +181,46 @@
             document.getElementById('orderItemsOverlay').style.display = 'none';
             document.getElementById('orderItems').style.display = 'none';
         }
+
+        let interval = 60000;
+        let remainingTime = interval;
+        async function fetchData() {
+            try {
+                // const response = await fetch("http://192.168.1.108:7000/chef/getOrderNotification");
+                // const response = await fetch("http://192.168.1.108:8000/chef/getOrderNotification");
+                // const response = await fetch("http://192.168.100.7:8000/chef/getOrderNotification");
+                // const response = await fetch("http://192.168.100.7:7000/chef/getOrderNotification");
+                const response = await fetch("http://127.0.0.1:8000/chef/getOrderNotification");
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    window.location.reload();   
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function startCountdown() {
+            updateCountdown();
+            setInterval(() => {
+                if (remainingTime <= 0) {
+                    console.log('Fetching data...');
+                    fetchData();
+                    remainingTime = interval;
+                }
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    fetchData();
+                    remainingTime = interval;
+                }
+                updateCountdown();
+            }, 1000);
+        }
+
+        function updateCountdown() {
+            const seconds = Math.ceil(remainingTime / 1000);
+        }
+        startCountdown();
     </script>
 @endsection

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('order_number')->unique();
             $table->unsignedBigInteger('customer_id')->nullable();
-            $table->unsignedBigInteger('assign_to_rider')->default(1111);
+            $table->unsignedBigInteger('assign_to_rider')->nullable();
             $table->unsignedBigInteger('salesman_id')->nullable();
             $table->unsignedBigInteger('branch_id')->nullable();
             $table->unsignedBigInteger('table_id')->nullable();
@@ -33,6 +33,7 @@ return new class extends Migration
             $table->integer('status')->default('2')->nullable();
             $table->integer('delivery_status')->default('0')->nullable();
             $table->string('order_cancel_by')->nullable();
+            $table->string('cancellation_reason')->nullable();
 
             $table->foreign('assign_to_rider')->references('id')->on('riders');
             $table->foreign('table_id')->references('id')->on('dine_in_tables')->onDelete('cascade');

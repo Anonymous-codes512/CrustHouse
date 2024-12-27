@@ -94,7 +94,6 @@
     color: #ffbb00; /* Optional: change color for selected link */
 }
 
-
 #products {
     display: flex;
     flex-direction: row;
@@ -359,7 +358,7 @@
 
 .tablesList select {
     border: none;
-    border-radius: 0.50rem;
+    border-radius: 0.5rem;
     padding: 0.5vw;
     width: 95%;
     font-size: 0.8vw;
@@ -382,7 +381,7 @@
 .paymentfields input,
 .paymentfields select {
     border: none;
-    border-radius: 0.50rem;
+    border-radius: 0.5rem;
     padding: 0.5vw;
     width: 75%;
     font-size: 0.8vw;
@@ -405,7 +404,6 @@
     background-color: #007bff;
     color: white;
 }
-
 
 /* Adding transitions for a smoother visual effect */
 
@@ -574,8 +572,8 @@
     bottom: 0;
     background-color: #fff;
     border: 1px solid #00000065;
-    -webkit-transition: .4s;
-    transition: .4s;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
 }
 
 .slider:before {
@@ -586,24 +584,23 @@
     left: 2px;
     bottom: 1.5px;
     background-color: #fb0;
-    -webkit-transition: .4s;
-    transition: .4s;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
 }
 
-input:checked+.slider {
+input:checked + .slider {
     background-color: #fff;
 }
 
-input:focus+.slider {
-    box-shadow: 0 0 1px #2196F3;
+input:focus + .slider {
+    box-shadow: 0 0 1px #2196f3;
 }
 
-input:checked+.slider:before {
+input:checked + .slider:before {
     -webkit-transform: translateX(0.85vw);
     -ms-transform: translateX(0.85vw);
     transform: translateX(0.85vw);
 }
-
 
 /* Rounded sliders */
 
@@ -615,12 +612,13 @@ input:checked+.slider:before {
     border-radius: 50%;
 }
 
-
 /* Dine-In and online orders stylings */
 
 #dineInOrdersOverlay,
 #allOrdersOverlay,
-#onlineOrdersOverlay {
+#onlineOrdersOverlay,
+#confirmCancelOverlay,
+#orderTypeConfirmationOverlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -630,10 +628,15 @@ input:checked+.slider:before {
     display: none;
     z-index: 999;
 }
+#confirmCancelOverlay {
+    z-index: 9999;
+}
 
 #dineInOrdersDiv,
 #allOrdersDiv,
-#onlineOrdersDiv {
+#onlineOrdersDiv,
+#orderTypeConfirmation,
+#confirmCancel {
     display: none;
     flex-direction: column;
     background-color: #ffffff;
@@ -646,6 +649,122 @@ input:checked+.slider:before {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1000;
+}
+#orderTypeConfirmation {
+    width: 35%;
+    height: auto;
+    font-size: 0.75rem;
+}
+#orderTypeConfirmation select {
+    border-radius: 0.5rem;
+    padding: 0.5vw;
+    width: 95%;
+    margin: .25rem 0;
+}
+#orderTypeConfirmation #input-div {
+    display: none;
+    flex-direction: column;
+}
+#input-div .inputfields {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.75rem;
+    margin: .25rem 0;
+}
+
+#input-div .inputfields input {
+    border: 1px solid #999;
+    border-radius: 0.5rem;
+    padding: 0.35rem;
+    width: 95%;
+}
+
+#input-div .inputfields input:focus {
+    outline: none;
+}
+
+#typeConfirmation-btns {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#typeConfirmation-btns button {
+    display: flex;
+    font-size: 1.2vw;
+    margin: 0.5vw;
+    border: none;
+    color: #fbfbfb;
+    font-weight: 400;
+    white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    padding: 0.375rem 0.75rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+#typeConfirmation-btns #submit {
+    background-color: #217d36;
+}
+
+#typeConfirmation-btns #submit:hover {
+    background-color: #276e3d;
+}
+#typeConfirmation-btns #cancel {
+    background-color: #dc3545;
+}
+
+#typeConfirmation-btns #cancel:hover {
+    background-color: #d21c2e;
+}
+
+#confirmCancel {
+    width: 50%;
+    height: 35%;
+    z-index: 10000;
+}
+
+#cancellation-reason {
+    resize: none;
+}
+
+#confirmCancelationBtn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#confirmCancelationBtn button {
+    display: flex;
+    font-size: 1.2vw;
+    margin: 0.5vw;
+    border: none;
+    color: #fbfbfb;
+    font-weight: 400;
+    white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    padding: 0.375rem 0.75rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+#close-cancel-order {
+    background-color: #dc3545;
+}
+
+#close-cancel-order:hover {
+    background-color: #d21c2e;
+}
+
+#cancelOrder {
+    background-color: #217d36;
+}
+#cancelOrder:hover {
+    background-color: #276e3d;
 }
 
 #dineInOrdersDiv h3,
@@ -686,7 +805,7 @@ input:checked+.slider:before {
     width: 18%;
     box-sizing: border-box;
     border: 1px solid #353535;
-    border-radius: 0.50rem;
+    border-radius: 0.5rem;
     font-size: 12px;
     background-color: #fbfbfb;
     background-position: 10px 10px;
@@ -763,7 +882,7 @@ input:checked+.slider:before {
 .bxs-right-arrow-square {
     font-size: 1.5rem;
     color: #fff;
-    border-radius: 0.30rem;
+    border-radius: 0.3rem;
     padding: 0.2rem 0.6rem;
     margin-left: 0.1rem;
 }
@@ -793,6 +912,7 @@ input:checked+.slider:before {
     color: #fff;
     border-radius: 10px;
     background-color: #f45b69;
+    cursor: pointer;
 }
 
 #actionstd a:hover {
@@ -827,7 +947,8 @@ input:checked+.slider:before {
     border-radius: 0.25rem;
     cursor: pointer;
     padding: 0.375rem 0.75rem;
-    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 #closeBtn button:hover {
@@ -918,14 +1039,15 @@ input:checked+.slider:before {
     color: #fbfbfb;
     background-color: #bcbcbc;
     text-decoration: none;
-    font-weight: 400; 
+    font-weight: 400;
     white-space: nowrap;
     text-align: center;
     vertical-align: middle;
     border-radius: 0.25rem;
     cursor: pointer;
     padding: 0.375rem 0.75rem;
-    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+        border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 #closebtn:hover {

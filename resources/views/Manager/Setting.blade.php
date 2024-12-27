@@ -705,6 +705,26 @@
                         <input type="email" id="editemail" name="email" value="{{ $profile->email }}" required
                             readonly>
                     </div>
+                    <div class="inputdivs" style="width: 85%; margin: 0.4vw auto;">
+                        <label for="password">Password</label>
+                        <div class="passwordfield">
+                            <input type="password" id="password" name="password" placeholder="**********" required
+                                oninput="validatePassword()">
+                            <i class='bx bxs-show' onclick="showAndHideProfilePswd('password')"></i>
+                        </div>
+                    </div>
+        
+                    <div class="inputdivs" style="width: 85%; margin: 0.4vw auto;">
+                        <label for="cnfrmPswd">Confirm Password</label>
+                        <div class="passwordfield">
+                            <input type="password" id="cnfrmPswd" name="password_confirmation" placeholder="**********"
+                                required oninput="validatePassword()">
+                            <i class='bx bxs-show' onclick="showAndHideProfilePswd('cnfrmPswd')"></i>
+                        </div>
+                    </div>
+
+                    <div id="message" class="error"></div>
+                    
                     <div class="formBtns">
                         <button type="button" id="cancel-profile-update" onclick="hideUpdateProfile()">Cancel</button>
                         <input type="submit" value="Update Profile" id="profile-update">
@@ -712,101 +732,6 @@
                 </form>
             @endif
 
-            {{--  
-            |---------------------------------------------------------------|
-            |========================== Tables Settings ====================|
-            |---------------------------------------------------------------|
-            --}}
-
-            {{-- <button class="opt-buttons" onclick="showTablesSettings({{ json_encode($branchOptions) }})">Tables
-                Settings</button>
-            <div id="tableSettingsOverlay"></div>
-            <div class="tableSettings" id="tableSettings">
-                <h3>Tables Settings</h3>
-                <div id="Table">
-                    <div class="searchBarDiv">
-                     archBar" name="search" placeholder="Search by table number..."
-                            style="background-i   <div onclick="showAddTableForm()" id="add-table" href="">Add New Table</div>
-                        <input type="text" id="semage: url('{{ asset('Images/search.png') }}');">
-                    </div>
-                    <div id="tableDiv">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Table Number</th>
-                                    <th>Max Capacity</th>
-                                    <th>Table Status</th>
-                                    <th>Action</th>
-
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{-- @foreach ($orders as $order) -}}
-                                <tr class="table-row">
-                                    <td id="table-number">H1T1</td>
-                                    <td>6 Chairs</td>
-                                    <td>Available</td>
-                                    <td>
-                                        <a onclick="showEditTableForm()" title="Edit Table"><i
-                                                class='bx bxs-edit-alt'></i></a>
-                                        <a title="Delete Table"><i class='bx bxs-trash-alt'></i></a>
-                                    </td>
-                                </tr>
-                                {{-- @endforeach -}}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div id="closeBtn">
-                    <button id="closeTable" onclick="hideTablesSettings()">Close</button>
-                </div>
-            </div>
-            <form class="add-table-form" id="add-table-form" {{-- action="{{ route('updateStaff') }}" -}} method="POST"
-                enctype="multipart/form-data">
-                @csrf
-                <h3>Add New Table</h3>
-                <hr>
-
-                <div class="tableFormDiv">
-                    <label for="table-number">Table Number</label>
-                    <input type="text" id="table-number" name="table_number" placeholder="H1T1, H2T1 etc..."
-                        required>
-                </div>
-
-                <div class="tableFormDiv">
-                    <label for="table-max-capacity">Table Maximum Capacity</label>
-                    <input type="text" id="table-max-capacity" name="table_max_apacity" placeholder="4 Chairs,etc.."
-                        required>
-                </div>
-
-                <div class="tableFormBtns">
-                    <button type="button" class="cancelBtn" onclick="hideAddTableForm()">Cancel</button>
-                    <input type="submit" value="Add Table">
-                </div>
-            </form>
-            <form class="edit-table-form" id="edit-table-form" {{-- action="{{ route('updateStaff') }}" -}} method="POST"
-                enctype="multipart/form-data">
-                @csrf
-                <h3>Add New Table</h3>
-                <hr>
-
-                <div class="tableFormDiv">
-                    <label for="edit_table-number">Table Number</label>
-                    <input type="text" id="edit_table-number" name="table_number" placeholder="H1T1, H2T1 etc..."
-                        required>
-                </div>
-
-                <div class="tableFormDiv">
-                    <label for="edit_table-max-capacity">Table Maximum Capacity</label>
-                    <input type="text" id="edit_table-max-capacity" name="table_max_apacity"
-                        placeholder="4 Chairs,etc.." required>
-                </div>
-
-                <div class="tableFormBtns">
-                    <button type="button" class="cancelBtn" onclick="hideEditTableForm()">Cancel</button>
-                    <input type="submit" value="Update Table">
-                </div>
-            </form> --}}
 
             {{--      
             |---------------------------------------------------------------|
@@ -960,6 +885,33 @@
         function hideUpdateProfile() {
             document.getElementById('updateProfileOverlay').style.display = 'none';
             document.getElementById('updateProfile').style.display = 'none';
+            window.location.reload();
+        }
+
+        function validatePassword() {
+            let password = document.getElementById('password').value;
+            let confirmPassword = document.getElementById('cnfrmPswd').value;
+            let message = document.getElementById('message');
+
+            if (password.length < 8) {
+                message.textContent = "Password must be at least 8 characters long!";
+                message.className = "error";
+            } else if (password !== confirmPassword) {
+                message.textContent = "Passwords do not match!";
+                message.className = "error";
+            } else {
+                message.textContent = "Passwords match!";
+                message.className = "success";
+            }
+        }
+
+        function showAndHideProfilePswd(password) {
+            let pswd = document.getElementById(password);
+            if (pswd.type === 'password') {
+                pswd.type = 'text';
+            } else {
+                pswd.type = 'password';
+            }
         }
         
         const uploadFile = document.getElementById('upload-update-file');

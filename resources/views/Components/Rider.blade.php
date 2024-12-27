@@ -81,6 +81,38 @@
                 @else
                     <span class="username">John Doe</span>
                 @endif
+
+                @php
+                    $count = $notifications ? $notifications->count() : 0;
+                @endphp
+
+                {{-- <div id="notify-logout"> --}}
+                <div class="notification">
+                    <i class='bx bxs-bell' title="notifications" onclick="toggleNotification()"></i>
+                    <span id="message-circle">
+                        <p>{{ $count }}</p>
+                    </span>
+                    <div id="notificationBox" class="notificationBox">
+                        <p id="heading">Notifications</p>
+                        @if (!$notifications || $notifications->isEmpty())
+                            <div class="message">
+                                <p>No new notifications</p>
+                            </div>
+                        @else
+                            @foreach ($notifications as $notification)
+                                <div class="message">
+
+                                    <p>{{ $notification['message'] }}</p>
+                                    <div class="buttons">
+                                        <a href="{{ route('markAsRead', $notification['orderNumber']) }}">
+                                            <i class='bx bxs-book-reader' title="Read"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+                </div>
             </div>
             <i class='bx bx-menu' id="menuIcon" onclick="toggleMenu()"></i>
         </header>
@@ -174,6 +206,15 @@
                 menu.style.display = 'none';
                 menuIcon.classList.remove('bx-x');
                 menuIcon.classList.add('bx-menu');
+            }
+        }
+
+        function toggleNotification() {
+            const notificationBox = document.getElementById('notificationBox');
+            if (notificationBox.style.display === "flex") {
+                notificationBox.style.display = "none";
+            } else {
+                notificationBox.style.display = "flex";
             }
         }
 

@@ -260,6 +260,7 @@ Route::get('salesman/addNewProductToDineInOrder/{order_Number}/{table_id}', [Sal
 Route::get('/getNotificationData', [SalesmanController::class, 'getNotificationData'])->name('getNotificationData');
 Route::delete('/deleteOnlineNotification/{id}', [SalesmanController::class, 'deleteNotification'])->name('deleteOnlineNotification');
 Route::get('/search', [SalesmanController::class, 'search'])->name('search');
+Route::get('/cancelorderbysalesman/{order_id}/{staff_id}/{branch_id}/{reason}', [salesmanController::class,'cancelOrder'])->name('cancelorderbysalesman');
 
 /*
 |---------------------------------------------------------------|
@@ -270,6 +271,7 @@ Route::get('/search', [SalesmanController::class, 'search'])->name('search');
 Route::get('chef/dashboard/{user_id}/{branch_id}',[KitchenController::class,'viewChefDashboard'])->name('chef_dashboard');
 Route::get('chef/orderComplete/{order_id}',[KitchenController::class,'orderComplete'])->name('orderComplete');
 Route::get('chef/printChefRecipt/{order_id}',[KitchenController::class,'printChefRecipt'])->name('printChefRecipt');
+Route::get('chef/getOrderNotification',[KitchenController::class,'getOrderNotification'])->name('getOrderNotification');
 
 /*
 |---------------------------------------------------------------|
@@ -308,3 +310,4 @@ Route::post('Update_rider_profile', [RiderController::class,'updateProfile'])->n
 Route::get('view_order_details/{order_number}/{rider_id}', [RiderController::class,'viewOrderDetails'])->name('viewOrderDetails');
 Route::get('delivery_cancelled/{order_number}/{rider_id}', [RiderController::class,'deliveryCancelled'])->name('deliveryCancelled');
 Route::get('delivery_completed/{order_number}/{rider_id}', [RiderController::class,'deliveryCompleted'])->name('deliveryCompleted');
+Route::get('mark_as_read/{order_number}', [RiderController::class,'markAsRead'])->name('markAsRead');

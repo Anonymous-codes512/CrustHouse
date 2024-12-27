@@ -73,6 +73,126 @@ header {
     text-overflow: ellipsis;
 }
 
+.notification {
+    display: flex;
+    align-items: center;
+    font-size: 1.7vw;
+    border-radius: 10%;
+    position: relative;
+    margin-right: 10px;
+}
+
+
+.notification i{
+    position: relative;
+    cursor: pointer;
+}
+
+#message-circle{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e01818;
+    border: 2px solid #fff;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    right: 7px;
+    text-align: center;
+    color: #fff;
+    font-size: .5rem;
+    font-weight: 600;
+}
+.notification .notificationBox {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    width: 20vw;
+    max-height: 40vh;
+    right: 0;
+    top: calc(100% + 10px);
+    background-color: #fff;
+    box-shadow: 0 0 5px #929292;
+    border-radius: 10px;
+    z-index: 100;
+    overflow-y: auto;
+}
+
+.notification .notificationBox::-webkit-scrollbar {
+    display: none;
+}
+
+.notificationBox #heading {
+    display: flex;
+    padding: 5px;
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-size: 0.81em;
+    background-color: #dbdbdb;
+    border-radius: 10px 10px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.notificationBox .message {
+    display: flex;
+    flex-direction: column;
+    padding: 05px 10px;
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    border-bottom: 1px solid #000;
+}
+
+.message p {
+    margin: 0;
+    padding: 0;
+    font-size: medium;
+}
+
+.message .buttons {
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.buttons a {
+    cursor: pointer;
+    margin-right: 1vw;
+    font-size: 1.5vw;
+}
+
+.bxs-trash {
+    color: #b83636;
+}
+
+.bxs-book-reader {
+    color: #138141;
+}
+
+.bxs-trash:hover {
+    color: #e26161;
+}
+
+.bxs-book-reader:hover {
+    color: #2ea25f;
+}
+
+.alert-danger {
+    color: #f45b69;
+    font-size: 0.7rem;
+    margin: 0px 20px;
+}
+
+.alert-success {
+    color: #40c788;
+    font-size: 0.7rem;
+    margin: 0px 20px;
+}
+
 .dashboard-container {
     display: flex;
     flex: 1;

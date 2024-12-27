@@ -132,6 +132,11 @@
                 <input type="email" id="email" name="email" placeholder="Enter Email Address" oninput="validateEmail()" required>
             </div>
             <div id="email-error-message" class="error-message" style="display: none;"></div>
+           
+            <div class="inputdivs">
+                <label for="phone_number">Phone Number</label>
+                <input type="tel" id="phone_number" name="phone_number" placeholder="03029876543" maxlength="11" required>
+            </div>
             
             <div class="inputdivs">
                 <label for="branch">Select Branch</label>
@@ -213,8 +218,13 @@
                 <label for="editemail">Member Email Address</label>
                 <input type="email" id="editemail" name="email" oninput="validateEditEmail()" required>
             </div>
-
+            
             <div id="edit-email-error-message" class="error-message" style="display: none;"></div>
+            
+            <div class="inputdivs">
+                <label for="edit_phone_number">Phone Number</label>
+                <input type="tel" id="edit_phone_number" name="phone_number" placeholder="03029875432" maxlength="11" required>
+            </div>
 
             <div class="inputdivs">
                 <label for="editbranch">Select Branch</label>
@@ -357,6 +367,7 @@
 
             document.getElementById('staffId').value = staff.id;
             document.getElementById('editname').value = staff.name;
+            document.getElementById('edit_phone_number').value = staff.phone_number;
             document.getElementById('editemail').value = staff.email;
 
             let branchDropdown = document.getElementById('editbranch');

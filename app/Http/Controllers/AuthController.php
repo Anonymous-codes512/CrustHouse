@@ -50,6 +50,9 @@ class AuthController extends Controller
         $user->role = $req->role;
         $user->branch_id = $req->branch;
         $user->password = Hash::make($req->password);
+        if ($req->filled('phone_number')) {
+            $user->phone_number = $req->phone_number;
+        }
         $user->save();
 
         if ($req->role !== 'owner') {

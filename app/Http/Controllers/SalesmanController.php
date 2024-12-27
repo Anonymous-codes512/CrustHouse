@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\EmailConfirmation;
 use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Deal;
@@ -22,10 +23,11 @@ use App\Models\Rider;
 use App\Models\Stock;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Pagination\Paginator;
 
 class SalesmanController extends Controller
 {
@@ -47,7 +49,7 @@ class SalesmanController extends Controller
 
         $tables = DineInTable::where('branch_id', $branch_id)->get();
         $allOrders = Order::with(['salesman', 'items'])->where('branch_id', $branch_id)->where('salesman_id', $id)->get();
-        $onlineOrders = Order::with(['items', 'customers'])->where('ordertype', 'online')->whereNot('status', [1,3])->get();
+        $onlineOrders = Order::with(['items', 'customers'])->where('ordertype', 'online')->whereNot('status', [1, 3])->get();
         $cartproducts = Cart::with('dineInTable')->where('salesman_id', $id)->get();
 
         $deals = handler::where(function ($query) use ($branch_id) {
@@ -281,7 +283,7 @@ class SalesmanController extends Controller
             $existingOrder = Order::where('order_number', $order_number)
                 ->where('table_id', $table_id)
                 ->first();
-            if ($ordertype == 'Dine-In') {
+            if ($ordertype === 'Dine-In') {
                 $table_id = $request->input('table_number');
                 $table = DineInTable::find($table_id);
                 $table->table_status = 0;
@@ -291,7 +293,6 @@ class SalesmanController extends Controller
                     return redirect()->back()->with('error', 'Table number is required for Dine-In orders.');
                 }
             }
-
 
             if ($ordertype !== 'Dine-In' && $cartedProducts->whereNull('order_status')->isEmpty()) {
                 return redirect()->back()->with('error', 'Select Product First');
@@ -358,7 +359,7 @@ class SalesmanController extends Controller
         $order->discount_type = $request->input('discount_type');
         $order->payment_method = $request->input('payment_method');
 
-        if ($ordertype == 'Dine-In') {
+        if ($ordertype === 'Dine-In') {
             $order->table_id = $table_id;
             $order->received_cash = null;
         } else {
@@ -367,48 +368,68 @@ class SalesmanController extends Controller
             $order->return_change = $request->input('change');
         }
 
-        $order->ordertype = $ordertype;
-        $order->save();
+        $order->ordertype = $ordertype === 'Takeaway - self' ? "Takeaway" : $ordertype;
+        if ($ordertype === "online") {
+            $old_customer = User::where('email', $request->input('customer_email'))->orWhere('phone_number', $request->input('customer_phone_number'))->first();
+            if ($old_customer) {
+                $order->customer_id = $old_customer->id;
+            } else {
+                $new_customer = new User();
+                $new_customer->name = $request->input('customer_name');
+                $new_customer->email = $request->input('customer_email');
+                $new_customer->phone_number = $request->input('customer_phone_number');
+                $new_customer->role = 'customer';
+                $new_customer->password = Hash::make('12345678');;
+                $new_customer->remember_token = Str::random(32);
+                if ($new_customer->save()) {
+                    $confirmationUrl = route('customerEmailConfirmation', ['token' => $new_customer->remember_token]);
+                    Mail::to($request->input('customer_email'))->send(new EmailConfirmation($new_customer, $confirmationUrl));
+                }
+                $order->customer_id = $new_customer->id;
+            }
+            $order->order_address = $request->input('delivery_address');
+            $order->save();
 
-        foreach ($cartedProducts as $cartItem) {
-            $totalProductPrice = floatval($cartItem->totalPrice);
-            $quantity = intval($cartItem->productQuantity);
+            foreach ($cartedProducts as $cartItem) {
+                $totalProductPrice = floatval($cartItem->totalPrice);
+                $quantity = intval($cartItem->productQuantity);
 
-            if ($ordertype == 'Dine-In') {
-                Cart::whereNull('order_number')->update([
-                    'table_id' => $table_id,
-                    'order_number' => $newOrderNumber,
-                    'order_status' => 0,
-                ]);
+                if ($ordertype === 'Dine-In') {
+                    Cart::whereNull('order_number')->update([
+                        'table_id' => $table_id,
+                        'order_number' => $newOrderNumber,
+                        'order_status' => 0,
+                    ]);
+                }
+
+                $orderItem = new OrderItem();
+                $orderItem->order_id = $order->id;
+                $orderItem->order_number = $newOrderNumber;
+                $orderItem->product_id = $cartItem->product_id;
+                $orderItem->product_name = $cartItem->productName;
+                $orderItem->product_variation = $cartItem->productVariation;
+                $orderItem->addons = $cartItem->productAddon;
+                $orderItem->product_price = $totalProductPrice / $quantity;
+                $orderItem->product_quantity = $quantity;
+                $orderItem->total_price = $cartItem->totalPrice;
+                $orderItem->save();
             }
 
-            $orderItem = new OrderItem();
-            $orderItem->order_id = $order->id;
-            $orderItem->order_number = $newOrderNumber;
-            $orderItem->product_id = $cartItem->product_id;
-            $orderItem->product_name = $cartItem->productName;
-            $orderItem->product_variation = $cartItem->productVariation;
-            $orderItem->addons = $cartItem->productAddon;
-            $orderItem->product_price = $totalProductPrice / $quantity;
-            $orderItem->product_quantity = $quantity;
-            $orderItem->total_price = $cartItem->totalPrice;
-            $orderItem->save();
-        }
-
-        if ($ordertype !== 'Dine-In') {
-            foreach ($cartedProducts as $cartItem) {
-                if ($cartItem->order_status !== 0) {
-                    $cartItem->delete();
+            if ($ordertype !== 'Dine-In') {
+                foreach ($cartedProducts as $cartItem) {
+                    if ($cartItem->order_status !== 0) {
+                        $cartItem->delete();
+                    }
                 }
             }
-        }
 
-        $this->deductStock($order->id);
-        $pdfFileName = $this->generateReceipt($order->id, $order->order_number);
-        return redirect()->back()->with([
-            'success' => 'Order placed successfully.',
-            'pdf_filename' => $pdfFileName
-        ]);
+            $this->deductStock($order->id);
+            $pdfFileName = $this->generateReceipt($order->id, $order->order_number);
+            return redirect()->back()->with([
+                'success' => 'Order placed successfully.',
+                'pdf_filename' => $pdfFileName
+            ]);
+        }
     }
 
     private function generateOrderNumber($lastOrder, $branch_initial)
@@ -752,6 +773,18 @@ class SalesmanController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Failed to delete notification.'], 500);
         }
+    }
+
+    public function cancelOrder($order_id, $staff_id, $branch_id, $reason)
+    {
+        $staff = User::find($staff_id);
+        $order = Order::where('id', $order_id)->first();
+        $order->status = 0;
+        $order->cancellation_reason = $reason;
+        $order->order_cancel_by = $staff->name;
+
+        $order->save();
+        return redirect()->route('salesman_dashboard', [$staff_id, $branch_id]);
     }
 }
 

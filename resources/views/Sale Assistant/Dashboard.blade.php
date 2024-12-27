@@ -67,7 +67,7 @@
             $staff_id = $staff_id;
             $branch_id = $branch_id;
             $addons = $addons;
-
+            $reason = 'Reason';
             $servingProducts = $cartProducts
                 ->filter(function ($product) {
                     return $product->order_status === 0;
@@ -253,7 +253,7 @@
                     let taxes = @json($taxes);
                 </script>
 
-                <form action="{{ route('placeOrder', $staff_id) }}" method="post" enctype="multipart/form-data"
+                <form id="placeOrder" action="{{ route('placeOrder', $staff_id) }}" method="post" enctype="multipart/form-data"
                     onsubmit="return validateDiscount()">
                     @csrf
                     <input type="hidden" name="cartItems" id="cartItems">
@@ -401,6 +401,40 @@
                         <button type="button" id="clearCart" onclick="clearCartedItems()">Clear Cart</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        {{-- Code for confirmation of Takeaway type. --}}
+
+        <div id="orderTypeConfirmationOverlay"></div>
+        <div id="orderTypeConfirmation">
+            <h2>Please select the takeaway order type.</h2>
+            <label for="type-confirmation">Select the order type</label>
+            <select id="type-confirmation" onchange="toggleDetailsFields(this)" required>
+                <option value="Takeaway - Self">Takeaway - Self</option>
+                <option value="Takeaway - Rider">Takeaway - Rider</option>
+            </select>
+            <div id="input-div">
+                <div class="inputfields">
+                    <label for="customer-name">Customer Name</label>
+                    <input type="text" name="customer_name" id="customer-name" placeholder="Alex benjamin" required>
+                </div>
+                <div class="inputfields">
+                    <label for="customer-email">Customer Email</label>
+                    <input type="email" name="customer_email" id="customer-email" placeholder="benjaminalix@gmail.com" required>
+                </div>
+                <div class="inputfields">
+                    <label for="customer-phone_number">Customer Phone Number</label>
+                    <input type="tal" name="customer_phone_number" id="customer-phone_number" placeholder="+923358765412" required>
+                </div>
+                <div class="inputfields">
+                    <label for="delivery-address">Delivery Address</label>
+                    <input type="text" name="delivery_address" id="delivery-address" placeholder="9000 Sunset Blvd. Suite 700 Los Angeles, CA 90069 USA" required>
+                </div>
+            </div>
+            <div id="typeConfirmation-btns">
+                <button id="submit" type="submit" onclick="chnageOrderType()">Submit</button>
+                <button id="cancel" onclick="hideOrderTypeConfirmationPopUp()">Cancel</button>
             </div>
         </div>
 
@@ -708,7 +742,8 @@
                                                 <i style="background-color:#4d4d4d; cursor: default;"
                                                     class='bx bx-check'></i>
                                             </a>
-                                            <a title="Assign to Rider" href="{{route('assignToRider', [$branch_id, $staff_id, $order->id])}}">
+                                            <a title="Assign to Rider"
+                                                href="{{ route('assignToRider', [$branch_id, $staff_id, $order->id]) }}">
                                                 <i class='bx bxs-right-arrow-square'></i>
                                             </a>
                                         @else
@@ -717,7 +752,7 @@
                                                 title="Confirm order">
                                                 <i class='bx bx-check'></i>
                                             </a>
-                                            <a href="{{ route('assignToRider', [$staff_id, $order->id]) }}"
+                                            <a href="{{ route('assignToRider', [$branch_id, $staff_id, $order->id]) }}"
                                                 title="Assign to Rider">
                                                 <i class='bx bxs-right-arrow-square'></i>
                                             </a>
@@ -770,7 +805,9 @@
                                     <td>{{ $order->salesman->name }}</td>
                                     <td>{{ $order->total_bill }}</td>
                                     <td>{{ $order->ordertype }}</td>
-                                    @if ($order->status == 1)
+                                    @if ($order->status == 0)
+                                        <td class="status">Request for cancellation</td>
+                                    @elseif ($order->status == 1)
                                         <td class="status">Completed</td>
                                     @elseif ($order->status == 2)
                                         <td class="status">Pending</td>
@@ -784,21 +821,24 @@
                                     <td id="actionstd">
                                         <a id="view" href="#"
                                             onclick="showOrderItems({{ json_encode($order) }})">View</a>
-                                        @if ($order->status == 1)
+                                        @if ($order->status == 0)
+                                            <a id="cancel-order"
+                                                style="background-color:#4d4d4d; cursor: default;">Cancel</a>
+                                        @elseif ($order->status == 1)
                                             <a id="cancel-order"
                                                 style="background-color:#4d4d4d; cursor: default;">Cancel</a>
                                         @elseif($order->status == 2)
                                             <a id="cancel-order"
-                                                href="{{ route('cancelorder', [$order->id, $staff_id]) }}">Cancel</a>
+                                                onclick="showCancelPopUp({{ $order->id }})">Cancel</a>
                                         @elseif($order->status == 3)
                                             <a id="cancel-order"
                                                 style="background-color:#4d4d4d;  cursor: default;">Cancel</a>
                                         @elseif($order->status == 4)
                                             <a id="cancel-order"
-                                                href="{{ route('cancelorder', [$order->id, $staff_id]) }}">Cancel</a>
+                                                onclick="showCancelPopUp({{ $order->id }})">Cancel</a>
                                         @elseif($order->status == 5)
                                             <a id="cancel-order"
-                                                href="{{ route('cancelorder', [$order->id, $staff_id]) }}">Cancel</a>
+                                                onclick="showCancelPopUp({{ $order->id }})">Cancel</a>
                                         @endif
                                     </td>
                                 </tr>
@@ -878,6 +918,20 @@
             }
         </style>
 
+        {{-- Confirm Cancel order with reason --}}
+        <div id="confirmCancelOverlay"></div>
+        <div id="confirmCancel">
+            <h1>Would you like to confirm the cancellation of this order? Please specify your reason for canceling.</h1>
+            <input type="hidden" id="order-id">
+            <textarea placeholder="Please specify reason." id="cancellation-reason" cols="30" rows="10"></textarea>
+            <div id="confirmCancelationBtn">
+                <button type="button"
+                    onclick="CancelOrder('{{ route('cancelorderbysalesman', [$order->id, $staff_id, $branch_id, ':Reason']) }}')"
+                    id="cancelOrder">Cancel Order</button>
+                <button type="button" onclick="closeCancelPopUp()" id="close-cancel-order">close</button>
+            </div>
+        </div>
+
     </main>
     @push('scripts')
         <script src="{{ asset('JavaScript/salesman.js') }}"></script>
@@ -892,8 +946,8 @@
                 // const response = await fetch("http://192.168.1.108:7000/getNotificationData");
                 // const response = await fetch("http://192.168.1.108:8000/getNotificationData");
                 // const response = await fetch("http://192.168.100.7:8000/getNotificationData");
-                // const response = await fetch("http://192.168.100.7:7000/getNotificationData");
-                const response = await fetch("http://127.0.0.1:8000/getNotificationData");
+                const response = await fetch("http://192.168.100.7:7000/getNotificationData");
+                // const response = await fetch("http://127.0.0.1:8000/getNotificationData");
                 const data = await response.json();
 
                 if (JSON.stringify(data.collection) !== JSON.stringify(previousData)) {
@@ -1134,5 +1188,35 @@
                 });
             });
         });
+
+        function showCancelPopUp(order_id) {
+            document.getElementById('confirmCancelOverlay').style.display = 'block';
+            document.getElementById('confirmCancel').style.display = 'flex';
+            document.getElementById('order-id').value = order_id;
+        }
+
+        function CancelOrder(route) {
+            let reason = document.getElementById('cancellation-reason').value;
+            let order_id = document.getElementById('order-id').value;
+
+            if (!reason.trim()) {
+                alert("Please provide a reason for cancellation.");
+                return;
+            }
+
+            console.log("Original Route: " + route);
+            // Replace the first parameter after the route name with the order_id
+            route = route.replace(/(cancelorderbysalesman\/)(\d+)/, `$1${order_id}`);
+            // Replace ":Reason" with the encoded reason
+            route = route.replace(':Reason', encodeURIComponent(reason));
+            console.log("Final Route: " + route);
+
+            window.location.href = route;
+        }
+
+        function closeCancelPopUp() {
+            document.getElementById('confirmCancelOverlay').style.display = 'none';
+            document.getElementById('confirmCancel').style.display = 'none';
+        }
     </script>
 @endsection

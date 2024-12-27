@@ -1018,7 +1018,9 @@ class ManagerController extends Controller
         $staff = User::find($staff_id);
         $order = Order::where('id', $order_id)->first();
         $order->status = 3;
-        $order->order_cancel_by = $staff->name;
+        if($order->order_cancel_by == null){
+            $order->order_cancel_by = $staff->name;
+        }
         $this->returnStock($order_id);
         $order->save();
 
@@ -1046,9 +1048,12 @@ class ManagerController extends Controller
                 $productQuantities[$item->product_id] += $item->product_quantity;
             }
         }
-
+        
         foreach ($productQuantities as $product_id => $totalQuantity) {
             $product = Product::find($product_id);
+            if(!$product){
+                return redirect()->back();
+            }
             $recipes = Recipe::where('product_id', $product->id)->get();
 
             foreach ($recipes as $recipeItem) {
@@ -1085,7 +1090,6 @@ class ManagerController extends Controller
         if (!session()->has('branchManager')) {
             return redirect()->route('viewLoginPage');
         }
-
         $existingChef = User::where('role', 'chef')
             ->where('id', '!=', $req->staffId)
             ->where('branch_id', $req->branch)
@@ -1117,6 +1121,7 @@ class ManagerController extends Controller
         }
 
         $auth->name = $req->input('name');
+        $auth->phone_number = $req->input('phone_number');
         $auth->email = $req->input('email');
         $auth->role = $req->input('role');
 
@@ -1596,24 +1601,40 @@ class ManagerController extends Controller
     {
         $user_id = $request->user_id;
         $updateProfile = User::find($user_id);
+    
+        // Handle profile picture update
         if ($request->hasFile('updated_profile_picture')) {
             $existingImage = public_path('Images/UsersImages') . '/' . $updateProfile->profile_picture;
-            File::delete($existingImage);
-
+            if (file_exists($existingImage)) {
+                File::delete($existingImage);
+            }
+    
             $image = $request->file('updated_profile_picture');
             $imageName = time() . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('Images/UsersImages'), $imageName);
             $updateProfile->profile_picture = $imageName;
         }
+    
+        // Update name
         $updateProfile->name = $request->name;
-        $updateProfile->save();
+    
+        // Handle password update
+        if ($request->filled('password')) {
+            $request->validate([
+                'password' => 'required|confirmed|min:8',
+            ]);
+    
+            $updateProfile->password = bcrypt($request->password);
+        }
+    
+        // Save the updated user information
         if ($updateProfile->save()) {
             return redirect()->back()->with('success', 'Profile Updated Successfully');
         } else {
-
             return redirect()->back()->with('error', 'Profile not updated');
         }
     }
+    
     /*
     |---------------------------------------------------------------|
     |====================== Reports Functions ======================|

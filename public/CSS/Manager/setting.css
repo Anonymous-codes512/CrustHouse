@@ -231,6 +231,49 @@ main {
     background-color: #e2e2e2;
 }
 
+.passwordfield {
+    display: flex;
+    width: 100%;
+    font-family: "Poppins", sans-serif;
+    border: 1px solid #8d8d8d;
+    border-radius: 5px;
+}
+
+.passwordfield input {
+    border: none;
+    padding: 0.71vw 0.5vw;
+    border-radius: 6px 0 0 6px;
+    width: 95%;
+}
+
+.passwordfield i {
+    border-left: 1px solid #8d8d8d;
+    padding: 5px 10px;
+    background-color: #cdcdcd;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.error-message {
+    color: #F45B69;
+    font-size: 0.7rem;
+    margin: 0px 30px;
+}
+
+.error {
+    display: flex;
+    color: #F45B69;
+    margin: auto;
+    width: 85%;
+}
+
+.success {
+    display: flex;
+    color: #179f58;
+    margin: auto;
+    width: 85%;
+}
+
 .forms-btns {
     display: flex;
     margin: 10px;
