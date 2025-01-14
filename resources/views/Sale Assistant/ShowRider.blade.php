@@ -112,12 +112,12 @@
 </head>
 
 <body>
-
+    @include('Components.Loader')
     <div id="popupOverlay" class="overlay">
         <div class="popup">
             <div style="display: flex;width:90%;align-items:center;">
                 <a style="text-decoration: none;"
-                    href="{{ route('salesman_dashboard', [$Salesman_id, $Branch_id]) }}"><i
+                    onclick="showLoader('{{ route('salesman_dashboard', [$Salesman_id, $Branch_id]) }}')"><i
                         class='bx bx-arrow-back'></i></a>
                 <h2>Select the Rider for Assigning Order</h2>
             </div>
@@ -141,7 +141,8 @@
                                 <td>{{ $rider->name }}</td>
                                 <td>{{ $rider->rider->license_number }}</td>
                                 <td>
-                                    <a href="{{route('assignOrder', [$Branch_id, $rider->rider->id, $Order_id, $Salesman_id])}}">
+                                    <a
+                                        onclick="showLoader('{{ route('assignOrder', [$Branch_id, $rider->rider->id, $Order_id, $Salesman_id]) }}')">
                                         <button class="assign_order">Assign</button>
                                     </a>
                                 </td>
@@ -153,5 +154,34 @@
         </div>
     </div>
 </body>
+<script>
+    function showLoader(route) {
+        document.getElementById('loaderOverlay').style.display = 'block'; // Show the overlay
+        document.getElementById('loaderOverlay').style.zIndex = '9999';
+        document.getElementById('loader').style.display = 'flex'; // Show the loader spinner
+        document.getElementById('loader').style.zIndex = '10000';
+        window.location.href = route; // Redirect after showing the loader
+    }
+
+    function show_Loader() {
+        document.getElementById('loaderOverlay').style.display = 'block'; // Show the overlay
+        document.getElementById('loaderOverlay').style.zIndex = '99999';
+        document.getElementById('loader').style.display = 'flex';
+        document.getElementById('loader').style.zIndex = '100000';
+    }
+
+    function hide_Loader() {
+        document.getElementById('loaderOverlay').style.display = 'none';
+        document.getElementById('loader').style.display = 'none';
+    }
+
+    window.addEventListener("beforeunload", function() {
+        show_Loader();
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        hide_Loader()
+    });
+</script>
 
 </html>

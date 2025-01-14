@@ -50,7 +50,7 @@
 
         <div id="dealProductInfoOverlay"></div>
         <form class="dealProdInfo" id="dealProdInfo" action="{{ route('addDealProduct') }}" method="POST"
-            enctype="multipart/form-data">
+            enctype="multipart/form-data" onsubmit="show_Loader()">
             @csrf
             <h3>Deal Details</h3>
             <hr>

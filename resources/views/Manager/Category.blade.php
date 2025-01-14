@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         <div id="overlay"></div>
         <form class="newcategory" id="newCategory" action="{{ route('createCategory') }}" method="POST"
-            enctype="multipart/form-data">
+            enctype="multipart/form-data" onsubmit="show_Loader()">
             @csrf
             <h3>Add New Category</h3>
             <hr>
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         <div id="editOverlay"></div>
         <form class="updateCategory" id="updateCategory" action="{{ route('updateCategory') }}" method="POST"
-            enctype="multipart/form-data">
+            enctype="multipart/form-data" onsubmit="show_Loader()">
             @csrf
             <h3>Update Category</h3>
             <hr>
@@ -451,6 +451,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             let confirmButton = document.getElementById('confirm');
             confirmButton.onclick = function() {
+                show_Loader();
                 window.location.href = deleteUrl;
             };
         }

@@ -16,10 +16,13 @@
 </head>
 
 <body>
+    @include('Components.Loader')
+
     @php
         $posLogo = false;
         $profile_pic = false;
         $user_name = false;
+        $branchName = null;
         if ($ThemeSettings) {
             $posLogo = $ThemeSettings->pos_logo;
 
@@ -89,8 +92,35 @@
     <script>
         function logout() {
             document.cookie = "selected_category=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            show_Loader();
             window.location.href = "{{ route('logout') }}";
         }
+        function showLoader(route) {
+            document.getElementById('loaderOverlay').style.display = 'block'; // Show the overlay
+            document.getElementById('loaderOverlay').style.zIndex = '9999'; 
+            document.getElementById('loader').style.display = 'flex'; // Show the loader spinner
+            document.getElementById('loader').style.zIndex = '10000'; 
+            window.location.href = route; // Redirect after showing the loader
+        }
+
+        function show_Loader() {
+            document.getElementById('loaderOverlay').style.display = 'block'; // Show the overlay
+            document.getElementById('loaderOverlay').style.zIndex = '99999'; 
+            document.getElementById('loader').style.display = 'flex'; 
+            document.getElementById('loader').style.zIndex = '100000'; 
+        }
+        function hide_Loader() {
+        document.getElementById('loaderOverlay').style.display = 'none';
+        document.getElementById('loader').style.display = 'none';
+    }
+
+    window.addEventListener("beforeunload", function() {
+        show_Loader();
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        hide_Loader()
+    });
     </script>
     <script src="{{ asset('JavaScript/index.js') }}"></script>
     @stack('scripts')

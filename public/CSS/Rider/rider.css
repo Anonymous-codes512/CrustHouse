@@ -404,6 +404,7 @@ table tr:nth-child(even) {
 .bi-x-square-fill,
 .bi-check-square-fill {
     font-size: 1.5rem;
+    cursor: pointer;
 }
 
 .bi-view-list{
@@ -556,12 +557,15 @@ button:hover {
     display: flex;
     flex-direction: column;
     background-color: #fff;
-    position: relative;
+    position: absolute;
     padding: 20px;
     border-radius: 8px;
     text-align: center;
     width: 85%;
     height: 85%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     z-index: 1000;
     overflow-x: hidden;

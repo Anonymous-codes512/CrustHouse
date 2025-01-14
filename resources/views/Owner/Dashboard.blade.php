@@ -25,7 +25,6 @@
     }
 </style>
 @section('main')
-    @include('Components.Loader')
     <main id="dashboard">
 
         <div style="margin-top:1vw;" class="stat">
@@ -252,7 +251,7 @@
         --}}
 
         <div id="addNewBranchOverlay"></div>
-        <form id="addNewBranch" action="{{ route('storeNewBranchData') }}" method="Post" enctype="multipart/form-data">
+        <form id="addNewBranch" action="{{ route('storeNewBranchData') }}" method="Post" enctype="multipart/form-data" onsubmit="show_Loader()">
             @csrf
             <h3>Add New Branch</h3>
             <hr>
@@ -370,7 +369,7 @@
         --}}
 
         <div id="editBranchOverlay"></div>
-        <form id="editBranch" action="{{ route('updateBranches') }}" method="Post" enctype="multipart/form-data">
+        <form id="editBranch" action="{{ route('updateBranches') }}" method="Post" enctype="multipart/form-data" onsubmit="show_Loader()">
             @csrf
             <h3>Edit Branch</h3>
             <hr>
@@ -526,7 +525,7 @@
         --}}
         <div id="editOwnerProfileOverlay"></div>
         <form id="editOwnerProfile" action="{{ route('UpdateOwnerProfile') }}" method="Post"
-            enctype="multipart/form-data">
+            enctype="multipart/form-data" onsubmit="show_Loader()">
             @csrf
             <h3>Edit Owner Profile</h3>
             <hr>
@@ -1635,6 +1634,7 @@
                 document.getElementById('loader').style.display = 'flex';
                 confirmDeletionOverlay.style.display = 'none';
                 confirmDeletionPopup.style.display = 'none';
+                show_Loader();
                 window.location.href = deleteUrl;
             };
         }
@@ -1729,12 +1729,6 @@
                 .catch(() => {
                     alert("something went wrong");
                 });
-        }
-
-        function showLoader(route) {
-            document.getElementById('loaderOverlay').style.display = 'block';
-            document.getElementById('loader').style.display = 'flex';
-            window.location.href = route;
         }
 
         function validateEmail() {
@@ -1842,4 +1836,4 @@
             filenameSpanNew.textContent = fileName ? fileName : 'No file chosen';
         });
     </script>
-@endsection
+@endsection 

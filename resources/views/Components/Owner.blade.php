@@ -14,6 +14,8 @@
 </head>
 
 <body>
+    @include('Components.Loader')
+
     @php
         $owner_id = session('owner_id');
         $posLogo = false;
@@ -77,7 +79,7 @@
                 @if ($user_name)
                     <p class="profilename" onclick="updateProfile({{ json_encode($ownerData) }})"
                         style="cursor: pointer;">
-                        {{$user_name}}</p>
+                        {{ $user_name }}</p>
                 @else
                     <p class="profilename" onclick="updateProfile({{ json_encode($ownerData) }})"
                         style="cursor: pointer;">
@@ -85,7 +87,7 @@
                 @endif
             </div>
 
-            <a href="{{ route('logout') }}" class="logout">
+            <a onclick="showLoader('{{ route('logout') }}')" class="logout">
                 <i class='bx bx-log-out-circle' title="logout"></i>
             </a>
         </div>
@@ -134,6 +136,34 @@
                         });
                         document.getElementById(activeMenu).classList.add('active');
                     }
+                });
+
+                function showLoader(route) {
+                    document.getElementById('loaderOverlay').style.display = 'block'; // Show the overlay
+                    document.getElementById('loaderOverlay').style.zIndex = '9999';
+                    document.getElementById('loader').style.display = 'flex'; // Show the loader spinner
+                    document.getElementById('loader').style.zIndex = '10000';
+                    window.location.href = route; // Redirect after showing the loader
+                }
+
+                function show_Loader() {
+                    document.getElementById('loaderOverlay').style.display = 'block'; // Show the overlay
+                    document.getElementById('loaderOverlay').style.zIndex = '9999';
+                    document.getElementById('loader').style.display = 'flex';
+                    document.getElementById('loader').style.zIndex = '10000';
+                }
+
+                function hide_Loader() {
+                    document.getElementById('loaderOverlay').style.display = 'none';
+                    document.getElementById('loader').style.display = 'none';
+                }
+
+                window.addEventListener("beforeunload", function() {
+                    show_Loader();
+                });
+
+                document.addEventListener("DOMContentLoaded", function() {
+                    hide_Loader()
                 });
             </script>
         </nav>

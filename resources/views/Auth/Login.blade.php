@@ -12,6 +12,7 @@
 </head>
 
 <body>
+    @include('Components.Loader')
     @if (session('success'))
         <div id="success" class="alert alert-success">
             {{ session('success') }}
@@ -45,7 +46,7 @@
         @error('forgot')
             <div class="error-message">{{ session('email') }}</div>
         @enderror
-        <form action="{{ route('login') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('login') }}" method="POST" enctype="multipart/form-data"  onsubmit="show_Loader()">
             @csrf
             <div class="heading">
                 <h1>Login Panel</h1>
@@ -95,6 +96,12 @@
         document.getElementById('forgotOverlay').style.display = "none";
         window.location.reload();
     }
+    function show_Loader() {
+            document.getElementById('loaderOverlay').style.display = 'block'; // Show the overlay
+            document.getElementById('loaderOverlay').style.zIndex = '9999'; 
+            document.getElementById('loader').style.display = 'flex'; 
+            document.getElementById('loader').style.zIndex = '10000'; 
+        }
 </script>
 
 </html>

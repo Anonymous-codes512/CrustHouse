@@ -104,7 +104,7 @@
 
         <div id="dineInSettingsOverlay"></div>
         <form class="add-table-form" id="add-table-form" action="{{ route('createTable') }}" method="POST"
-            enctype="multipart/form-data">
+            enctype="multipart/form-data" onsubmit="show_Loader()">
             @csrf
             <h3>Add New Table</h3>
             <hr>
@@ -135,7 +135,7 @@
         --}}
 
         <form class="edit-table-form" id="edit-table-form" action="{{ route('updateTable') }}" method="POST"
-            enctype="multipart/form-data">
+            enctype="multipart/form-data" onsubmit="show_Loader()">
             @csrf
             <h3>Edit Table</h3>
             <hr>
@@ -200,6 +200,7 @@
 
             let confirmButton = document.getElementById('confirm');
             confirmButton.onclick = function() {
+                show_Loader();
                 window.location.href = deleteUrl;
             };
         }

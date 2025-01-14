@@ -109,19 +109,19 @@
                         <td>Nill</td>
                         @endif --}}
                         <td>
-                            <a id="view" href="{{ route('viewOrderProducts', [$branch_id, $order->id]) }}">View</a>
+                            <a id="view" onclick="showLoader('{{ route('viewOrderProducts', [$branch_id, $order->id]) }}')">View</a>
                             @if ($order->status == 0)
-                                <a id="cancel-order" href="{{ route('cancelorder', [$order->id, $user_id]) }}">Cancel</a>
+                                <a id="cancel-order" onclick="showLoader('{{ route('cancelorder', [$order->id, $user_id]) }}')">Cancel</a>
                             @elseif ($order->status == 1)
                                 <a id="cancel-order" style="background-color:#4d4d4d; cursor: default;">Cancel</a>
                             @elseif($order->status == 2)
-                                <a id="cancel-order" href="{{ route('cancelorder', [$order->id, $user_id]) }}">Cancel</a>
+                                <a id="cancel-order" onclick="showLoader('{{ route('cancelorder', [$order->id, $user_id]) }}')">Cancel</a>
                             @elseif($order->status == 3)
                                 <a id="cancel-order" style="background-color:#4d4d4d;  cursor: default;">Cancel</a>
                             @elseif($order->status == 4)
-                                <a id="cancel-order" href="{{ route('cancelorder', [$order->id, $user_id]) }}">Cancel</a>
+                                <a id="cancel-order" onclick="showLoader('{{ route('cancelorder', [$order->id, $user_id]) }}')">Cancel</a>
                             @elseif($order->status == 5)
-                                <a id="cancel-order" href="{{ route('cancelorder', [$order->id, $user_id]) }}">Cancel</a>
+                                <a id="cancel-order" onclick="showLoader('{{ route('cancelorder', [$order->id, $user_id]) }}')">Cancel</a>
                             @endif
 
                             @if ($order->status == 0)
@@ -174,7 +174,7 @@
                 <div class="btns">
                     <a href="{{ route('printrecipt', $order_id) }}"><button id="printbtn"
                             type="button">Print</button></a>
-                    <a href="{{ route('viewOrdersPage', [$user_id, $branch_id]) }}"><button id="closebtn"
+                    <a onclick="showLoader('{{ route('viewOrdersPage', [$user_id, $branch_id]) }}')"><button id="closebtn"
                             type="button">Close</button></a>
                 </div>
             </div>

@@ -15,7 +15,7 @@
 </head>
 
 <body>
-
+    @include('Components.Loader')
     <div class="container">
         @php
             $id = session('id');
@@ -75,80 +75,80 @@
                     <div class="menuItems active" id="menu1">
                         <i class='bx bxs-dashboard'></i>
                         <a href="{{ route('managerdashboard', [$id, $branch_id]) }}" style="text-decoration: none;"
-                            onclick="setActiveMenu('menu1')">
+                            onclick="setActiveMenus('menu1','{{ route('managerdashboard', [$id, $branch_id]) }}')">
                             <p class="link">Dashboard</p>
                         </a>
                     </div>
                     <div class="menuItems" id="menu2">
                         <i class='bx bxs-category'></i>
-                        <a href="{{ route('viewCategoryPage', [$id, $branch_id]) }}" style="text-decoration: none;"
-                            onclick="setActiveMenu('menu2')">
+                        <a {{-- href="{{ route('viewCategoryPage', [$id, $branch_id]) }}" --}} style="text-decoration: none;"
+                            onclick="setActiveMenus('menu2','{{ route('viewCategoryPage', [$id, $branch_id]) }}')">
                             <p class="link">Categories</p>
                         </a>
                     </div>
                     <div class="menuItems" id="menu3">
                         <i class='bx bx-package'></i>
-                        <a href="{{ route('viewProductPage', [$id, $branch_id]) }}" style="text-decoration: none;"
-                            onclick="setActiveMenu('menu3')">
+                        <a {{-- href="{{ route('viewProductPage', [$id, $branch_id]) }}" --}} style="text-decoration: none;"
+                            onclick="setActiveMenus('menu3','{{ route('viewProductPage', [$id, $branch_id]) }}')">
                             <p class="link">Products</p>
                         </a>
                     </div>
                     <div class="menuItems" id="menu4">
                         <i class='bx bxs-dock-bottom bx-rotate-180'></i>
-                        <a href="{{ route('viewDealPage', [$id, $branch_id]) }}" style="text-decoration: none;"
-                            onclick="setActiveMenu('menu4')">
+                        <a {{-- href="{{ route('viewDealPage', [$id, $branch_id]) }}"--}} style="text-decoration: none;"
+                            onclick="setActiveMenus('menu4','{{ route('viewDealPage', [$id, $branch_id]) }}')">
                             <p class="link">Deals</p>
                         </a>
                     </div>
                     <div class="menuItems" id="menu5">
                         <i class='bx bxs-store'></i>
-                        <a href="{{ route('viewStockPage', [$id, $branch_id]) }}" style="text-decoration: none;"
-                            onclick="setActiveMenu('menu5')">
+                        <a {{-- href="{{ route('viewStockPage', [$id, $branch_id]) }}" --}} style="text-decoration: none;"
+                            onclick="setActiveMenus('menu5','{{ route('viewStockPage', [$id, $branch_id]) }}')">
                             <p class="link">Stock</p>
                         </a>
                     </div>
                     <div class="menuItems" id="menu6">
                         <i class='bx bx-cookie'></i>
-                        <a href="{{ route('viewRecipePage', [$id, $branch_id]) }}" style="text-decoration: none;"
-                            onclick="setActiveMenu('menu6')">
+                        <a {{-- href="{{ route('viewRecipePage', [$id, $branch_id]) }}"--}} style="text-decoration: none;"
+                            onclick="setActiveMenus('menu6','{{ route('viewRecipePage', [$id, $branch_id]) }}')">
                             <p class="link">Recipe</p>
                         </a>
                     </div>
                     <div class="menuItems" id="menu7">
                         <i class='bx bxs-file-import'></i>
-                        <a href="{{ route('viewOrdersPage', [$id, $branch_id]) }}" style="text-decoration: none;"
-                            onclick="setActiveMenu('menu7')">
+                        <a {{-- href="{{ route('viewOrdersPage', [$id, $branch_id]) }}" --}} style="text-decoration: none;"
+                            onclick="setActiveMenus('menu7','{{ route('viewOrdersPage', [$id, $branch_id]) }}')">
                             <p class="link">Orders</p>
                         </a>
                     </div>
                     <div class="menuItems" id="menu8">
                         <i class='bx bxs-group'></i>
-                        <a href="{{ route('viewStaffPage', [$id, $branch_id]) }}" style="text-decoration: none;"
-                            onclick="setActiveMenu('menu8')">
+                        <a {{-- href="{{ route('viewStaffPage', [$id, $branch_id]) }}"--}} style="text-decoration: none;"
+                            onclick="setActiveMenus('menu8','{{ route('viewStaffPage', [$id, $branch_id]) }}')">
                             <p class="link">My Staff</p>
                         </a>
                     </div>
 
                     <div class="menuItems" id="menu9">
                         <i class='bx bxs-group'></i>
-                        <a href="{{ route('viewDineInPage', $branch_id) }}" style="text-decoration: none;"
-                            onclick="setActiveMenu('menu9')">
+                        <a {{-- href="{{ route('viewDineInPage', $branch_id) }}"--}} style="text-decoration: none;"
+                            onclick="setActiveMenus('menu9','{{ route('viewDineInPage', $branch_id) }}')">
                             <p class="link">Dine-In</p>
                         </a>
                     </div>
 
                     <div class="menuItems" id="menu10">
                         <i class='bx bxs-report'></i>
-                        <a href="{{ route('report', $branch_id) }}" style="text-decoration: none;"
-                            onclick="setActiveMenu('menu10')">
+                        <a {{--href="{{ route('report', $branch_id) }}"--}} style="text-decoration: none;"
+                            onclick="setActiveMenus('menu10','{{ route('report',  $branch_id) }}')">
                             <p class="link">Reports</p>
                         </a>
                     </div>
 
                     <div class="menuItems" id="menu11">
                         <i class='bx bx-dots-vertical-rounded'></i>
-                        <a href="{{ route('viewSettingsPage', [$id, $branch_id]) }}" style="text-decoration: none;"
-                            onclick="setActiveMenu('menu11')">
+                        <a {{--href="{{ route('viewSettingsPage', [$id, $branch_id]) }}"--}} style="text-decoration: none;"
+                            onclick="setActiveMenus('menu11','{{ route('viewSettingsPage', [$id, $branch_id]) }}')">
                             <p class="link">More</p>
                         </a>
                     </div>
@@ -161,7 +161,8 @@
                         item.classList.remove('active');
                     });
                     document.getElementById(menuId).classList.add('active');
-                    window.location.href = route;
+                    // window.location.href = route;
+                    showLoader(route);
                 }
 
                 function setActiveMenu(menuId) {
@@ -258,7 +259,7 @@
                     @endif
 
                     <a class="logout" onclick="logout('{{ route('logout') }}')">
-                        <i class='bx bx-log-out-circle' title="logout"></i>
+                        <i class='bx bx-log-out-circle' title="logout" style="cursor:pointer;"></i>
                     </a>
                     {{-- </div> --}}
                 </div>
@@ -273,6 +274,7 @@
                         const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
                         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
                     }
+                    show_Loader();
                     window.location.href = route;
                 }
             </script>
@@ -291,6 +293,33 @@
                 notificationBox.style.display = "flex";
             }
         }
+
+        function showLoader(route) {
+            document.getElementById('loaderOverlay').style.display = 'block'; // Show the overlay
+            document.getElementById('loaderOverlay').style.zIndex = '9999'; 
+            document.getElementById('loader').style.display = 'flex'; // Show the loader spinner
+            document.getElementById('loader').style.zIndex = '10000'; 
+            window.location.href = route; // Redirect after showing the loader
+        }
+
+        function show_Loader() {
+            document.getElementById('loaderOverlay').style.display = 'block'; // Show the overlay
+            document.getElementById('loaderOverlay').style.zIndex = '9999'; 
+            document.getElementById('loader').style.display = 'flex'; 
+            document.getElementById('loader').style.zIndex = '10000'; 
+        }
+        function hide_Loader() {
+        document.getElementById('loaderOverlay').style.display = 'none';
+        document.getElementById('loader').style.display = 'none';
+    }
+
+    window.addEventListener("beforeunload", function() {
+        show_Loader();
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        hide_Loader()
+    });
     </script>
     @stack('scripts')
 </body>

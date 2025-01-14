@@ -123,7 +123,7 @@
 
         <div id="overlay"></div>
         <form class="newdeal" id="newDeal" action="{{ route('createDeal') }}" method="POST"
-            enctype="multipart/form-data">
+            enctype="multipart/form-data"  onsubmit="show_Loader()">
             @csrf
 
             <h3>Add New Deal</h3>
@@ -304,7 +304,7 @@
 
         <div id="editOverlay"></div>
         <form class="editdeal" id="editDeal" action="{{ route('updateDeal') }}" method="POST"
-            enctype="multipart/form-data">
+            enctype="multipart/form-data" onsubmit="show_Loader()">
             @csrf
             <div id="form-div">
                 <h3>Edit Deal</h3>
@@ -560,6 +560,7 @@
 
             let confirmButton = document.getElementById('confirm');
             confirmButton.onclick = function() {
+                show_Loader();
                 window.location.href = deleteUrl;
             };
         }

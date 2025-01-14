@@ -12,7 +12,7 @@
         <h2>Profile Photo</h2>
         <section class="profile-photo-section">
             <form action="{{ route('updateProfilePicture') }}" method="POST" id="profile-photo-form"
-                enctype="multipart/form-data">
+                enctype="multipart/form-data" onsubmit="show_Loader()">
                 @csrf
                 <input type="hidden" name="rider_id" value="{{ $user_id }}">
                 <div class="profile-photo-container">
@@ -38,7 +38,7 @@
 
         <h2>Rider Profile</h2>
         <section class="profile-section">
-            <form action="{{ route('updateRiderProfile') }}" method="POST" id="profile-form" enctype="multipart/form-data">
+            <form action="{{ route('updateRiderProfile') }}" method="POST" id="profile-form" enctype="multipart/form-data" onsubmit="show_Loader()">
                 @csrf
                 <input type="hidden" name="rider_id" value="{{ $user_id }}">
 

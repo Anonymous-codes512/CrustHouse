@@ -51,7 +51,6 @@ class SalesmanController extends Controller
         $allOrders = Order::with(['salesman', 'items'])->where('branch_id', $branch_id)->where('salesman_id', $id)->get();
         $onlineOrders = Order::with(['items', 'customers'])->where('ordertype', 'online')->whereNot('status', [1, 3])->get();
         $cartproducts = Cart::with('dineInTable')->where('salesman_id', $id)->get();
-
         $deals = handler::where(function ($query) use ($branch_id) {
             $query->whereHas('product', function ($query) use ($branch_id) {
                 $query->where('branch_id', $branch_id);
@@ -202,14 +201,13 @@ class SalesmanController extends Controller
 
         $table = DineInTable::find($table_id);
         if ($table) {
-            if ($table->table_status !== 1) {
+            if ($table->table_status != 1) {
                 $table->table_status = 1;
                 $table->save();
             }
         } else {
             return redirect()->back()->with('error', 'Table not found.');
         }
-
         $cartedProducts = Cart::where('order_number', $order_Number)->get();
 
         if ($cartedProducts->isEmpty()) {
@@ -224,7 +222,7 @@ class SalesmanController extends Controller
         return redirect()->back();
     }
 
-    public function placeOrder($salesman_id, Request $request)
+     public function placeOrder($salesman_id, Request $request)
     {
         if (!session()->has('salesman')) {
             return redirect()->route('viewLoginPage');
@@ -390,6 +388,47 @@ class SalesmanController extends Controller
             $order->order_address = $request->input('delivery_address');
             $order->save();
 
+            foreach ($cartedProducts as $cartItem) {
+                $totalProductPrice = floatval($cartItem->totalPrice);
+                $quantity = intval($cartItem->productQuantity);
+
+                if ($ordertype === 'Dine-In') {
+                    Cart::whereNull('order_number')->update([
+                        'table_id' => $table_id,
+                        'order_number' => $newOrderNumber,
+                        'order_status' => 0,
+                    ]);
+                }
+
+                $orderItem = new OrderItem();
+                $orderItem->order_id = $order->id;
+                $orderItem->order_number = $newOrderNumber;
+                $orderItem->product_id = $cartItem->product_id;
+                $orderItem->product_name = $cartItem->productName;
+                $orderItem->product_variation = $cartItem->productVariation;
+                $orderItem->addons = $cartItem->productAddon;
+                $orderItem->product_price = $totalProductPrice / $quantity;
+                $orderItem->product_quantity = $quantity;
+                $orderItem->total_price = $cartItem->totalPrice;
+                $orderItem->save();
+            }
+
+            if ($ordertype !== 'Dine-In') {
+                foreach ($cartedProducts as $cartItem) {
+                    if ($cartItem->order_status !== 0) {
+                        $cartItem->delete();
+                    }
+                }
+            }
+
+            $this->deductStock($order->id);
+            $pdfFileName = $this->generateReceipt($order->id, $order->order_number);
+            return redirect()->back()->with([
+                'success' => 'Order placed successfully.',
+                'pdf_filename' => $pdfFileName
+            ]);
+        }else{
+            $order->save();
             foreach ($cartedProducts as $cartItem) {
                 $totalProductPrice = floatval($cartItem->totalPrice);
                 $quantity = intval($cartItem->productQuantity);

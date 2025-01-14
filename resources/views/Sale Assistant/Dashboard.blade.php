@@ -386,7 +386,7 @@
                                 <select name="table_number" id="tables_list" onchange="handleTableChange()">
                                     <option value="">Select Tables</option>
                                     @foreach ($dineInTables as $table)
-                                        @if ($table->table_status === 1)
+                                        @if ($table->table_status == 1.00)
                                             <option value="{{ $table->id }}">{{ $table->table_number }}</option>
                                         @endif
                                     @endforeach
@@ -588,7 +588,7 @@
                                             onclick="addNewProductToDineInOrder({{ json_encode($orders) }}, '{{ route('addNewProductToDineInOrder', [$orderNumber, $orders->first()->table_id]) }}')"><i
                                                 class='bx bxs-cart-add'></i></a>
                                         <a title="Proceed to Payment"
-                                            href="{{ route('addNewProductToDineInOrder', [$orderNumber, $orders->first()->table_id]) }}"><i
+                                            onclick="addNewProductToDineInOrder({{ json_encode($orders) }}, '{{ route('addNewProductToDineInOrder', [$orderNumber, $orders->first()->table_id]) }}')"><i
                                                 class='bx bxs-right-arrow-square'></i></a>
                                     </td>
                                 </tr>
@@ -729,7 +729,7 @@
                                             </a>
                                         @elseif ($order->status == 2)
                                             <!-- Default for status 2 -->
-                                            <a href="{{ route('confirmOnlineOrder', [$branch_id, $staff_id, $order->id]) }}"
+                                            <a onclick="showLoader('{{ route('confirmOnlineOrder', [$branch_id, $staff_id, $order->id]) }}')"
                                                 title="Confirm order">
                                                 <i class='bx bx-check'></i>
                                             </a>
@@ -743,16 +743,16 @@
                                                     class='bx bx-check'></i>
                                             </a>
                                             <a title="Assign to Rider"
-                                                href="{{ route('assignToRider', [$branch_id, $staff_id, $order->id]) }}">
+                                                onclick="showLoader('{{ route('assignToRider', [$branch_id, $staff_id, $order->id]) }}')" style="cursor:pointer;">
                                                 <i class='bx bxs-right-arrow-square'></i>
                                             </a>
                                         @else
                                             <!-- Default for any other status -->
-                                            <a href="{{ route('confirmOnlineOrder', [$branch_id, $staff_id, $order->id]) }}"
+                                            <a onclick="showLoader('{{ route('confirmOnlineOrder', [$branch_id, $staff_id, $order->id]) }}')"
                                                 title="Confirm order">
                                                 <i class='bx bx-check'></i>
                                             </a>
-                                            <a href="{{ route('assignToRider', [$branch_id, $staff_id, $order->id]) }}"
+                                            <a onclick="showLoader('{{ route('assignToRider', [$branch_id, $staff_id, $order->id]) }}')" style="cursor:pointer;"
                                                 title="Assign to Rider">
                                                 <i class='bx bxs-right-arrow-square'></i>
                                             </a>
@@ -926,7 +926,7 @@
             <textarea placeholder="Please specify reason." id="cancellation-reason" cols="30" rows="10"></textarea>
             <div id="confirmCancelationBtn">
                 <button type="button"
-                    onclick="CancelOrder('{{ route('cancelorderbysalesman', [$order->id, $staff_id, $branch_id, ':Reason']) }}')"
+                    onclick="CancelOrder('{{ route('cancelorderbysalesman', [':order_id', $staff_id, $branch_id, ':Reason']) }}')"
                     id="cancelOrder">Cancel Order</button>
                 <button type="button" onclick="closeCancelPopUp()" id="close-cancel-order">close</button>
             </div>
@@ -946,8 +946,8 @@
                 // const response = await fetch("http://192.168.1.108:7000/getNotificationData");
                 // const response = await fetch("http://192.168.1.108:8000/getNotificationData");
                 // const response = await fetch("http://192.168.100.7:8000/getNotificationData");
-                const response = await fetch("http://192.168.100.7:7000/getNotificationData");
-                // const response = await fetch("http://127.0.0.1:8000/getNotificationData");
+                // const response = await fetch("http://192.168.100.7:7000/getNotificationData");
+                const response = await fetch("https://crusthouse.com.pk/getNotificationData");
                 const data = await response.json();
 
                 if (JSON.stringify(data.collection) !== JSON.stringify(previousData)) {
@@ -1032,6 +1032,7 @@
             let link = element.getElementsByTagName('a')[0];
             link.classList.add('selected');
             document.cookie = "selected_category=" + link.textContent.trim() + "; path=/";
+            show_Loader();
             window.location = route;
         }
 
@@ -1206,11 +1207,11 @@
 
             console.log("Original Route: " + route);
             // Replace the first parameter after the route name with the order_id
-            route = route.replace(/(cancelorderbysalesman\/)(\d+)/, `$1${order_id}`);
+            route = route.replace(':order_id', encodeURIComponent(order_id));
             // Replace ":Reason" with the encoded reason
             route = route.replace(':Reason', encodeURIComponent(reason));
             console.log("Final Route: " + route);
-
+            show_Loader();
             window.location.href = route;
         }
 

@@ -71,7 +71,7 @@
                     <div class="container-fields">
                         @foreach ($discounts as $discount)
                             <form id="texFields" action="{{ route('updateDiscount') }}" enctype="multipart/form-data"
-                                method="POST">
+                                method="POST" onsubmit="show_Loader()">
                                 @csrf
                                 <input type="hidden" name="discount_id" value="{{ $discount->id }}">
 
@@ -94,7 +94,7 @@
                             </form>
                         @endforeach
                     </div>
-                    <form action="{{ route('createDiscount') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('createDiscount') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -113,7 +113,7 @@
                         </div>
                     </form>
                 @else
-                    <form method="POST" action="{{ route('createDiscount') }}" enctype="multipart/form-data">
+                    <form method="POST" onsubmit="show_Loader()" action="{{ route('createDiscount') }}" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -148,7 +148,7 @@
                     <div class="container-fields">
                         @foreach ($discountTypes as $type)
                             <form id="texFields" action="{{ route('updateDiscountTypes') }}" enctype="multipart/form-data"
-                                method="POST">
+                                method="POST" onsubmit="show_Loader()">
                                 @csrf
                                 <input type="hidden" name="discount_type_id" value="{{ $type->id }}">
                                 <div class="inputdivs">
@@ -169,7 +169,7 @@
                             </form>
                         @endforeach
                     </div>
-                    <form action="{{ route('createDiscountTypes') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('createDiscountTypes') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -186,7 +186,7 @@
                         </div>
                     </form>
                 @else
-                    <form action="{{ route('createDiscountTypes') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('createDiscountTypes') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -221,7 +221,7 @@
                         @php
                             $discount_percentage = $receipt->max_discount_percentage;
                         @endphp
-                        <form action="{{ route('updateDiscountValue') }}" enctype="multipart/form-data" method="POST">
+                        <form action="{{ route('updateDiscountValue') }}" enctype="multipart/form-data" method="POST" onsubmit="show_Loader()">
                             @csrf
                             <input type="hidden" name="discount_value_id" value="{{ $receipt->id }}">
 
@@ -245,7 +245,7 @@
                         </form>
                     </div>
                 @else
-                    <form method="POST" action="{{ route('createDiscountValue') }}" enctype="multipart/form-data">
+                    <form method="POST" onsubmit="show_Loader()" action="{{ route('createDiscountValue') }}" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -279,7 +279,7 @@
                     <div class="container-fields">
                         @foreach ($taxes as $tax)
                             <form id="texFields" action="{{ route('updateTax') }}" enctype="multipart/form-data"
-                                method="POST">
+                                method="POST" onsubmit="show_Loader()">
                                 @csrf
                                 <input type="hidden" name="tax_id" value="{{ $tax->id }}">
                                 <div class="inputdivs">
@@ -305,7 +305,7 @@
                             </form>
                         @endforeach
                     </div>
-                    <form action="{{ route('createTax') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('createTax') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -330,7 +330,7 @@
                         </div>
                     </form>
                 @else
-                    <form action="{{ route('createTax') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('createTax') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -380,7 +380,7 @@
                             $feedback = $receipt->feedback;
                             $receipt_tagline = $receipt->receipt_tagline;
                         @endphp
-                        <form action="{{ route('updateReceipt') }}" enctype="multipart/form-data" method="POST">
+                        <form action="{{ route('updateReceipt') }}" enctype="multipart/form-data" method="POST" onsubmit="show_Loader()">
                             @csrf
                             <input type="hidden" name="receipt_id" value="{{ $receipt->id }}">
 
@@ -416,7 +416,7 @@
                         </form>
                     </div>
                 @else
-                    <form method="POST" action="{{ route('createReceipt') }}" enctype="multipart/form-data">
+                    <form method="POST" onsubmit="show_Loader()" action="{{ route('createReceipt') }}" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -463,7 +463,7 @@
                     <div class="container-fields">
                         @foreach ($paymentMethods as $method)
                             <form id="texFields" action="{{ route('updatePaymentMethod') }}"
-                                enctype="multipart/form-data" method="POST">
+                                enctype="multipart/form-data" method="POST" onsubmit="show_Loader()">
                                 @csrf
                                 <input type="hidden" name="payment_method_id" value="{{ $method->id }}">
                                 <div class="inputdivs">
@@ -484,7 +484,7 @@
                             </form>
                         @endforeach
                     </div>
-                    <form action="{{ route('createPaymentMethod') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('createPaymentMethod') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -501,7 +501,7 @@
                         </div>
                     </form>
                 @else
-                    <form action="{{ route('createPaymentMethod') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('createPaymentMethod') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -534,7 +534,7 @@
                     <div class="container-fields">
                         @foreach ($orderTypes as $oType)
                             <form id="texFields" action="{{ route('updateOrderTypes') }}" enctype="multipart/form-data"
-                                method="POST">
+                                method="POST" onsubmit="show_Loader()">
                                 @csrf
                                 <input type="hidden" name="order_type_id" value="{{ $oType->id }}">
                                 <div class="inputdivs">
@@ -555,7 +555,7 @@
                             </form>
                         @endforeach
                     </div>
-                    <form action="{{ route('createOrderTypes') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('createOrderTypes') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -572,7 +572,7 @@
                         </div>
                     </form>
                 @else
-                    <form action="{{ route('createOrderTypes') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('createOrderTypes') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -599,7 +599,7 @@
             <button class="opt-buttons" onclick="showThemeSetting()">Theme Settings</button>
             <div id="themeSettingOverlay"></div>
             @if ($settingsData)
-                <form action="{{ route('updateThemeSettings') }}" class="themeSetting" id="themeSetting" method="post"
+                <form action="{{ route('updateThemeSettings') }}" class="themeSetting" id="themeSetting" method="POST" onsubmit="show_Loader()"
                     enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -637,7 +637,7 @@
                     </div>
                 </form>
             @else
-                <form action="{{ route('createThemeSettings') }}" class="themeSetting" id="themeSetting" method="post"
+                <form action="{{ route('createThemeSettings') }}" class="themeSetting" id="themeSetting" method="POST" onsubmit="show_Loader()"
                     enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -680,7 +680,7 @@
             <button class="opt-buttons" onclick="showUpdateProfile()">Update Profile</button>
             <div id="updateProfileOverlay"></div>
             @if ($profile)
-                <form action="{{ route('updateProfile') }}" class="updateProfile" id="updateProfile" method="POST"
+                <form action="{{ route('updateProfile') }}" class="updateProfile" id="updateProfile" method="POST" onsubmit="show_Loader()"
                     enctype="multipart/form-data">
                     @csrf
                     <h3>Edit Profile</h3>
@@ -708,7 +708,7 @@
                     <div class="inputdivs" style="width: 85%; margin: 0.4vw auto;">
                         <label for="password">Password</label>
                         <div class="passwordfield">
-                            <input type="password" id="password" name="password" placeholder="**********" required
+                            <input type="password" id="password" name="password" placeholder="**********" 
                                 oninput="validatePassword()">
                             <i class='bx bxs-show' onclick="showAndHideProfilePswd('password')"></i>
                         </div>
@@ -718,7 +718,7 @@
                         <label for="cnfrmPswd">Confirm Password</label>
                         <div class="passwordfield">
                             <input type="password" id="cnfrmPswd" name="password_confirmation" placeholder="**********"
-                                required oninput="validatePassword()">
+                                 oninput="validatePassword()">
                             <i class='bx bxs-show' onclick="showAndHideProfilePswd('cnfrmPswd')"></i>
                         </div>
                     </div>

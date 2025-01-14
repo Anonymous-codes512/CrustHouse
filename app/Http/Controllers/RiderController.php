@@ -21,7 +21,7 @@ class RiderController extends Controller
         $branch = Branch::with('users.rider')->find($branch_id);
         $user = $branch->users->where('id', $rider_id)->first();
 
-        if ($user === null || $user->phone_number === null) {
+        if ($user->rider === null) {
             return redirect()->back()->with('error', 'Please complete the profile first');
         }
 
@@ -113,7 +113,7 @@ class RiderController extends Controller
         $branch = Branch::with('users.rider')->find($branch_id);
         $user = $branch->users->where('id', $rider_id)->first();
 
-        if ($user === null || $user->phone_number === null) {
+        if ($user->rider === null) {
             return redirect()->back()->with('error', 'Please complete the profile first');
         }
 

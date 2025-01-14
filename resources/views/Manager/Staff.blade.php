@@ -105,7 +105,7 @@
 
         <div id="overlay"></div>
         <form class="newstaff" id="newStaff" action="{{ route('storeRegistrationData') }}" method="POST"
-            enctype="multipart/form-data">
+            enctype="multipart/form-data" onsubmit="show_Loader()">
             @csrf
             <h3>Add New Staff Member</h3>
             <hr>
@@ -194,7 +194,7 @@
 
         <div id="editOverlay"></div>
         <form class="editstaff" id="editStaff" action="{{ route('updateStaff') }}" method="POST"
-            enctype="multipart/form-data" onsubmit="return checkFormSubmission()">
+            enctype="multipart/form-data" onsubmit="show_Loader()">
             @csrf
             <h3>Edit Staff Member</h3>
             <hr>
@@ -308,6 +308,7 @@
 
             let confirmButton = document.getElementById('confirm');
             confirmButton.onclick = function() {
+                show_Loader();
                 window.location.href = deleteUrl;
             };
         }

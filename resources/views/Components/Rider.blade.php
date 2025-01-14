@@ -19,6 +19,8 @@
 </head>
 
 <body>
+    @include('Components.Loader')
+
     @if (session('success'))
         <script type="text/javascript">
             $(document).ready(function() {
@@ -104,7 +106,7 @@
 
                                     <p>{{ $notification['message'] }}</p>
                                     <div class="buttons">
-                                        <a href="{{ route('markAsRead', $notification['orderNumber']) }}">
+                                        <a onclick="showLoader('{{ route('markAsRead', $notification['orderNumber']) }}')">
                                             <i class='bx bxs-book-reader' title="Read"></i>
                                         </a>
                                     </div>
@@ -124,26 +126,26 @@
                     <div class="menu" id="menu">
                         <div class="menuItems active" id="menu1">
                             <i class="bi bi-house"></i>
-                            <a href="{{ route('rider_dashboard', ['rider_id' => $user_id, 'branch_id' => $branch_id]) }}"
-                                style="text-decoration: none;" onclick="setActiveMenu('menu1')">
+                            <a style="text-decoration: none;" onclick="setActiveMenu('menu1', '{{ route('rider_dashboard', ['rider_id' => $user_id, 'branch_id' => $branch_id]) }}')">
                                 <p class="link">Dashboard</p>
                             </a>
                         </div>
 
                         <div class="menuItems" id="menu2">
                             <i class="bi bi-clipboard2-plus"></i>
-                            <a href="{{ route('riderOrders', ['rider_id' => $user_id, 'branch_id' => $branch_id]) }}"
-                                style="text-decoration: none;" onclick="setActiveMenu('menu2')">
+                            <a style="text-decoration: none;" onclick="setActiveMenu('menu2', '{{ route('riderOrders', ['rider_id' => $user_id, 'branch_id' => $branch_id]) }}')">
                                 <p class="link">Orders</p>
                             </a>
                         </div>
                         <div class="menuItems" id="menu3">
                             <i class="bi bi-person"></i>
-                            <a href="{{ route('riderProfile', ['rider_id' => $user_id, 'branch_id' => $branch_id]) }}"
-                                style="text-decoration: none;" onclick="setActiveMenu('menu3')">
+                            <a href="{{ route('riderProfile', ['rider_id' => $user_id, 'branch_id' => $branch_id]) }}" 
+                                style="text-decoration: none;" 
+                                onclick="setActiveMenu('menu3', '{{ route('riderProfile', ['rider_id' => $user_id, 'branch_id' => $branch_id]) }}')">
                                 <p class="link">Profile</p>
                             </a>
                         </div>
+                        
                     </div>
 
                     <div class="menuItems logout" id="menuLogout">
@@ -154,21 +156,14 @@
                     </div>
 
                     <script>
-                        function setActiveMenus(menuId, route) {
+                        function setActiveMenu(menuId, route) {
                             document.cookie = "activeMenu=" + menuId + "; path=/";
                             document.querySelectorAll('.menuItems').forEach(item => {
                                 item.classList.remove('active');
                             });
                             document.getElementById(menuId).classList.add('active');
+                            show_Loader();
                             window.location.href = route;
-                        }
-
-                        function setActiveMenu(menuId) {
-                            document.cookie = "activeMenu=" + menuId + "; path=/";
-                            document.querySelectorAll('.menuItems').forEach(item => {
-                                item.classList.remove('active');
-                            });
-                            document.getElementById(menuId).classList.add('active');
                         }
 
                         document.addEventListener('DOMContentLoaded', (event) => {
@@ -226,6 +221,7 @@
                 const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
                 document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
             }
+            show_Loader();
             window.location.href = route;
         }
 
@@ -243,6 +239,34 @@
         }
         window.addEventListener('resize', adjustMenuVisibility);
         adjustMenuVisibility();
+
+        function showLoader(route) {
+            document.getElementById('loaderOverlay').style.display = 'block'; // Show the overlay
+            document.getElementById('loaderOverlay').style.zIndex = '9999';
+            document.getElementById('loader').style.display = 'flex'; // Show the loader spinner
+            document.getElementById('loader').style.zIndex = '10000';
+            window.location.href = route; // Redirect after showing the loader
+        }
+
+        function show_Loader() {
+            document.getElementById('loaderOverlay').style.display = 'block'; // Show the overlay
+            document.getElementById('loaderOverlay').style.zIndex = '9999';
+            document.getElementById('loader').style.display = 'flex';
+            document.getElementById('loader').style.zIndex = '10000';
+        }
+
+        function hide_Loader() {
+            document.getElementById('loaderOverlay').style.display = 'none';
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        window.addEventListener("beforeunload", function() {
+            show_Loader();
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            hide_Loader()
+        });
     </script>
 
 

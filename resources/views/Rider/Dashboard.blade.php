@@ -18,14 +18,18 @@
             $branch_Name = $branch->branch_city . ' - Dashboard';
         }
 
-        $totalEarnings = $orders
-            ->filter(function ($order) {
-                return $order->delivery_status == 1;
-            })
-            ->sum(function ($order) {
-                $normalizedBill = preg_replace('/[^\d]/', '', $order->total_bill); // Keep only numbers
-                return (float) $normalizedBill;
-            });
+        if ($orders) {
+            $totalEarnings = $orders
+                ->filter(function ($order) {
+                    return $order->delivery_status == 1;
+                })
+                ->sum(function ($order) {
+                    $normalizedBill = preg_replace('/[^\d]/', '', $order->total_bill);
+                    return (float) $normalizedBill;
+                });
+        } else {
+            $totalEarnings = 0; // Default to zero if no orders
+        }
 
         $pendingOrders = $orders->where('delivery_status', '0')->count();
         $completedOrders = $orders->where('delivery_status', '1')->count();
@@ -90,11 +94,11 @@
                                 <td>{{ $order->delivery_status === 0 ? 'Pending' : 'Complete' }}</td>
                                 <td>Rs. {{ $order->total_bill }}</td>
                                 <td>
-                                    <a href="{{ route('viewOrderDetails', [$order->order_number, $rider_id]) }}"
+                                    <a onclick="showLoader('{{ route('viewOrderDetails', [$order->order_number, $rider_id]) }}')"
                                         title="View Order Details"><i class="bi bi-view-list"></i></a>
-                                    <a href="{{ route('deliveryCancelled', [$order->order_number, $rider_id]) }}"
+                                    <a onclick="showLoader('{{ route('deliveryCancelled', [$order->order_number, $rider_id]) }}')"
                                         title="Mark As Cancelled Order"><i class="bi bi-x-square-fill"></i></a>
-                                    <a href="{{ route('deliveryCompleted', [$order->order_number, $rider_id]) }}"
+                                    <a onclick="showLoader('{{ route('deliveryCompleted', [$order->order_number, $rider_id]) }}')"
                                         title="MarK as Completed Order"><i class="bi bi-check-square-fill"></i></a>
                                 </td>
                             </tr>
@@ -147,6 +151,7 @@
     </main>
     <script>
         function reload() {
+            show_Loader();
             window.location.reload();
         }
 

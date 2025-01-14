@@ -125,7 +125,7 @@
                 </button>
                 <div id="dayFullTransactionReportOverlay"></div>
                 <form id="dayFullTransactionReport" action="{{ route('dayFullTransactionReport') }}" method="POST"
-                    enctype="multipart/form-data">
+                    enctype="multipart/form-data" onsubmit="show_Loader()">
                     @csrf
                     <h3>Daily Transaction Report By Salesman</h3>
                     <hr>
@@ -290,7 +290,7 @@
                 </button>
                 <div id="salesAssistantTotalReportOverlay"></div>
                 <form id="salesAssistantTotalReport" action="{{ route('salesAssistantTotalSalesReport') }}" method="POST"
-                    enctype="multipart/form-data">
+                    enctype="multipart/form-data" onsubmit="show_Loader()">
                     @csrf
                     <h3>Sales Assistant Total Sales Report</h3>
                     <hr>
@@ -376,7 +376,7 @@
                 </button>
                 <div id="tillReconcilationFigureByDateOverlay"></div>
                 <form id="tillReconcilationFigureByDate" action="{{ route('tillReconcilationFigureByDate') }}"
-                    method="POST" enctype="multipart/form-data">
+                    method="POST" enctype="multipart/form-data" onsubmit="show_Loader()">
                     @csrf
                     <h3>Salesman Reconcilation Figure By Date</h3>
                     <hr>
@@ -472,20 +472,20 @@
                 @endif
             </div>
 
+            {{--  
+            |---------------------------------------------------------------|
+            |===================== Product Sale Report =====================|
+            |---------------------------------------------------------------|
+            --}}
+
             <div id="product_reports">
                 <h4>Product Reports</h4>
-                {{--  
-                |---------------------------------------------------------------|
-                |===================== Product Sale Report =====================|
-                |---------------------------------------------------------------|
-                --}}
-
                 <button type="button" class="option" id="option5" onclick="soldProductsReport()">
                     Product sales report
                 </button>
                 <div id="soldProductsReportOverlay"></div>
                 <form id="soldProductsReport" action="{{ route('soldProductsReport') }}" method="POST"
-                    enctype="multipart/form-data">
+                    enctype="multipart/form-data" onsubmit="show_Loader()">
                     @csrf
                     <h3>Products Sales Report</h3>
                     <hr>
@@ -632,7 +632,7 @@
                 </button>
                 <div id="productsRefundReportOverlay"></div>
                 <form id="productsRefundReport" action="{{ route('productsRefundReport') }}" method="POST"
-                    enctype="multipart/form-data">
+                    enctype="multipart/form-data" onsubmit="show_Loader()">
                     @csrf
                     <h3>Products Refund Report</h3>
                     <hr>
@@ -661,8 +661,11 @@
                     <div id="productsRefundReportTable">
                         @php
                             $salesRefund = session('salesRefund');
+                            // dd($salesRefund);
                             $total_Sales = 0.0;
                             $count = 0;
+                            $start_date = null;
+                            $end_date = null;
                         @endphp
                         <h3>Sold Products Report</h3>
                         <hr>
@@ -682,6 +685,10 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($salesRefund as $Sales)
+                                        @php
+                                            $start_date = $Sales->start_date;
+                                            $end_date = $Sales->end_date;
+                                        @endphp
                                         @foreach ($Sales->items as $item)
                                             @php
                                                 $date = $item->created_at->format('d/m/y');
@@ -742,7 +749,7 @@
                 </button>
                 <div id="refundReportOverlay"></div>
                 <form id="refundReport" action="{{ route('refundReport') }}" method="POST"
-                    enctype="multipart/form-data">
+                    enctype="multipart/form-data" onsubmit="show_Loader()">
                     @csrf
                     <h3>Refund Report</h3>
                     <hr>
@@ -820,20 +827,20 @@
                 @endif
             </div>
 
+            {{--  
+            |---------------------------------------------------------------|
+            |==================== Tax Report By Date =======================|
+            |---------------------------------------------------------------|
+            --}}
+
             <div id="tax_reports">
                 <h4>Tax Reports</h4>
-                {{--  
-                |---------------------------------------------------------------|
-                |==================== Tax Report By Date =======================|
-                |---------------------------------------------------------------|
-                --}}
-
                 <button type="button" class="option" id="option10" onclick="taxReportByDate()">
                     Tax report by date
                 </button>
                 <div id="taxReportByDateOverlay"></div>
                 <form id="taxReportByDate" action="{{ route('taxReportByDate') }}" method="POST"
-                    enctype="multipart/form-data">
+                    enctype="multipart/form-data" onsubmit="show_Loader()">
                     @csrf
                     <h3>Tax Report By Date</h3>
                     <hr>
@@ -928,7 +935,7 @@
                 </button>
                 <div id="dailyTransactionTaxReportOverlay"></div>
                 <form id="dailyTransactionTaxReport" action="{{ route('dailyTransactionTaxReport') }}" method="POST"
-                    enctype="multipart/form-data">
+                    enctype="multipart/form-data" onsubmit="show_Loader()">
                     @csrf
                     <h3>Daily Transaction Tax Report</h3>
                     <hr>
@@ -1034,7 +1041,7 @@
                 </button>
                 <div id="salesmanTaxReportByDateOverlay"></div>
                 <form id="salesmanTaxReportByDate" action="{{ route('salesmanTaxReportByDate') }}" method="POST"
-                    enctype="multipart/form-data">
+                    enctype="multipart/form-data" onsubmit="show_Loader()">
                     @csrf
                     <h3>Tax Report by Salesman</h3>
                     <hr>
@@ -1130,7 +1137,7 @@
                 </button>
                 <div id="salesAndDiscountReportByDateOverlay"></div>
                 <form id="salesAndDiscountReportByDate" action="{{ route('salesAndDiscountReportByDate') }}"
-                    method="POST" enctype="multipart/form-data">
+                    method="POST" enctype="multipart/form-data" onsubmit="show_Loader()">
                     @csrf
                     <h3>Sales Discount Report By Date</h3>
                     <hr>
@@ -1212,7 +1219,6 @@
                         </div>
                     </div>
                 @endif
-
 
                 {{-- <button type="button" class="option" id="option15">
                 Item price change / Discounts

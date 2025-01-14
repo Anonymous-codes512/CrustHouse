@@ -72,7 +72,7 @@
                                 <td onclick="showDetails({{ json_encode($order) }})">{{ $order->total_bill }}</td>
                                 <td onclick="showDetails({{ json_encode($order) }})">{{ $order->ordertype }}</td>
                                 <td>
-                                    <a id="done" href="{{ route('orderComplete', $order->id) }}">Done</a>
+                                    <a id="done" onclick="showLoader('{{ route('orderComplete', $order->id) }}')" style="cursor: pointer;">Done</a>
                                     <a id="print" href="{{ route('printChefRecipt', $order->id) }}">Print</a>
                                 </td>
                             </tr>
@@ -194,6 +194,7 @@
                 const data = await response.json();
 
                 if (data.status === 'success') {
+                    show_Loader();
                     window.location.reload();   
                 }
             } catch (error) {

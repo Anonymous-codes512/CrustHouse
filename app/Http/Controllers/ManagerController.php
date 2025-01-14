@@ -18,7 +18,7 @@ use App\Models\Product;
 use App\Models\Recipe;
 use App\Models\Stock;
 use App\Models\Tax;
-use App\Models\StockHistory;
+use App\Models\StockHistory; 
 use Dompdf\Dompdf;
 use App\Models\User;
 use Carbon\Carbon;
@@ -759,7 +759,7 @@ class ManagerController extends Controller
             $newStock->unitPrice = number_format($request->unitPrice, 2) . ' Pkr';
 
             $newStock->save();
-            return redirect()->back();
+            return redirect()->back()->with('success', 'Stock added Successfully.');
         }
     }
     public function updateStock(Request $request)
@@ -775,7 +775,7 @@ class ManagerController extends Controller
         $stockData->unitPrice = $request->unitPrice . ' Pkr';
 
         $stockData->save();
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Stock Updated Successfully.');
     }
     public function deleteStock($id)
     {
@@ -1209,6 +1209,7 @@ class ManagerController extends Controller
 
     public function viewDineInPage($branch_id)
     {
+        // dd($branch_id);
         if (!session()->has('branchManager')) {
             return redirect()->route('viewLoginPage');
         }
@@ -1651,7 +1652,6 @@ class ManagerController extends Controller
             ->with('items')
             ->get();
         $user = User::where('branch_id', $branch_id)->where('role', 'salesman')->get();
-
         return view('Manager/Report')->with([
             'totalOrders' => $order,
             'salesman' => $user,
@@ -1665,7 +1665,7 @@ class ManagerController extends Controller
         $branch_id = $request->branch_id;
         $salesman_id = $request->salesman;
         $selectedDate = $request->transaction_report_date;
-
+        
         $dailyOrders = Order::whereDate('created_at', $selectedDate)
             ->where('branch_id', $branch_id)
             ->where('salesman_id', $salesman_id)

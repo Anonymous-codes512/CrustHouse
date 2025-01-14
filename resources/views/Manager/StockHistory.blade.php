@@ -34,7 +34,7 @@
 @section('main')
     <main id="stock">
         <div style="display:flex;justify-content:space-between; align-item:center;">
-            <button id="back" type="button" onclick="window.location='{{ route('viewStockPage', [$user_id, $branch_id]) }}'">Back</button>
+            <button id="back" type="button" onclick="showLoader('{{ route('viewStockPage', [$user_id, $branch_id]) }}')">Back</button>
             <h3 style="margin:0; width:60%;">Stock history</h3>
         </div>
         @php

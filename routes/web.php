@@ -6,9 +6,7 @@ use App\Http\Controllers\KitchenController;
 use App\Http\Controllers\OnlineOrdersController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\SalesmanController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RiderController;
-use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,7 +21,6 @@ Route::get('/', function () {
 
 Route::get('/login',[AuthController::class, 'loginIndex'])->name('viewLoginPage');
 Route::get('/viewRegisterPage',[AuthController::class, 'registrationIndex'])->name('viewRegisterPage');
-
 Route::post('/storeRegistrationData',[AuthController::class, 'register'])->name('storeRegistrationData');
 Route::post('/login',[AuthController::class, 'login'])->name('login');
 Route::get('/viewForgotPassword',[AuthController::class, 'viewForgotPassword'])->name('viewForgotPassword');
@@ -39,10 +36,7 @@ Route::get('/logout',[AuthController::class, 'logout'])->name('logout');
 */ 
 
 Route::get('/dashboard/{owner_id}', [OwnerController::class, 'viewOwnerDashboard'])->name('dashboard');
-
 Route::post('/UpdateOwnerProfile', [OwnerController::class, 'UpdateOwnerProfile'])->name('UpdateOwnerProfile');
-
-
 Route::post('/storeNewBranchData',[OwnerController::class,'newBranch'])->name('storeNewBranchData'); 
 Route::get('/deleteBranch/{branch_id}', [OwnerController::class, 'deleteBranch'])->name('deleteBranch');
 Route::post('/updateBranches', [OwnerController::class, 'updateBranches'])->name('updateBranches');
@@ -132,7 +126,6 @@ Route::get('/viewOrdersPage/{id}/{branch_id}', [ManagerController::class,'viewOr
 Route::get('/viewOrderProducts/{branch_id}/{order_id}', [ManagerController::class,'viewOrderProducts'])->name('viewOrderProducts');
 Route::get('/printrecipt/{order_id}', [ManagerController::class,'printRecipt'])->name('printrecipt');
 Route::get('/cancelorder/{order_id}/{staff_id}', [ManagerController::class,'cancelOrder'])->name('cancelorder');
-
 Route::get('/viewStaffPage/{id}/{branch_id}', [ManagerController::class,'viewStaffPage'])->name('viewStaffPage');
 Route::post('/updateStaff', [ManagerController::class,'updateStaff'])->name('updateStaff');
 Route::get('/deleteStaff/{id}', [ManagerController::class,'deleteStaff'])->name('deleteStaff');
@@ -312,3 +305,4 @@ Route::get('view_order_details/{order_number}/{rider_id}', [RiderController::cla
 Route::get('delivery_cancelled/{order_number}/{rider_id}', [RiderController::class,'deliveryCancelled'])->name('deliveryCancelled');
 Route::get('delivery_completed/{order_number}/{rider_id}', [RiderController::class,'deliveryCompleted'])->name('deliveryCompleted');
 Route::get('mark_as_read/{order_number}', [RiderController::class,'markAsRead'])->name('markAsRead');
+

@@ -71,7 +71,7 @@
         @endif
         <div class="newCategory">
             <button onclick="addStock()">Add New Stock</button>
-            <button onclick="window.location='{{ route('viewStockHistory', [$branch_id, $user_id]) }}'">Stock History</button>
+            <button onclick="showLoader('{{ route('viewStockHistory', [$branch_id, $user_id]) }}')">Stock History</button>
         </div>
 
         @if (!empty($notifications))
@@ -112,7 +112,7 @@
         {{-- Add New Stock Overlay --}}
         <div id="overlay"></div>
         <form class="newstock" id="newStock" action="{{ route('createStock') }}" method="POST"
-            enctype="multipart/form-data">
+            enctype="multipart/form-data" onsubmit="show_Loader()">
             @csrf
             <h3>Add New Stock</h3>
             <hr>
@@ -187,7 +187,7 @@
         {{-- Edit Stock Overlay --}}
         <div id="editOverlay"></div>
         <form class="editstock" id="editStock" action="{{ route('updateStock') }}" method="POST"
-            enctype="multipart/form-data">
+            enctype="multipart/form-data" onsubmit="show_Loader()">
             @csrf
             <h3>Edit Stock</h3>
             <hr>
@@ -309,6 +309,7 @@
 
             let confirmButton = document.getElementById('confirm');
             confirmButton.onclick = function() {
+                show_Loader();
                 window.location.href = deleteUrl;
             };
         }

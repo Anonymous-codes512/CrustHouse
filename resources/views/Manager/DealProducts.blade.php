@@ -75,14 +75,12 @@
             const actualPrice = parseFloat(document.getElementById('currentDealPrice').value);
             const finalPrice = parseFloat(document.getElementById('dealFinalPrice').value);
 
-            console.log(actualPrice);
-            console.log(finalPrice);
-
             if (finalPrice > actualPrice) {
                 alert('The Deal Final Price should be less than or equal to the Deal Actual Price.');
                 document.getElementById('dealFinalPrice').value = '';
                 return false;
             }
+            show_Loader();
             return true;
         }
 

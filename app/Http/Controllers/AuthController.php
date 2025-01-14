@@ -69,7 +69,7 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::with('rider')->where('email', $request->email)->first();
 
         if ($user && Hash::check($request->password, $user->password)) {
             session(['username' => $user->name, 'profile_pic' => $user->profile_picture]);
@@ -92,7 +92,7 @@ class AuthController extends Controller
                 return redirect()->route('chef_dashboard', ['user_id' => $user->id, 'branch_id' => $user->branch_id]);
             }else if ($user->role === 'rider') {
                 session()->put('rider', true);
-                if($user->phone_number === null) {
+                if($user->rider === null) {
                     return redirect()->route('riderProfile', ['rider_id' => $user->id, 'branch_id' => $user->branch_id]);
                 }
                 else{
