@@ -134,19 +134,30 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($Riders as $rider)
-                        @if ($rider->rider->status === 1)
-                            <tr>
-                                <td>{{ $rider->rider->id }}</td>
-                                <td>{{ $rider->name }}</td>
-                                <td>{{ $rider->rider->license_number }}</td>
-                                <td>
-                                    <a
-                                        onclick="showLoader('{{ route('assignOrder', [$Branch_id, $rider->rider->id, $Order_id, $Salesman_id]) }}')">
-                                        <button class="assign_order">Assign</button>
-                                    </a>
-                                </td>
-                            </tr>
+                    @php
+                        $users = $Riders;
+                    @endphp
+
+                    @foreach ($users as $user)
+                        @if ($user->role == 'rider')
+                            @if ($user->rider)
+                                <tr>
+                                    <td>{{ $user->rider->id }}</td>
+                                    <td>{{ $user->name }}</td>
+                                    <td>{{ $user->rider->license_number }}</td>
+                                    <td>
+                                        <a
+                                            onclick="showLoader('{{ route('assignOrder', [$Branch_id, $user->rider->id, $Order_id, $Salesman_id]) }}')">
+                                            <button class="assign_order">Assign</button>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @else
+                                <!-- Optionally handle the case where there is no associated rider -->
+                                <tr>
+                                    <td colspan="4">No rider associated with this user.</td>
+                                </tr>
+                            @endif
                         @endif
                     @endforeach
                 </tbody>

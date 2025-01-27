@@ -11,19 +11,19 @@
         <tr>
             <td
                 style="background-color: #ffbb00; padding: 20px; text-align: center; color: white; border-radius: 10px 10px 0 0;">
-                <h1 style="margin: 0; color:#ffffff">Order Confirmation</h1>
+                <h1 style="margin: 0; color:#ffffff">Order Summary</h1>
             </td>
         </tr>
         <tr>
             <td style="padding: 20px;">
-                <h2 style="color: #333;">{{ $orderData->customers->name }}, thank you for your order!</h2>
+                <h2 style="color: #333;">{{ optional($orderData->customers)->name ?? 'Guest' }}, thank you for your order!</h2>
                 <p style="color: #555;">Your order has been successfully placed. Below are the details of your order:
                 </p>
 
                 <h3 style="color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px;">Order Information</h3>
-                <p style="margin: 5px 0; color: #555;"><strong>Phone:</strong> {{ $orderData->customers->phone_number }}
+                <p style="margin: 5px 0; color: #555;"><strong>Phone:</strong> {{ optional($orderData->customers)->phone_number ?? 'N/A' }}
                 </p>
-                <p style="margin: 5px 0; color: #555;"><strong>Email:</strong> {{ $orderData->customers->email }}</p>
+                <p style="margin: 5px 0; color: #555;"><strong>Email:</strong> {{ optional($orderData->customers)->email ?? 'N/A' }}</p>
                 <p style="margin: 5px 0; color: #555;"><strong>Address:</strong> {{ $orderData->order_address }}</p>
                 <p style="margin: 5px 0; color: #555;"><strong>Payment Method:</strong> {{ $orderData->payment_method }}
                 </p>

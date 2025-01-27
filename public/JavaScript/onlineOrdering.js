@@ -10,7 +10,7 @@ function closeProductPopup() {
     document.body.style.overflow = "auto";
 }
 function addToCart(product, allProducts, addons) {
-    const productArray = Object.values(allProducts); 
+    const productArray = Object.values(allProducts);
     let productVariations = [];
 
     productArray.forEach((element) => {
@@ -414,33 +414,61 @@ function showMessage() {
     }, 1000);
 }
 
+// function checkOut() {
+//     const LoginStatus = localStorage.getItem("LoginStatus");
+//     const CartPopup = document.getElementById('cartPopupOverlay');
+//     if (LoginStatus) {
+//         const parsedLoginStatus = JSON.parse(LoginStatus);
+//         if ((parsedLoginStatus.loginStatus === false && parsedLoginStatus.signupStatus === false) || parsedLoginStatus.loginStatus === null) {
+//             CartPopup.style.display = "none";
+//             showSignupPopup();
+//         } else if ((parsedLoginStatus.loginStatus === false && parsedLoginStatus.signupStatus === true) || parsedLoginStatus.loginStatus === null) {
+//             CartPopup.style.display = "none";
+//             showLoginPopup();
+//         } else if ((parsedLoginStatus.loginStatus === true && parsedLoginStatus.signupStatus === true) || parsedLoginStatus.loginStatus === null) {
+//             CartPopup.style.display = "none";
+//             showCheckOutPopup();
+//         } else if ((parsedLoginStatus.loginStatus === true && parsedLoginStatus.signupStatus === false) || parsedLoginStatus.loginStatus === null) {
+//             CartPopup.style.display = "none";
+//             showCheckOutPopup();
+//         } else {
+//             CartPopup.style.display = "none";
+//             showSignupPopup();
+//         }
+//     }
+// }
+
+
 function checkOut() {
     const LoginStatus = localStorage.getItem("LoginStatus");
     const CartPopup = document.getElementById('cartPopupOverlay');
+
     if (LoginStatus) {
         const parsedLoginStatus = JSON.parse(LoginStatus);
-        if ((parsedLoginStatus.loginStatus === false && parsedLoginStatus.signupStatus === false) || parsedLoginStatus.loginStatus === null) {
-            CartPopup.style.display = "none";
-            showSignupPopup();
-        } else if ((parsedLoginStatus.loginStatus === false && parsedLoginStatus.signupStatus === true) || parsedLoginStatus.loginStatus === null) {
-            CartPopup.style.display = "none";
-            showLoginPopup();
-        } else if ((parsedLoginStatus.loginStatus === true && parsedLoginStatus.signupStatus === true) || parsedLoginStatus.loginStatus === null) {
+
+        if (parsedLoginStatus.isGuest) {
+            // For guest accounts, directly show checkout popup
             CartPopup.style.display = "none";
             showCheckOutPopup();
-        } else if ((parsedLoginStatus.loginStatus === true && parsedLoginStatus.signupStatus === false) || parsedLoginStatus.loginStatus === null) {
+        } else if (parsedLoginStatus.loginStatus && parsedLoginStatus.signupStatus) {
             CartPopup.style.display = "none";
             showCheckOutPopup();
         } else {
+            // Handle cases for users who aren't logged in
             CartPopup.style.display = "none";
             showSignupPopup();
         }
+    } else {
+        // If no LoginStatus, show signup by default
+        CartPopup.style.display = "none";
+        showSignupPopup();
     }
 }
 
+
 function updateLoginStatus() {
     let email = document.getElementById("email").value;
-    let Data = { loginStatus: false, signupStatus: true, email: email };
+    let Data = { loginStatus: false,isGuest:false ,signupStatus: true, email: email };
     localStorage.setItem("LoginStatus", JSON.stringify(Data));
     return true;
 }
@@ -521,9 +549,10 @@ function closeCheckOutDivPopup() {
 
 function updateCartAndTotals() {
     const RegisteredCustomer = JSON.parse(localStorage.getItem("RegisteredCustomer"));
-    document.getElementById("userName").value = RegisteredCustomer["name"];
-    document.getElementById("userPhone").value = RegisteredCustomer["Phone Number"];
-    document.getElementById("userEmail").value = RegisteredCustomer["Email"];
+    document.getElementById("userName").value = RegisteredCustomer?.["name"] ?? null;
+    document.getElementById("userPhone").value = RegisteredCustomer?.["Phone Number"] ?? null;
+    document.getElementById("userEmail").value = RegisteredCustomer?.["Email"] ?? null;
+    
 
     const cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
     const centerDiv = document.getElementById("center-div");
@@ -643,16 +672,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                         userFound = true;
                     }
                 });
-                if (!userFound) {
-                    const updatedLoginData = {
-                        loginStatus: loginData.loginStatus,
-                        signupStatus: false,
-                        email: loginData.email,
-                        LoginTime: null,
-                    };
-                    localStorage.setItem("LoginStatus", JSON.stringify(updatedLoginData));
-                    console.log("Email Not Verified");
-                }
+                // if (!userFound) {
+                //     const updatedLoginData = {
+                //         loginStatus: loginData.loginStatus,
+                //         signupStatus: false,
+                //         email: loginData.email,
+                //         LoginTime: null,
+                //     };
+                //     localStorage.setItem("LoginStatus", JSON.stringify(updatedLoginData));
+                //     console.log("Email Not Verified");
+                // }
             })
             .catch((error) => console.error("Error:", error));
 
@@ -703,6 +732,7 @@ function loginUser(route) {
                 const updatedLoginData = {
                     loginStatus: true,
                     signupStatus: true,
+                    isGuest : false,
                     email: data.user.email,
                     LoginTime: login_time,
                 };
@@ -789,6 +819,21 @@ function logout() {
     localStorage.clear();
 }
 
+function guestAccount() {
+    // Set LoginStatus for guest account
+    const newLoginStatus = {
+        loginStatus: true,
+        signupStatus: true,
+        isGuest: true // Add a flag to identify guest accounts
+    };
+    localStorage.setItem("LoginStatus", JSON.stringify(newLoginStatus));
+
+    hideLoginPopup();
+    hideSignupPopup();
+    showCheckOutPopup(); // Directly open checkout popup
+}
+
+
 let interval = 3600000;
 
 function checkAndRemoveData() {
@@ -840,13 +885,18 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function openProfilePopup(route) {
-    getProfileData(route);
-    const dropdown = document.getElementById("dropdownMenu");
-    dropdown.style.display = "none";
+    const LoginStatus = localStorage.getItem("LoginStatus");
+    const parsedLoginStatus = JSON.parse(LoginStatus);
+    if (!parsedLoginStatus.isGuest) {
 
-    document.getElementById("popupOverlay").style.display = "block";
-    document.getElementById("profilePopup").style.display = "flex";
-    document.body.style.overflow = "hidden";
+        getProfileData(route);
+        const dropdown = document.getElementById("dropdownMenu");
+        dropdown.style.display = "none";
+
+        document.getElementById("popupOverlay").style.display = "block";
+        document.getElementById("profilePopup").style.display = "flex";
+        document.body.style.overflow = "hidden";
+    }
 }
 
 function closeProfilePopup() {

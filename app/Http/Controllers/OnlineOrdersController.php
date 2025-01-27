@@ -22,12 +22,13 @@ use Illuminate\Support\Facades\Hash;
 use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
 use Stripe\Checkout\Session;
+
 class OnlineOrdersController extends Controller
 {
 
     public function viewOnlinePage()
     {
-        $branches = Branch::whereIn('company_name', ['CrustHouse', 'crusthouse, Crust-House', 'crust-house', 'crust house', 'Crust house' , 'Crust House'])->get();
+        $branches = Branch::whereIn('company_name', ['CrustHouse', 'crusthouse, Crust-House', 'crust-house', 'crust house', 'Crust house', 'Crust House'])->get();
         $branch_ids = [];
         foreach ($branches as $branch) {
             $branch_ids[] = $branch->id;
@@ -39,7 +40,7 @@ class OnlineOrdersController extends Controller
 
         $categories = Category::whereIn('branch_id', $branch_ids)->get();
         $taxes = tax::whereIn('branch_id', $branch_ids)->get();
-        
+
         $deals = handler::where(function ($query) use ($branch_ids) {
             $query->whereHas('product', function ($query) use ($branch_ids) {
                 $query->whereIn('branch_id', $branch_ids);
@@ -208,6 +209,7 @@ class OnlineOrdersController extends Controller
                 $products[$key] = $cartItem;
             }
         }
+
         $name = $request['name'];
         $email = $request['email'];
         $phone = $request['phone_number'];
@@ -220,10 +222,19 @@ class OnlineOrdersController extends Controller
         $orderType = 'online';
         $order_initial = "OL-ORD";
         $newOrderNumber = 0;
-        
+
+        // Check if user exists; if not, create a new user
         $user = User::where('email', $email)->first();
+        if (!$user) {
+            $user = new User();
+            $user->name = $name;
+            $user->email = $email;
+            $user->phone_number = $phone;
+            $user->password = bcrypt('12345678');
+            $user->save();
+        }
         $user_id = $user->id;
-        
+
         // Generate new order number
         $lastOnlineOrder = Order::where('ordertype', 'online')->orderBy('id', 'desc')->first();
         if ($lastOnlineOrder) {
@@ -237,7 +248,7 @@ class OnlineOrdersController extends Controller
         $newOrder = new Order();
         $newOrder->order_number = $newOrderNumber;
         $newOrder->customer_id = $user_id;
-        $newOrder->total_bill = 'Rs.' . $totalBillPKR;
+        $newOrder->total_bill = $totalBillPKR;
         $newOrder->taxes = $taxAmount;
         $newOrder->received_cash = $paymentMethod === 'Credit Card' ? $totalBillPKR : null;
         $newOrder->return_change = $paymentMethod === 'Credit Card' ? 0.0 : null;
@@ -247,7 +258,8 @@ class OnlineOrdersController extends Controller
         $newOrder->order_address = $orderAddress;
         $newOrder->status = 2; // Set status as pending or appropriate value
         $newOrder->save();
-        
+
+        // Save each product in the order
         foreach ($products as $item) {
             $orderItem = new OrderItem();
             $orderItem->order_id = $newOrder->id;
@@ -263,16 +275,19 @@ class OnlineOrdersController extends Controller
             }
             $orderItem->addons = $toppingNames;
             $orderItem->save();
-        } 
+        }
 
+        // Send order summary email
         $order = Order::with(['items', 'customers'])->where('order_number', $newOrder->order_number)->first();
         Mail::to($order->customers->email)->send(new OrderSummaryMail($order));
 
+        // Notify admin about the new order
         $notify = new OnlineNotification();
         $notify->message = "A new online order has been placed. Please refresh your page.";
         $notify->toast = 0;
         $notify->save();
 
+        // Flash message and redirect
         session()->flash('Order_Place_Success', 'Order placed successfully');
         return redirect()->route('onlineOrderPage');
     }

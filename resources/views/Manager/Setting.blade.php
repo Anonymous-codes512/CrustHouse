@@ -94,7 +94,8 @@
                             </form>
                         @endforeach
                     </div>
-                    <form action="{{ route('createDiscount') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
+                    <form action="{{ route('createDiscount') }}" method="POST" onsubmit="show_Loader()"
+                        enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -113,7 +114,8 @@
                         </div>
                     </form>
                 @else
-                    <form method="POST" onsubmit="show_Loader()" action="{{ route('createDiscount') }}" enctype="multipart/form-data">
+                    <form method="POST" onsubmit="show_Loader()" action="{{ route('createDiscount') }}"
+                        enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -169,7 +171,8 @@
                             </form>
                         @endforeach
                     </div>
-                    <form action="{{ route('createDiscountTypes') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
+                    <form action="{{ route('createDiscountTypes') }}" method="POST" onsubmit="show_Loader()"
+                        enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -186,7 +189,8 @@
                         </div>
                     </form>
                 @else
-                    <form action="{{ route('createDiscountTypes') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
+                    <form action="{{ route('createDiscountTypes') }}" method="POST" onsubmit="show_Loader()"
+                        enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -221,7 +225,8 @@
                         @php
                             $discount_percentage = $receipt->max_discount_percentage;
                         @endphp
-                        <form action="{{ route('updateDiscountValue') }}" enctype="multipart/form-data" method="POST" onsubmit="show_Loader()">
+                        <form action="{{ route('updateDiscountValue') }}" enctype="multipart/form-data" method="POST"
+                            onsubmit="show_Loader()">
                             @csrf
                             <input type="hidden" name="discount_value_id" value="{{ $receipt->id }}">
 
@@ -245,7 +250,8 @@
                         </form>
                     </div>
                 @else
-                    <form method="POST" onsubmit="show_Loader()" action="{{ route('createDiscountValue') }}" enctype="multipart/form-data">
+                    <form method="POST" onsubmit="show_Loader()" action="{{ route('createDiscountValue') }}"
+                        enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -305,7 +311,8 @@
                             </form>
                         @endforeach
                     </div>
-                    <form action="{{ route('createTax') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
+                    <form action="{{ route('createTax') }}" method="POST" onsubmit="show_Loader()"
+                        enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -330,7 +337,8 @@
                         </div>
                     </form>
                 @else
-                    <form action="{{ route('createTax') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
+                    <form action="{{ route('createTax') }}" method="POST" onsubmit="show_Loader()"
+                        enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -380,7 +388,8 @@
                             $feedback = $receipt->feedback;
                             $receipt_tagline = $receipt->receipt_tagline;
                         @endphp
-                        <form action="{{ route('updateReceipt') }}" enctype="multipart/form-data" method="POST" onsubmit="show_Loader()">
+                        <form action="{{ route('updateReceipt') }}" enctype="multipart/form-data" method="POST"
+                            onsubmit="show_Loader()">
                             @csrf
                             <input type="hidden" name="receipt_id" value="{{ $receipt->id }}">
 
@@ -404,7 +413,8 @@
                             </div>
 
                             <div class="forms-btns">
-                                <button style="height: 40px;" type="button" id="cancel" onclick="closeReceiptOverlay()">Cancel</button>
+                                <button style="height: 40px;" type="button" id="cancel"
+                                    onclick="closeReceiptOverlay()">Cancel</button>
                                 <button style="height: 40px;" class="add" type="submit">
                                     Update
                                 </button>
@@ -416,7 +426,8 @@
                         </form>
                     </div>
                 @else
-                    <form method="POST" onsubmit="show_Loader()" action="{{ route('createReceipt') }}" enctype="multipart/form-data">
+                    <form method="POST" onsubmit="show_Loader()" action="{{ route('createReceipt') }}"
+                        enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -484,7 +495,8 @@
                             </form>
                         @endforeach
                     </div>
-                    <form action="{{ route('createPaymentMethod') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
+                    <form action="{{ route('createPaymentMethod') }}" method="POST" onsubmit="show_Loader()"
+                        enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -501,7 +513,8 @@
                         </div>
                     </form>
                 @else
-                    <form action="{{ route('createPaymentMethod') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
+                    <form action="{{ route('createPaymentMethod') }}" method="POST" onsubmit="show_Loader()"
+                        enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -555,7 +568,8 @@
                             </form>
                         @endforeach
                     </div>
-                    <form action="{{ route('createOrderTypes') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
+                    <form action="{{ route('createOrderTypes') }}" method="POST" onsubmit="show_Loader()"
+                        enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -572,7 +586,8 @@
                         </div>
                     </form>
                 @else
-                    <form action="{{ route('createOrderTypes') }}" method="POST" onsubmit="show_Loader()" enctype="multipart/form-data">
+                    <form action="{{ route('createOrderTypes') }}" method="POST" onsubmit="show_Loader()"
+                        enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="admin_id" value="{{ $id }}">
                         <input type="hidden" name="branch_id" value="{{ $branch_id }}">
@@ -599,8 +614,8 @@
             <button class="opt-buttons" onclick="showThemeSetting()">Theme Settings</button>
             <div id="themeSettingOverlay"></div>
             @if ($settingsData)
-                <form action="{{ route('updateThemeSettings') }}" class="themeSetting" id="themeSetting" method="POST" onsubmit="show_Loader()"
-                    enctype="multipart/form-data">
+                <form action="{{ route('updateThemeSettings') }}" class="themeSetting" id="themeSetting" method="POST"
+                    onsubmit="show_Loader()" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="branch_id" value="{{ $branch_id }}">
                     <input type="hidden" name="setting_id" value="{{ $settingsData->id }}">
@@ -617,13 +632,15 @@
                         </div>
                     </div>
 
-                    <div class="inputdivs" style="flex-direction:row; justify-content:flex-start; align-item:start; gap:10px;">
+                    <div class="inputdivs"
+                        style="flex-direction:row; justify-content:flex-start; align-item:start; gap:10px;">
                         <label style="width:40%;" for="primaryColor">Primery Color</label>
                         <input style="width:25%;" type="color" name="primary_color" id="primaryColor"
                             value="{{ $settingsData->pos_primary_color }}">
                     </div>
 
-                    <div class="inputdivs" style="flex-direction:row; justify-content:flex-start; align-item:start; gap:10px;">
+                    <div class="inputdivs"
+                        style="flex-direction:row; justify-content:flex-start; align-item:start; gap:10px;">
                         <label style="width:40%;" for="secondaryColor">Secondary Color</label>
                         <input style="width:25%;" type="color" name="secondary_color" id="secondaryColor"
                             value="{{ $settingsData->pos_secondary_color }}">
@@ -637,8 +654,8 @@
                     </div>
                 </form>
             @else
-                <form action="{{ route('createThemeSettings') }}" class="themeSetting" id="themeSetting" method="POST" onsubmit="show_Loader()"
-                    enctype="multipart/form-data">
+                <form action="{{ route('createThemeSettings') }}" class="themeSetting" id="themeSetting" method="POST"
+                    onsubmit="show_Loader()" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="branch_id" value="{{ $branch_id }}">
                     <h3>Add Logo and Theme</h3>
@@ -680,8 +697,8 @@
             <button class="opt-buttons" onclick="showUpdateProfile()">Update Profile</button>
             <div id="updateProfileOverlay"></div>
             @if ($profile)
-                <form action="{{ route('updateProfile') }}" class="updateProfile" id="updateProfile" method="POST" onsubmit="show_Loader()"
-                    enctype="multipart/form-data">
+                <form action="{{ route('updateProfile') }}" class="updateProfile" id="updateProfile" method="POST"
+                    onsubmit="show_Loader()" enctype="multipart/form-data">
                     @csrf
                     <h3>Edit Profile</h3>
                     <hr>
@@ -708,29 +725,74 @@
                     <div class="inputdivs" style="width: 85%; margin: 0.4vw auto;">
                         <label for="password">Password</label>
                         <div class="passwordfield">
-                            <input type="password" id="password" name="password" placeholder="**********" 
+                            <input type="password" id="password" name="password" placeholder="**********"
                                 oninput="validatePassword()">
                             <i class='bx bxs-show' onclick="showAndHideProfilePswd('password')"></i>
                         </div>
                     </div>
-        
+
                     <div class="inputdivs" style="width: 85%; margin: 0.4vw auto;">
                         <label for="cnfrmPswd">Confirm Password</label>
                         <div class="passwordfield">
                             <input type="password" id="cnfrmPswd" name="password_confirmation" placeholder="**********"
-                                 oninput="validatePassword()">
+                                oninput="validatePassword()">
                             <i class='bx bxs-show' onclick="showAndHideProfilePswd('cnfrmPswd')"></i>
                         </div>
                     </div>
 
                     <div id="message" class="error"></div>
-                    
+
                     <div class="formBtns">
                         <button type="button" id="cancel-profile-update" onclick="hideUpdateProfile()">Cancel</button>
                         <input type="submit" value="Update Profile" id="profile-update">
                     </div>
                 </form>
             @endif
+
+
+            {{--      
+            |---------------------------------------------------------------|
+            |==================== Sync With Remote DB ======================|
+            |---------------------------------------------------------------|
+            --}}
+            <style>
+                .sync_with_remote_db_overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: none;
+                    z-index: 999;
+                }
+
+                #output {
+                    display: none;
+                    flex-direction: column;
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background-color: #171717FF;
+                    border-radius: 0.25rem;
+                    color: #27CA19FF;
+                    font-family: monospace;
+                    overflow-y: auto;
+                    height: 400px;
+                    min-width: 400px;
+                    max-width: 1000px;
+                    padding: 1rem;
+                    z-index: 1000;
+                }
+            </style>
+            <div class="sync_with_remote_db_overlay" id="sync_with_remote_db_overlay"></div>
+            <div id="output">
+                <span>Waiting for sync to start...</span>
+            </div>
+            <button class="opt-buttons" onclick="syncWithRemoteDB()">Sync With Remote Database</button>
+
+            {{-- <button class="opt-buttons" onclick="syncWithRemoteDB()">Sync With Remote Database</button> --}}
 
 
             {{--      
@@ -913,7 +975,47 @@
                 pswd.type = 'password';
             }
         }
-        
+
+        function syncWithRemoteDB() {
+            document.getElementById('sync_with_remote_db_overlay').style.display = 'block';
+            document.getElementById('output').style.display = 'flex';
+
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = '<span>Starting sync process...</span>';
+
+            fetch('/sync-with-remote-db', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Append the output to the terminal
+                    outputDiv.innerHTML = data.output;
+
+                    // Hide the overlay and output div after 1 second
+                    setTimeout(() => {
+                        hideSyncWithRemoteDB();
+                    }, 3000);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    outputDiv.innerHTML = '<span style="color: red;">Failed to execute sync.</span>';
+
+                    // Hide the overlay and output div after 1 second
+                    setTimeout(() => {
+                        hideSyncWithRemoteDB();
+                    }, 3000);
+                });
+        }
+
+        function hideSyncWithRemoteDB() {
+            document.getElementById('sync_with_remote_db_overlay').style.display = 'none';
+            document.getElementById('output').style.display = 'none';
+        }
+
         const uploadFile = document.getElementById('upload-update-file');
         const filenameSpanNew = document.getElementById('filename');
         uploadFile.addEventListener('change', function(e) {

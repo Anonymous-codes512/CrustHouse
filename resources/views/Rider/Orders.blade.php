@@ -56,7 +56,7 @@
                                 @endif
                             </td>
 
-                            <td>Rs. {{ $order->total_bill }}</td>
+                            <td>{{ $order->total_bill }}</td>
                             <td>
                                 <a onclick="showLoader('{{ route('viewOrderDetails', [$order->order_number, $rider_id]) }}')"
                                     title="View Order Details">

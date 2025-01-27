@@ -119,7 +119,7 @@
                     </div>
                     <span class="icon-text">Profile</span>
                     <div id="dropdownMenu" class="dropdownMenu-content">
-                        <span id="username" class="truncate-text">Danish</span>
+                        <span id="username" class="truncate-text">Customer</span>
                         <a onclick="openProfilePopup('{{ route('deleteCustomer', ':customer_id') }}')">Profile</a>
                         <a onclick="logout()">Logout</a>
                     </div>
@@ -179,7 +179,8 @@
                                     $displayedProductNames[] = $Product->productName;
                                 @endphp
                                 <div class="card">
-                                    <div class="card-img">
+                                    <div class="card-img"
+                                        onclick="addToCart({{ json_encode($Product) }}, {{ json_encode($CategoryProducts) }}, {{ json_encode($addons) }})">
                                         <img src="{{ asset('Images/ProductImages/' . $Product->productImage) }}"
                                             alt="Product">
                                     </div>
@@ -218,7 +219,8 @@
                             @endphp
                             @if ($Deal->deal->dealStatus != 'not active')
                                 <div class="card">
-                                    <div class="card-img">
+                                    <div class="card-img"
+                                        onclick="addDealToCart({{ json_encode($Deal) }}, {{ json_encode($Deals) }}, {{ json_encode($AllProducts) }})">
                                         <img src="{{ asset('Images/DealImages/' . $Deal->deal->dealImage) }}"
                                             alt="Deals">
                                     </div>
@@ -233,8 +235,7 @@
                                             <div class="card-btn">
                                                 <button class="cart-btn"
                                                     onclick="addDealToCart({{ json_encode($Deal) }}, {{ json_encode($Deals) }}, {{ json_encode($AllProducts) }})">
-                                                    Add
-                                                    To Cart </button>
+                                                    Add #sectionTo Cart </button>
                                             </div>
                                         </div>
                                     </div>
@@ -413,6 +414,12 @@
 
                 <button class="sign-up-btn" onclick="showSignupPopup()">Sign-up</button>
                 <button class="close-login-popup-btn" onclick="hideLoginPopup()">Close</button>
+                
+                <div class="option-div">
+                    <span>OR</span>
+                </div>
+
+                <a id="guest-account" class="guest-account" onclick="guestAccount()">Continue as a Guest</a>
             </div>
 
         </form>
@@ -473,6 +480,12 @@
                 <a class="login-link" onclick="redirectToLogin()">Already have an account?</a>
                 <button type="button" class="close-signUp-popup" onclick="hideSignupPopup()">Close</button>
             </div>
+            <div class="option-div">
+                <span>OR</span>
+            </div>
+
+            <a id="guest-account" class="guest-account" onclick="guestAccount()">Continue as a Guest</a>
+
         </form>
     </div>
 
@@ -739,7 +752,7 @@
                     <div class="input-div">
                         <label for="userEmail">Email Address</label>
                         <input type="text" name="email" id="userEmail" placeholder="Enter you email address"
-                            required readonly>
+                            required>
                     </div>
                     <div class="input-address-div">
                         <label for="userAddress">Your Address</label>
@@ -751,15 +764,18 @@
 
                     <div class="payment-methods">
                         <!-- Cash On Delivery -->
-                        <label for="COD" class="payment-option" onclick="selectPaymentOption(this, {{json_encode($taxes)}})">
-                            <input type="radio" class="payment" id="COD" name="paymentMethod" value="Cash On Delivery" >
+                        <label for="COD" class="payment-option"
+                            onclick="selectPaymentOption(this, {{ json_encode($taxes) }})">
+                            <input type="radio" class="payment" id="COD" name="paymentMethod"
+                                value="Cash On Delivery">
                             <span class="custom-radio"></span>
                             <img src="{{ asset('Images/cash-on-delivery.png') }}" alt="Cash On Delivery">
                             Cash On Delivery
                         </label>
 
                         <!-- Credit Card -->
-                        <label for="CreditCard" class="payment-option" onclick="selectPaymentOption(this, {{json_encode($taxes)}})">
+                        <label for="CreditCard" class="payment-option"
+                            onclick="selectPaymentOption(this, {{ json_encode($taxes) }})">
                             <input type="radio" class="payment" id="CreditCard" name="paymentMethod"
                                 value="Credit Card">
                             <span class="custom-radio"></span>

@@ -1105,6 +1105,12 @@ function validateDiscount() {
         return false;
     }
 
+    let table = document.getElementById("tables_list").value;
+    if (order_type.toLowerCase() === "dine-in" && table.trim() === "") {
+        alert("Table is empty");
+        return false;
+    }
+
     let productDiv = document.getElementById("productdiv");
     if (productDiv === null) {
         alert("Select the Product First.");
@@ -1336,8 +1342,7 @@ function chnageOrderType() {
             form.appendChild(hiddenField);
         });
         document.getElementById("orderTypeHidden").value = "online";
-    }
-    else{
+    } else {
         document.getElementById("orderTypeHidden").value = "Takeaway - self";
     }
     validateDiscount();

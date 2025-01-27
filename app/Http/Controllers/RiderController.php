@@ -59,7 +59,15 @@ class RiderController extends Controller
         }
 
         $order->delivery_status = 1;
+
+        // Convert total_bill and received_cash to floats
+        $totalBill = (float) str_replace('Rs.', '', $order->total_bill); // Remove 'Rs.' if present and convert to float
+        $receivedCash = $totalBill;
+
+        $order->received_cash = $receivedCash;
+        $order->return_change = $receivedCash - $totalBill;
         $order->save();
+
 
         $rider->status = 1;
         $rider->save();
@@ -238,7 +246,7 @@ class RiderController extends Controller
     public function markAsRead($order_number)
     {
         $order = Order::where('order_number', $order_number)->first();
-    
+
         if ($order) {
             $order->created_at = now()->subHours(2);
             $order->save();
@@ -246,5 +254,4 @@ class RiderController extends Controller
         }
         return redirect()->back()->with('error', 'Order not found against this order number');
     }
-    
 }

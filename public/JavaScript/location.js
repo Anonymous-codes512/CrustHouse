@@ -117,6 +117,7 @@ function initializeLoginData() {
     const loginData = {
         loginStatus: false,
         signupStatus: false,
+        isGuest : null,
         email: null,
         LoginTime: null
     };

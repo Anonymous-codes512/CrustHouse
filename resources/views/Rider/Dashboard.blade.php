@@ -92,7 +92,7 @@
                                 <td>{{ $order->customers->name }}</td>
                                 <td>{{ $order->order_address }}</td>
                                 <td>{{ $order->delivery_status === 0 ? 'Pending' : 'Complete' }}</td>
-                                <td>Rs. {{ $order->total_bill }}</td>
+                                <td>{{ $order->total_bill }}</td>
                                 <td>
                                     <a onclick="showLoader('{{ route('viewOrderDetails', [$order->order_number, $rider_id]) }}')"
                                         title="View Order Details"><i class="bi bi-view-list"></i></a>
