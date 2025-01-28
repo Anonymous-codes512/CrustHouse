@@ -101,7 +101,7 @@
                             {{ $deal->dealDiscountedPrice }}</td>
 
                         <td onclick="showDealInfo({{ json_encode($deal) }}, {{ json_encode($allDealProducts) }})">
-                            {{ $deal->dealEndDate }}</td>
+                            {{ $deal->IsForever ? 'Is Forever' : $deal->dealEndDate }}</td>
 
                         <td>
                             <a id="editButton"
@@ -123,7 +123,7 @@
 
         <div id="overlay"></div>
         <form class="newdeal" id="newDeal" action="{{ route('createDeal') }}" method="POST"
-            enctype="multipart/form-data"  onsubmit="show_Loader()">
+            enctype="multipart/form-data" onsubmit="show_Loader()">
             @csrf
 
             <h3>Add New Deal</h3>
@@ -274,8 +274,16 @@
             </div>
 
             <div class="inputdivs">
+                <label for="isForever">
+                    <input type="checkbox" id="isForever" name="isForever" style="margin-right: 10px;"
+                        onclick="toggleEndDate('isForever','end-date')"> isForever...?
+                </label>
+            </div>
+
+
+            <div class="inputdivs" id="end-date">
                 <label for="dealEndDate">Deal End Date</label>
-                <input type="date" id="dealEndDate" name="dealEndDate" required>
+                <input type="date" id="dealEndDate" name="dealEndDate">
             </div>
 
             <div class="btns">
@@ -465,6 +473,13 @@
                 </div>
 
                 <div class="inputdivs">
+                    <label for="edit-isForever">
+                        <input type="checkbox" id="edit-isForever" name="isForever" style="margin-right: 10px;"
+                            onclick="toggleEndDate('edit-isForever', 'edit-end-date')">isForever...?
+                    </label>
+                </div>
+
+                <div class="inputdivs" id="edit-end-date">
                     <label for="deal-End-Date">Deal End Data</label>
                     <input type="date" id="deal-End-Date" name="dealEndDate" required>
                 </div>
@@ -551,6 +566,23 @@
                 "lengthMenu": [5, 10, 25, 50, 100]
             });
         });
+
+        function toggleEndDate(checkboxId, endDateDivId) {
+            var isForeverChecked = document.getElementById(checkboxId).checked;
+            var endDateDiv = document.getElementById(endDateDivId);
+
+            if (isForeverChecked) {
+                endDateDiv.style.display = "none";
+            } else {
+                endDateDiv.style.display = "flex";
+            }
+        }
+
+        // Initial state based on the checkbox when the page loads
+        window.onload = function() {
+            toggleEndDate('isForever', 'end-date');
+            toggleEndDate('edit-isForever', 'edit-end-date');
+        }
 
         function showConfirmDelete(deleteUrl) {
             let confirmDeletionOverlay = document.getElementById('confirmDeletionOverlay');
@@ -714,10 +746,8 @@
         Array.from(texts).forEach(text => {
             if (text.textContent.toLowerCase() === "active") {
                 text.style.color = '#3FC28A';
-                text.style.backgroundColor = '#3FC28A14';
             } else if (text.textContent.toLowerCase() === "not active") {
                 text.style.color = '#F45B69';
-                text.style.backgroundColor = '#F45B6914';
             }
         });
 

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('dealStatus');
             $table->string('dealActualPrice')->nullable();
             $table->string('dealDiscountedPrice')->nullable();
+            $table->boolean('IsForever')->nullable();
             $table->string('dealEndDate')->nullable();
             $table->unsignedBigInteger('branch_id');
             $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');

@@ -123,8 +123,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             <div class="inputdivs">
                 <label for="upload-file" class="choose-file-btn">
-                    <span>Choose File <br> <span style="color: #b11d1d; margin:0;padding:0;">(Max = 1MB, Ratio = 3:2)*</span></span>
-                    <input type="file" id="upload-file" name="CategoryImage" accept=".jpg,.jpeg,.png" required>
+                    <span>Choose File <br> <span style="margin:0;padding:0;">(Max = 1MB, Ratio = 3:2)</span></span>
+                    <input type="file" id="upload-file" name="CategoryImage" accept=".jpg,.jpeg,.png">
                     <p id="filename"></p>
                 </label>
             </div>

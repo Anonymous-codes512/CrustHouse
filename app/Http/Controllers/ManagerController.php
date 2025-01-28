@@ -18,14 +18,14 @@ use App\Models\Product;
 use App\Models\Recipe;
 use App\Models\Stock;
 use App\Models\Tax;
-use App\Models\StockHistory; 
+use App\Models\StockHistory;
 use Dompdf\Dompdf;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Hash; 
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class ManagerController extends Controller
@@ -143,7 +143,20 @@ class ManagerController extends Controller
             $image = $request->file('CategoryImage');
             $imageName = time() . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('Images/CategoryImages'), $imageName);
+        } else {
+            $defaultImagePath = public_path('Images/General-Category.jpg'); // Path to the default image
+            $imageName = time() . '.jpg';
+            $destinationPath = public_path('Images/CategoryImages/' . $imageName);
+
+            // Copy the default image to the target directory
+            if (file_exists($defaultImagePath)) {
+                copy($defaultImagePath, $destinationPath);
+            } else {
+                // Handle the case where the default image doesn't exist
+                return redirect()->back()->with('error', 'Default image not found.');
+            }
         }
+
 
         $category = new Category();
         $category->categoryImage = $imageName;
@@ -348,7 +361,6 @@ class ManagerController extends Controller
             return redirect()->back()->with('success', 'Product delete successfully');
         } else {
             return redirect()->back()->with('error', 'Product not delete');
-
         }
     }
 
@@ -368,7 +380,10 @@ class ManagerController extends Controller
         $settings = ThemeSetting::where('branch_id', $branch_id)->first();
         $deals = Deal::all();
         foreach ($deals as $deal) {
-            if ($deal->dealEndDate <= $currentDate) {
+            if($deal->IsForever){
+                $deal->dealStatus = 'active';
+                $deal->save();
+            }else if($deal->dealEndDate <= $currentDate) {
                 $deal->dealStatus = 'not active';
                 $deal->save();
             }
@@ -415,7 +430,6 @@ class ManagerController extends Controller
             return redirect()->route('viewLoginPage');
         }
         $branch_id = $request->branch_id;
-
         $existingDeals = Deal::all();
         foreach ($existingDeals as $deal) {
             if (strtolower($deal->dealTitle) == strtolower($request->input('dealTitle'))) {
@@ -435,6 +449,7 @@ class ManagerController extends Controller
         $deal->dealImage = $imageName;
         $deal->dealTitle = $request->dealTitle;
         $deal->dealStatus = $request->dealStatus;
+        $deal->IsForever = $request->has('isForever') ? true : false;
         $deal->dealEndDate = $request->dealEndDate;
         $deal->branch_id = $branch_id;
         $deal->save();
@@ -511,6 +526,7 @@ class ManagerController extends Controller
         $deal->dealTitle = $request->dealTitle;
         $deal->dealDiscountedPrice = $request->dealprice . " Pkr";
         $deal->dealStatus = $request->dealStatus;
+        $deal->IsForever = $request->has('isForever') ? true : false;
         $deal->dealEndDate = $request->dealEndDate;
 
         $deal->save();
@@ -641,8 +657,7 @@ class ManagerController extends Controller
         //     ->with('deal', $deal)
         //     ->with('success', 'Product Deleted Successfully.');
 
-        return redirect()->back()->with('success', 'Product Deleted Successfully.');
-        ;
+        return redirect()->back()->with('success', 'Product Deleted Successfully.');;
     }
 
     /*
@@ -1018,7 +1033,7 @@ class ManagerController extends Controller
         $staff = User::find($staff_id);
         $order = Order::where('id', $order_id)->first();
         $order->status = 3;
-        if($order->order_cancel_by == null){
+        if ($order->order_cancel_by == null) {
             $order->order_cancel_by = $staff->name;
         }
         $this->returnStock($order_id);
@@ -1048,10 +1063,10 @@ class ManagerController extends Controller
                 $productQuantities[$item->product_id] += $item->product_quantity;
             }
         }
-        
+
         foreach ($productQuantities as $product_id => $totalQuantity) {
             $product = Product::find($product_id);
-            if(!$product){
+            if (!$product) {
                 return redirect()->back();
             }
             $recipes = Recipe::where('product_id', $product->id)->get();
@@ -1081,7 +1096,7 @@ class ManagerController extends Controller
         $branches = Branch::where('id', $branch_id)->get();
         $staff = User::with('branch')
             ->where('branch_id', $branch_id)
-            ->whereIn('role', ['salesman', 'chef', 'rider','branchManager'])
+            ->whereIn('role', ['salesman', 'chef', 'rider', 'branchManager'])
             ->get();
         return view('Manager.Staff')->with(['Staff' => $staff, 'branches' => $branches, 'ThemeSettings' => $settings]);
     }
@@ -1602,32 +1617,32 @@ class ManagerController extends Controller
     {
         $user_id = $request->user_id;
         $updateProfile = User::find($user_id);
-    
+
         // Handle profile picture update
         if ($request->hasFile('updated_profile_picture')) {
             $existingImage = public_path('Images/UsersImages') . '/' . $updateProfile->profile_picture;
             if (file_exists($existingImage)) {
                 File::delete($existingImage);
             }
-    
+
             $image = $request->file('updated_profile_picture');
             $imageName = time() . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('Images/UsersImages'), $imageName);
             $updateProfile->profile_picture = $imageName;
         }
-    
+
         // Update name
         $updateProfile->name = $request->name;
-    
+
         // Handle password update
         if ($request->filled('password')) {
             $request->validate([
                 'password' => 'required|confirmed|min:8',
             ]);
-    
+
             $updateProfile->password = bcrypt($request->password);
         }
-    
+
         // Save the updated user information
         if ($updateProfile->save()) {
             return redirect()->back()->with('success', 'Profile Updated Successfully');
@@ -1635,7 +1650,7 @@ class ManagerController extends Controller
             return redirect()->back()->with('error', 'Profile not updated');
         }
     }
-    
+
     /*
     |---------------------------------------------------------------|
     |====================== Reports Functions ======================|
@@ -1665,7 +1680,7 @@ class ManagerController extends Controller
         $branch_id = $request->branch_id;
         $salesman_id = $request->salesman;
         $selectedDate = $request->transaction_report_date;
-        
+
         $dailyOrders = Order::whereDate('created_at', $selectedDate)
             ->where('branch_id', $branch_id)
             ->where('salesman_id', $salesman_id)
@@ -1864,7 +1879,6 @@ class ManagerController extends Controller
                 $dailyReconciliation['total_sales'] += $order_bill;
                 $dailyReconciliation['sales_data'][$salesmanName][$order_date]['discount'] += $order->discount_type == '%' ? ($order_bill + $order->taxes) * ($order->discount / 100) : $order->discount;
             }
-
         }
         if ($dailyOrders->isEmpty()) {
             return redirect()->back()->with('error', 'Data Not Found');
