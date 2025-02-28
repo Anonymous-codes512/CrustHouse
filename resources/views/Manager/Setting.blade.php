@@ -755,46 +755,34 @@
             |==================== Sync With Remote DB ======================|
             |---------------------------------------------------------------|
             --}}
-            <style>
-                .sync_with_remote_db_overlay {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0, 0, 0, 0.5);
-                    display: none;
-                    z-index: 999;
-                }
+            <button class="opt-buttons" onclick="showSyncWithRemoteDB()">Sync With Remote Database</button>
 
-                #output {
-                    display: none;
-                    flex-direction: column;
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background-color: #171717FF;
-                    border-radius: 0.25rem;
-                    color: #27CA19FF;
-                    font-family: monospace;
-                    overflow-y: auto;
-                    height: 400px;
-                    min-width: 400px;
-                    max-width: 1000px;
-                    padding: 1rem;
-                    z-index: 1000;
-                }
-            </style>
             <div class="sync_with_remote_db_overlay" id="sync_with_remote_db_overlay"></div>
-            <div id="output">
-                <span>Waiting for sync to start...</span>
+            <div id="sync_with_remote_db">
+                <h3>Synchronization with remote Database</h3>
+                <div id="top">
+                    <div id="left">
+                        <button onclick="showResponseScreen('/sync-user-data')">Sync Users</button>
+                        <button onclick="showResponseScreen('/sync-category-data')">Sync Categories</button>
+                        <button onclick="showResponseScreen('/sync-product-data')">Sync Products</button>
+                        <button onclick="showResponseScreen('/sync-deals-data')">Sync Deals</button>
+                        <button onclick="showResponseScreen('/sync-rider-data')">Sync Rider</button>
+                    </div>
+                    <div id="right">
+                        <button onclick="showResponseScreen('/sync-with-remote-db')">Sync Orders</button>
+                        <button onclick="showResponseScreen('/sync-recipe-data')">Sync Recipe</button>
+                        <button onclick="showResponseScreen('/sync-stock-data')">Sync Stock Tables</button>
+                        <button onclick="showResponseScreen('/sync-other-data')">Sync Other Tables</button>
+                    </div>
+                    <div id="output">
+                        <div id="outputScreen"></div>
+                        <h1 id="outputScreenHeading">Output Screen</h1>
+                    </div>
+                </div>
+                <div id="bottom">
+                    <button onclick="hideSyncWithRemoteDB()">Close</button>
+                </div>
             </div>
-            <button class="opt-buttons" onclick="syncWithRemoteDB()">Sync With Remote Database</button>
-
-            {{-- <button class="opt-buttons" onclick="syncWithRemoteDB()">Sync With Remote Database</button> --}}
-
-
             {{--      
             |---------------------------------------------------------------|
             |==================== Confirm Delete Overlay ===================|
@@ -976,14 +964,17 @@
             }
         }
 
-        function syncWithRemoteDB() {
-            document.getElementById('sync_with_remote_db_overlay').style.display = 'block';
-            document.getElementById('output').style.display = 'flex';
+        function showResponseScreen(apiAddress) {
+            console.log(apiAddress);
+            const outputDiv = document.getElementById('outputScreen');
+            const heading = document.getElementById('outputScreenHeading');
 
-            const outputDiv = document.getElementById('output');
-            outputDiv.innerHTML = '<span>Starting sync process...</span>';
+            heading.style.display = 'none';
+            outputDiv.innerHTML = '<span>🔄 Starting sync process...</span>';
+            outputDiv.style.display = 'block';
+            outputDiv.style.opacity = '1';
 
-            fetch('/sync-with-remote-db', {
+            fetch(apiAddress, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -992,28 +983,33 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Append the output to the terminal
-                    outputDiv.innerHTML = data.output;
-
-                    // Hide the overlay and output div after 1 second
-                    setTimeout(() => {
-                        hideSyncWithRemoteDB();
-                    }, 3000);
+                    outputDiv.innerHTML = `<span>✅ ${data.output}</span>`;
+                    setTimeout(hideResponseScreen, 3000);
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    outputDiv.innerHTML = '<span style="color: red;">Failed to execute sync.</span>';
-
-                    // Hide the overlay and output div after 1 second
-                    setTimeout(() => {
-                        hideSyncWithRemoteDB();
-                    }, 3000);
+                    outputDiv.innerHTML = '<span style="color: red;">❌ Failed to execute sync.</span>';
+                    setTimeout(hideResponseScreen, 3000);
                 });
+        }
+
+        function hideResponseScreen() {
+            const outputDiv = document.getElementById('outputScreen');
+            outputDiv.style.opacity = '0';
+            setTimeout(() => {
+                outputDiv.style.display = 'none';
+                document.getElementById('outputScreenHeading').style.display = 'flex';
+            }, 500);
+        }
+
+        function showSyncWithRemoteDB() {
+            document.getElementById('sync_with_remote_db_overlay').style.display = 'block';
+            document.getElementById('sync_with_remote_db').style.display = 'flex';
         }
 
         function hideSyncWithRemoteDB() {
             document.getElementById('sync_with_remote_db_overlay').style.display = 'none';
-            document.getElementById('output').style.display = 'none';
+            document.getElementById('sync_with_remote_db').style.display = 'none';
         }
 
         const uploadFile = document.getElementById('upload-update-file');

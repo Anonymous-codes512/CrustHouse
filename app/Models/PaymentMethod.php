@@ -7,8 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class PaymentMethod extends Model
 {
-    public function branch(){
+    use HasFactory;
+    protected $fillable = [
+        'payment_method',
+        'order_type',
+        'discount_type',
+        'branch_id',
+    ];
+    public function branch()
+    {
         return $this->belongsTo(Branch::class);
     }
 }
- 

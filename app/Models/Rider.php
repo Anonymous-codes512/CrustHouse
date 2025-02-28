@@ -9,12 +9,19 @@ class Rider extends Model
 {
     use HasFactory;
 
-    /**
-     * Get the user associated with the rider.
-     */
+    protected $fillable = [
+        'user_id',
+        'motorbike_number',
+        'license_number',
+        'status',
+    ];
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function order()
+    {
+        return $this->hasMany(Order::class, 'assign_to_rider');
     }
 }
 

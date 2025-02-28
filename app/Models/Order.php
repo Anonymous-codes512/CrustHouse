@@ -32,4 +32,10 @@ class Order extends Model
     {
         return $this->belongsTo(Branch::class, 'branch_id');
     }
+    public function rider()
+    {
+        return $this->belongsTo(Rider::class, 'assign_to_rider'); // Specify the correct foreign key
+    }
+    
 }
+ 

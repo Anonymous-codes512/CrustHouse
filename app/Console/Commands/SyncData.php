@@ -8,7 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\User;
 use App\Models\Rider;
-
+use App\Models\Stock;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
@@ -47,17 +47,17 @@ class SyncData extends Command
                 return; // Exit if no records found
             }
 
-            // $data = $records->toArray();
-            // $batchSize = 10;
-            // $chunks = array_chunk($data, $batchSize);
-            $data = $records->where('email', 'ahsannazir@gmail.com');
+            $data = $records->toArray();
+            $batchSize = 10;
+            $chunks = array_chunk($data, $batchSize);
+            // $data = $records->where('email', 'ahsannazir@gmail.com');
             $overallResponse = []; // Collect all responses
 
-            // foreach ($chunks as $chunk) {
+            foreach ($chunks as $chunk) {
             try {
                 $response = Http::timeout(120)
                     ->post('https://crusthouse.com.pk/api/sync-user-record', [
-                        'data' => $data,
+                        'data' => $chunk,
                     ]);
 
                 $this->processApiResponse($response, 'User');
@@ -65,7 +65,7 @@ class SyncData extends Command
             } catch (\Exception $e) {
                 $this->error("Error syncing batch for User: " . $e->getMessage());
             }
-            // }
+            }
 
             $this->syncRiderData($overallResponse);
         } catch (\Exception $e) {
@@ -105,7 +105,7 @@ class SyncData extends Command
                     $riderData['user_id'] = $matchingUser['id'];
                     unset($riderData['user']);
                     $updatedRiders[] = $riderData; // Add to the updated riders list
-                    $this->info("Prepared updated data for Rider (id: {$rider->id}) and (user_id: {$riderData['user_id']}).");
+                    // $this->info("Prepared updated data for Rider (id: {$rider->id}) and (user_id: {$riderData['user_id']}).");
                 }
             }
 
@@ -116,7 +116,7 @@ class SyncData extends Command
                     ]);
 
                 if ($response->successful()) {
-                    $this->info("Successfully synced updated rider data {$response}");
+                    // $this->info("Successfully synced updated rider data {$response}");
                     $overallResponse[] = $response->json();
                     // Call the function to sync Order and Order Items after successful Rider sync
                     $this->syncOrderAndOrderItemData($userApiResponse, $overallResponse);
@@ -137,14 +137,73 @@ class SyncData extends Command
             ->pluck('updatedRecords')
             ->flatten(1);
 
-        $updatedriders = collect($riderApiResponse)
+        $updatedRiders = collect($riderApiResponse)
             ->pluck('record')
             ->flatten(1);
 
-        $orders = Order::with('items')->get();
-        $this->info("\n\nUpdated Users Data {$updatedUsers}\n\nUpdated Riders Data {$updatedriders}\n\n Orders with Orders Items Data {$orders}" );
-    }
+        $orders = Order::with(['items', 'customers', 'rider'])->get();
 
+        $updatedOrders = [];
+
+        foreach ($orders as $order) {
+            if ($order->ordertype === 'online') {
+                foreach ($updatedUsers as $user) {
+                    if ($user['email'] === $order->customers->email) {
+                        $newOrder = $order->replicate();
+                        $newOrder->customer_id = $user['id'];
+                        break;
+                    }
+                }
+            }
+
+            if ($order->rider) {
+                foreach ($updatedRiders as $rider) {
+                    if (
+                        $rider['motorbike_number'] === $order->rider->motorbike_number &&
+                        $rider['license_number'] === $order->rider->license_number
+                    ) {
+                        $newOrder = $newOrder ?? $order->replicate();
+                        $newOrder->assign_to_rider = $rider['id'];
+                        break;
+                    }
+                }
+            }
+
+            $updatedOrders[] = $newOrder ?? $order;
+        }
+
+        $stocks = Stock::all();
+        $stockData = $stocks->map(function ($stock) {
+            return [
+                'id' => $stock->id,
+                'itemName' => $stock->itemName,
+                'itemQuantity' => $stock->itemQuantity,
+                'mimimumItemQuantity' => $stock->mimimumItemQuantity,
+                'unitPrice' => $stock->unitPrice,
+                'branch_id' => $stock->branch_id,
+                'created_at' => $stock->created_at,
+                'updated_at' => $stock->updated_at,
+            ];
+        });
+
+        $response = Http::post('https://crusthouse.com.pk/api/sync-orderWithOrderItems-record', [
+            'orders' => $updatedOrders,
+            'stock_data' => $stockData
+        ]);
+
+        // Handle the response from the API if needed
+        if ($response->successful()) {
+            return response()->json([
+                'message' => 'Sync completed and data sent successfully',
+                'data' => $response->json()
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Error sending data to the API',
+                'error' => $response->body()
+            ], 500);
+        }
+    }
 
     public function processApiResponse($response, $type)
     {

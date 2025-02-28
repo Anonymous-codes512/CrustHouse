@@ -9,6 +9,16 @@ use Illuminate\Database\Eloquent\Model;
 class Deal extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        "dealImage",
+        "dealTitle",
+        "dealStatus",
+        "dealActualPrice",
+        "dealDiscountedPrice",
+        "IsForever",
+        "dealEndDate",
+        "branch_id",
+    ];
 
     public function handlers()
     {

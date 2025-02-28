@@ -7,6 +7,25 @@ use Illuminate\Database\Eloquent\Model;
 
 class Branch extends Model
 {
+    
+    protected $fillable = [
+        'branch_state',
+        'branch_city',
+        'company_name',
+        'branch_initial',
+        'branch_name',
+        'branch_code',
+        'branch_address',
+        'branch_web_address',
+        'max_discount_percentage',
+        'receipt_message',
+        'feedback',
+        'receipt_tagline',
+        'riderOption',
+        'onlineDeliveryOption',
+        'DiningOption',
+    ];
+    
     public function users()
     {
         return $this->hasMany(User::class);

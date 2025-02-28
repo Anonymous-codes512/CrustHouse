@@ -7,8 +7,8 @@ use App\Http\Controllers\OnlineOrdersController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\SalesmanController;
 use App\Http\Controllers\RiderController;
+use App\Models\Rider;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
@@ -311,11 +311,12 @@ Route::get('delivery_completed/{order_number}/{rider_id}', [RiderController::cla
 Route::get('mark_as_read/{order_number}', [RiderController::class, 'markAsRead'])->name('markAsRead');
 
 
-// Route::post('/sync-with-remote-db', function () {
-//     Artisan::call('sync:data');
-//     $commandOutput = Artisan::output(); // Capture the command output
-//     return response()->json(['message' => 'Sync executed successfully', 'output' => $commandOutput]);
-// });
+/*
+|---------------------------------------------------------------|
+|========================= Sync Routes =========================|
+|---------------------------------------------------------------|
+*/
+
 
 Route::post('/sync-with-remote-db', function () {
     $phpPath = (new PhpExecutableFinder)->find();
@@ -331,5 +332,125 @@ Route::post('/sync-with-remote-db', function () {
         $output .= $line; // Append each line to the output
     });
 
+    return response()->json(['output' => $output]);
+});
+
+Route::post('/sync-user-data', function () {
+    $phpPath = (new PhpExecutableFinder)->find();
+    $artisanPath = base_path('artisan');
+
+    $process = new Process([$phpPath, $artisanPath, 'sync:userData']);
+    $process->setTimeout(180);
+    $output = '';
+    $process->start();
+
+    $process->wait(function ($type, $line) use (&$output) {
+        $output .= $line . PHP_EOL;
+    });
+    return response()->json(['output' => $output]);
+});
+
+Route::post('/sync-category-data', function () {
+    $phpPath = (new PhpExecutableFinder)->find();
+    $artisanPath = base_path('artisan');
+
+    $process = new Process([$phpPath, $artisanPath, 'sync:categoryData']);
+    $process->setTimeout(180);
+    $output = '';
+    $process->start();
+
+    $process->wait(function ($type, $line) use (&$output) {
+        $output .= $line . PHP_EOL;
+    });
+    return response()->json(['output' => $output]);
+});
+
+Route::post('/sync-product-data', function () {
+    $phpPath = (new PhpExecutableFinder)->find();
+    $artisanPath = base_path('artisan');
+
+    $process = new Process([$phpPath, $artisanPath, 'sync:productData']);
+    $process->setTimeout(180);
+    $output = '';
+    $process->start();
+
+    $process->wait(function ($type, $line) use (&$output) {
+        $output .= $line . PHP_EOL;
+    });
+    return response()->json(['output' => $output]);
+});
+
+Route::post('/sync-deals-data', function () {
+    $phpPath = (new PhpExecutableFinder)->find();
+    $artisanPath = base_path('artisan');
+
+    $process = new Process([$phpPath, $artisanPath, 'sync:dealData']);
+    $process->setTimeout(180);
+    $output = '';
+    $process->start();
+
+    $process->wait(function ($type, $line) use (&$output) {
+        $output .= $line . PHP_EOL;
+    });
+    return response()->json(['output' => $output]);
+});
+
+Route::post('/sync-recipe-data', function () {
+    $phpPath = (new PhpExecutableFinder)->find();
+    $artisanPath = base_path('artisan');
+
+    $process = new Process([$phpPath, $artisanPath, 'sync:recipeData']);
+    $process->setTimeout(180);
+    $output = '';
+    $process->start();
+
+    $process->wait(function ($type, $line) use (&$output) {
+        $output .= $line . PHP_EOL;
+    });
+    return response()->json(['output' => $output]);
+});
+
+Route::post('/sync-stock-data', function () {
+    $phpPath = (new PhpExecutableFinder)->find();
+    $artisanPath = base_path('artisan');
+
+    $process = new Process([$phpPath, $artisanPath, 'sync:stockData']);
+    $process->setTimeout(180);
+    $output = '';
+    $process->start();
+
+    $process->wait(function ($type, $line) use (&$output) {
+        $output .= $line . PHP_EOL;
+    });
+    return response()->json(['output' => $output]);
+});
+
+Route::post('/sync-rider-data', function () {
+    $phpPath = (new PhpExecutableFinder)->find();
+    $artisanPath = base_path('artisan');
+
+    $process = new Process([$phpPath, $artisanPath, 'sync:riderData']);
+    $process->setTimeout(180);
+    $output = '';
+    $process->start();
+
+    $process->wait(function ($type, $line) use (&$output) {
+        $output .= $line . PHP_EOL;
+    });
+    return response()->json(['output' => $output]);
+});
+
+Route::post('/sync-other-data', function () {
+    $phpPath = (new PhpExecutableFinder)->find();
+    $artisanPath = base_path('artisan');
+
+    $process = new Process([$phpPath, $artisanPath, 'sync:otherData']);
+    $process->setTimeout(180);
+    $output = '';
+    $process->start();
+
+    $process->wait(function ($type, $line) use (&$output) {
+        $output .= $line . PHP_EOL;
+    });
     return response()->json(['output' => $output]);
 });

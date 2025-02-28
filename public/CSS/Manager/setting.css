@@ -73,6 +73,7 @@ main {
 #discountValueOverlay,
 #paymentMethodOverlay,
 #tableSettingsOverlay,
+.sync_with_remote_db_overlay,
 #confirmDeletionOverlay {
     position: fixed;
     top: 0;
@@ -95,6 +96,7 @@ main {
 #add-table-form,
 #edit-table-form,
 #receipt,
+#sync_with_remote_db,
 .confirmDeletion {
     display: none;
     flex-direction: column;
@@ -106,6 +108,82 @@ main {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1000;
+}
+#sync_with_remote_db {
+    width: 60vw;
+    max-width: 800px;
+    background: #222;
+    color: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+#sync_with_remote_db h3 {
+    font-size: 1.5rem;
+    text-align: center;
+    border-bottom: 2px solid #ffbb00;
+    padding-bottom: 0.5rem;
+}
+
+#sync_with_remote_db #top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 1rem 0;
+}
+
+#sync_with_remote_db #bottom {
+    display: flex;
+    justify-content: center;
+    padding-top: 1rem;
+    border-top: 1px solid #ffbb00;
+}
+
+#sync_with_remote_db button {
+    background-color: #ffbb00;
+    color: #222;
+    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    transition: 0.3s;
+    border: none;
+    cursor: pointer;
+}
+
+#sync_with_remote_db button:hover {
+    background-color: #fff;
+    color: #ffbb00;
+}
+
+#sync_with_remote_db #top #left,
+#sync_with_remote_db #top #right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 0.5rem;
+    min-width: 45%;
+}
+
+#sync_with_remote_db #top #output {
+    flex: 1;
+    min-width: 50%;
+    border: 1px solid #ffbb00;
+    padding: 1rem;
+    background: #171717;
+    color: #27CA19;
+    font-family: monospace;
+    height: 150px;
+    overflow-y: auto;
+    border-radius: 6px;
+    margin-top: 0.75rem;
+}
+
+#outputScreen {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
 }
 
 #updateProfile,

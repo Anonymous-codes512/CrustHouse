@@ -437,7 +437,6 @@ class ManagerController extends Controller
             }
         }
 
-
         $deal = new Deal();
         $imageName = null;
         if ($request->hasFile('dealImage')) {

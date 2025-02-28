@@ -6,9 +6,19 @@ use App\Models\Category;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
- 
+
 class Product extends Model
 {
+
+    protected $fillable = [
+        'productImage',
+        'productName',
+        'productVariation',
+        'productPrice',
+        'category_name',
+        'category_id',
+        'branch_id',
+    ];
     use HasFactory;
 
     public function category()
@@ -25,7 +35,7 @@ class Product extends Model
     {
         return $this->belongsToMany(Deal::class, 'handlers')->withPivot('product_quantity', 'product_total_price');
     }
-    
+
     public function recipe()
     {
         return $this->hasOne(Recipe::class);

@@ -39,9 +39,9 @@ class OnlineOrdersController extends Controller
         $products = Product::whereIn('branch_id', $branch_ids)->get();
 
         $categories = Category::whereIn('branch_id', $branch_ids)->get();
-        $taxes = tax::whereIn('branch_id', $branch_ids)->get();
+        $taxes = Tax::whereIn('branch_id', $branch_ids)->get();
 
-        $deals = handler::where(function ($query) use ($branch_ids) {
+        $deals = Handler::where(function ($query) use ($branch_ids) {
             $query->whereHas('product', function ($query) use ($branch_ids) {
                 $query->whereIn('branch_id', $branch_ids);
             })
